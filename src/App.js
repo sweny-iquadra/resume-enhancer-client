@@ -21,7 +21,7 @@ function App() {
       setTimeout(() => {
         resolve({ 
           complete: false, 
-          hasInterviews: false,
+          hasInterviews: null, // null means not asked yet
           profile: null 
         });
       }, 1000);
@@ -38,12 +38,49 @@ function App() {
           type,
           createdAt: new Date(),
           downloadUrl: '#',
-          score: Math.floor(Math.random() * 30) + 70
+          score: Math.floor(Math.random() * 30) + 70,
+          targetRole: profileData.targetRole || 'General',
+          profileData
         };
         setGeneratedResumes(prev => [...prev, resume]);
         resolve(resume);
-      }, 2000);
+      }, 3000); // Longer delay to simulate actual generation
     });
+  };
+
+  const handleInterviewStatus = (attended) => {
+    setHasAttendedInterviews(attended);
+    
+    if (!attended) {
+      // Show "Attend Interview First" message
+      // But still allow profile setup if they click Create Resume
+      return;
+    }
+    
+    // If they have attended interviews, check profile completion
+    if (!profileComplete && !userProfile) {
+      setCurrentStep('profile');
+    }
+  };
+
+  const handleCreateResume = () => {
+    if (hasAttendedInterviews === false) {
+      // They haven't attended interviews, but we'll help them prepare
+      setCurrentStep('profile');
+      return;
+    }
+    
+    if (!profileComplete || !userProfile) {
+      setCurrentStep('profile');
+    } else {
+      setCurrentStep('generator');
+    }
+  };
+
+  const handleProfileComplete = (profile) => {
+    setUserProfile(profile);
+    setProfileComplete(true);
+    setCurrentStep('generator');
   };
 
   useEffect(() => {
@@ -62,8 +99,8 @@ function App() {
           <Dashboard
             hasAttendedInterviews={hasAttendedInterviews}
             profileComplete={profileComplete}
-            onCreateResume={() => setCurrentStep('profile')}
-            onAttendInterview={() => setCurrentStep('profile')}
+            onCreateResume={handleCreateResume}
+            onAttendInterview={handleInterviewStatus}
             onViewHistory={() => setCurrentStep('history')}
           />
         )}
@@ -71,11 +108,7 @@ function App() {
         {currentStep === 'profile' && (
           <ProfileSetup
             userProfile={userProfile}
-            onProfileComplete={(profile) => {
-              setUserProfile(profile);
-              setProfileComplete(true);
-              setCurrentStep('generator');
-            }}
+            onProfileComplete={handleProfileComplete}
             onBack={() => setCurrentStep('dashboard')}
           />
         )}

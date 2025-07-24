@@ -1,27 +1,101 @@
 
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
 import './App.css';
+import Dashboard from './components/Dashboard';
+import ProfileSetup from './components/ProfileSetup';
+import ResumeGenerator from './components/ResumeGenerator';
+import ResumeHistory from './components/ResumeHistory';
 
 function App() {
+  const [currentStep, setCurrentStep] = useState('dashboard');
+  const [userProfile, setUserProfile] = useState(null);
+  const [hasAttendedInterviews, setHasAttendedInterviews] = useState(null);
+  const [profileComplete, setProfileComplete] = useState(false);
+  const [generatedResumes, setGeneratedResumes] = useState([]);
+
+  // API placeholder functions
+  const checkUserProfile = async () => {
+    // API call placeholder
+    console.log('API: Checking user profile...');
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve({ 
+          complete: false, 
+          hasInterviews: false,
+          profile: null 
+        });
+      }, 1000);
+    });
+  };
+
+  const generateResume = async (type, profileData) => {
+    // API call placeholder
+    console.log('API: Generating resume...', { type, profileData });
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const resume = {
+          id: Date.now(),
+          type,
+          createdAt: new Date(),
+          downloadUrl: '#',
+          score: Math.floor(Math.random() * 30) + 70
+        };
+        setGeneratedResumes(prev => [...prev, resume]);
+        resolve(resume);
+      }, 2000);
+    });
+  };
+
+  useEffect(() => {
+    // Initialize user data
+    checkUserProfile().then(data => {
+      setProfileComplete(data.complete);
+      setHasAttendedInterviews(data.hasInterviews);
+      setUserProfile(data.profile);
+    });
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center">
-      <header className="text-center">
-        <img src={logo} className="h-20 w-20 mx-auto animate-spin" alt="logo" />
-        <h1 className="text-4xl font-bold text-gray-900 mt-4">
-          Resume Enhancer
-        </h1>
-        <p className="text-lg text-gray-600 mt-2">
-          Edit <code className="bg-gray-200 px-2 py-1 rounded">src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="inline-block mt-4 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="container mx-auto px-4 py-8">
+        {currentStep === 'dashboard' && (
+          <Dashboard
+            hasAttendedInterviews={hasAttendedInterviews}
+            profileComplete={profileComplete}
+            onCreateResume={() => setCurrentStep('profile')}
+            onAttendInterview={() => setCurrentStep('profile')}
+            onViewHistory={() => setCurrentStep('history')}
+          />
+        )}
+        
+        {currentStep === 'profile' && (
+          <ProfileSetup
+            userProfile={userProfile}
+            onProfileComplete={(profile) => {
+              setUserProfile(profile);
+              setProfileComplete(true);
+              setCurrentStep('generator');
+            }}
+            onBack={() => setCurrentStep('dashboard')}
+          />
+        )}
+        
+        {currentStep === 'generator' && (
+          <ResumeGenerator
+            userProfile={userProfile}
+            onGenerateResume={generateResume}
+            onBack={() => setCurrentStep('dashboard')}
+            generatedResumes={generatedResumes}
+          />
+        )}
+        
+        {currentStep === 'history' && (
+          <ResumeHistory
+            resumes={generatedResumes}
+            onBack={() => setCurrentStep('dashboard')}
+          />
+        )}
+      </div>
     </div>
   );
 }

@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
-import Dashboard from './components/Dashboard';
-import ProfileSetup from './components/ProfileSetup';
-import ResumeGenerator from './components/ResumeGenerator';
-import ResumeHistory from './components/ResumeHistory';
+import Dashboard from './components/Dashboard.jsx';
+import ProfileSetup from './components/ProfileSetup.jsx';
+import ResumeGenerator from './components/ResumeGenerator.jsx';
+import ResumeHistory from './components/ResumeHistory.jsx';
 import './App.css';
 
 // Mock API functions
@@ -20,7 +19,7 @@ const checkUserProfile = async () => {
 const generateResumeAPI = async (profile, resumeType, targetRole) => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 2000));
-  
+
   return {
     id: Date.now(),
     type: resumeType,
@@ -66,7 +65,7 @@ function App() {
   const handleInterviewResponse = (attended) => {
     setHasAttendedInterviews(attended);
     setShowInterviewModal(false);
-    
+
     if (!attended) {
       // Show "Attend Interview First" modal
       setShowInterviewModal(false);
@@ -200,7 +199,7 @@ function App() {
                 Back to Dashboard
               </button>
             </div>
-            
+
             <div className="bg-gray-50 rounded-lg p-6 mb-6">
               <h3 className="text-lg font-semibold mb-2">Resume Preview</h3>
               <p className="text-gray-600 mb-4">{generatedResumes[0].content}</p>

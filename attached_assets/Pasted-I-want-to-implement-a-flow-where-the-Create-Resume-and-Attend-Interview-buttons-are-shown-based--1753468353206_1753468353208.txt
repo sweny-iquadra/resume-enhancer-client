@@ -1,0 +1,23 @@
+I want to implement a flow where the "Create Resume" and "Attend Interview" buttons are shown based on the user's interview history. If the user has no interviews, disable the "Create Resume" button and enable the "Attend Interview" button. If the user has at least one interview, enable the "Create Resume" button and disable the "Attend Interview" button.
+
+When "Attend Interview" is clicked, redirect the user to the dashboard.
+
+When "Create Resume" is clicked, check if the user has attended three or more interviews with different job roles. If yes, display a chatbot message that says:
+"We noticed you've explored multiple job roles with iQua.ai. Please select the role you'd like us to tailor this resume for"
+Then show a dropdown list of job roles from the interview history. When the user selects a role, pass that selection to the ProfileCompletionModal component.
+
+Keep the UI of ProfileCompletionModal as it is. Inside this modal, if the user clicks "Complete Profile", redirect them to the dashboard.
+
+If the user clicks "Generate Anyway", call the enhanceresume API with the selected role, the user’s existing resume, and the user profile (use a dummy object for now). On success, store the API response in localStorage. In the chatbot, show a message like this:
+"Resume is enhanced with [dynamic response data]"
+
+Below that, display in this order:
+Basic Details including name, email, phone using API response
+Professional Summary from API response
+Skills and Roles from API response
+A tip message that says: "Add your missing details to improve your profile and stand out"
+An "Edit Profile" button that redirects to dashboard
+Then a final message in the chat: "Your resume is ready"
+Finally, provide a "Preview" button that opens a component to show the original resume and the AI-enhanced version line by line. Let the user accept or reject each change, similar to Git-style diff and version control.
+
+Make sure the flow is clean, components are modular, and states are preserved using React hooks and localStorage.

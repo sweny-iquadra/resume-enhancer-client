@@ -7,18 +7,6 @@ channel = "stable-25_05"
 [deployment]
 run = ["sh", "-c", "npm run start"]
 
-[[ports]]
-localPort = 3000
-externalPort = 80
-
-[[ports]]
-localPort = 5000
-externalPort = 5000
-
-[[ports]]
-localPort = 5001
-externalPort = 3000
-
 [workflows]
 runButton = "Start Resume Enhancer"
 
@@ -30,3 +18,7 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run dev"
+
+[[ports]]
+localPort = 5000
+externalPort = 5000

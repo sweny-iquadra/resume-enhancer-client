@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-const InterviewPage = ({ setHasAttendedInterview, setCurrentPage }) => {
+const InterviewPage = ({ setCurrentPage }) => {
   return (
     <main className="flex items-center justify-center min-h-[calc(100vh-80px)] px-6 py-12">
       <div className="max-w-4xl w-full text-center">
@@ -47,8 +47,7 @@ const InterviewPage = ({ setHasAttendedInterview, setCurrentPage }) => {
 
           <button 
             onClick={() => {
-              // Mark interview as attended and go back to dashboard
-              setHasAttendedInterview(true);
+              // Go back to dashboard (interview history is managed in userProfile)
               setCurrentPage('dashboard');
             }}
             className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105"

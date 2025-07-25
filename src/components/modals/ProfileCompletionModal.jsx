@@ -1,12 +1,46 @@
 
 import React from 'react';
+import { enhanceResumeAPI } from '../../utils/userProfile';
 
-const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userProfile }) => {
+const ProfileCompletionModal = ({ 
+  showProfileModal, 
+  setShowProfileModal, 
+  userProfile, 
+  selectedRole, 
+  setIsLoading, 
+  setEnhancedResumeData 
+}) => {
   if (!showProfileModal) return null;
 
   const handleOutsideClick = (e) => {
     if (e.target === e.currentTarget) {
       setShowProfileModal(false);
+    }
+  };
+
+  const handleGenerateAnyway = async () => {
+    setShowProfileModal(false);
+    setIsLoading(true);
+    
+    try {
+      // Call the enhance resume API
+      const response = await enhanceResumeAPI(selectedRole, userProfile);
+      
+      if (response.success) {
+        // Store in localStorage
+        localStorage.setItem('enhancedResumeData', JSON.stringify(response.data));
+        
+        // Update state
+        setEnhancedResumeData(response.data.enhancedResume);
+      } else {
+        console.error('API call failed');
+        alert('Failed to enhance resume. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error calling enhance resume API:', error);
+      alert('An error occurred while enhancing your resume. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -30,6 +64,11 @@ const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userPro
             <span className="text-3xl">📝</span>
           </div>
           <h3 className="text-xl font-semibold">Complete Your Profile</h3>
+          {selectedRole && (
+            <p className="text-sm opacity-90 mt-2">
+              For: {selectedRole}
+            </p>
+          )}
         </div>
 
         {/* Modal Body */}
@@ -92,11 +131,7 @@ const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userPro
 
             {/* Generate Anyway Button - Secondary Action */}
             <button 
-              onClick={() => {
-                setShowProfileModal(false);
-                // Generate resume with existing data
-                console.log('Generating resume with existing data...');
-              }}
+              onClick={handleGenerateAnyway}
               className="text-gray-700 border-2 border-gray-300 px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold hover:bg-gray-50 hover:border-gray-400 transform hover:scale-105 flex-1 max-w-[180px] relative overflow-hidden"
               onMouseEnter={(e) => {
                 e.target.style.borderColor = '#9ca3af';

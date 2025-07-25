@@ -1,55 +1,12 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 
 const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userProfile }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-
   if (!showProfileModal) return null;
 
   const handleOutsideClick = (e) => {
-    if (e.target === e.currentTarget && !isLoading) {
+    if (e.target === e.currentTarget) {
       setShowProfileModal(false);
-    }
-  };
-
-  const simulateResumeGeneration = async () => {
-    setIsLoading(true);
-    
-    try {
-      // Simulate API call to OpenAI backend
-      await new Promise(resolve => setTimeout(resolve, 3000)); // 3 second delay
-      
-      // Simulate successful response
-      const enhancedProfile = {
-        ...userProfile,
-        professionalSummary: "Generated professional summary based on experience and skills",
-        projects: "Enhanced project details with AI optimization",
-        resumeEnhanced: true
-      };
-      
-      // Show first success message
-      setSuccessMessage("Resume is enhanced with all user profile detail and also updated your profile.");
-      setShowSuccess(true);
-      
-      // After 2 seconds, show final message
-      setTimeout(() => {
-        setSuccessMessage("Your resume is ready!");
-        
-        // After another 2 seconds, close modal and trigger ResumeChat
-        setTimeout(() => {
-          setIsLoading(false);
-          setShowSuccess(false);
-          setShowProfileModal(false);
-          // Trigger ResumeChat to show enhanced UI
-          window.dispatchEvent(new CustomEvent('resumeReady'));
-        }, 2000);
-      }, 2000);
-      
-    } catch (error) {
-      console.error('Resume generation failed:', error);
-      setIsLoading(false);
     }
   };
 
@@ -59,38 +16,12 @@ const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userPro
       onClick={handleOutsideClick}
     >
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-fade-in">
-        {/* Loading State */}
-        {isLoading && (
-          <div className="absolute inset-0 bg-white bg-opacity-95 rounded-2xl flex items-center justify-center z-10">
-            <div className="text-center">
-              <div className="w-16 h-16 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-700 font-medium">Generating your resume...</p>
-              <p className="text-gray-500 text-sm mt-2">Please wait while we enhance your profile</p>
-            </div>
-          </div>
-        )}
-
-        {/* Success State */}
-        {showSuccess && (
-          <div className="absolute inset-0 bg-white bg-opacity-95 rounded-2xl flex items-center justify-center z-10">
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-2xl">✓</span>
-              </div>
-              <p className="text-gray-700 font-medium text-lg leading-relaxed">{successMessage}</p>
-            </div>
-          </div>
-        )}
-
         {/* Modal Header */}
         <div className="text-white p-6 rounded-t-2xl text-center relative" style={{backgroundColor: '#3935cd'}}>
           {/* Close X Button */}
           <button
-            onClick={() => !isLoading && setShowProfileModal(false)}
-            className={`absolute top-4 right-4 text-white rounded-full p-2 transition-colors ${
-              isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white hover:bg-opacity-20'
-            }`}
-            disabled={isLoading}
+            onClick={() => setShowProfileModal(false)}
+            className="absolute top-4 right-4 text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors"
           >
             <span className="text-lg">✕</span>
           </button>
@@ -133,16 +64,11 @@ const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userPro
             {/* Complete Profile Button - Primary Action */}
             <button 
               onClick={() => {
-                if (!isLoading) {
-                  setShowProfileModal(false);
-                  // Redirect to dashboard
-                  window.location.href = '/';
-                }
+                setShowProfileModal(false);
+                // Redirect to dashboard
+                window.location.href = '/';
               }}
-              disabled={isLoading}
-              className={`text-white px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold shadow-lg flex-1 max-w-[180px] ${
-                isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-xl transform hover:scale-105'
-              }`}
+              className="text-white px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex-1 max-w-[180px]"
               style={{
                 backgroundColor: '#3935cd',
                 boxShadow: '0 8px 25px rgba(57, 53, 205, 0.3)'
@@ -166,24 +92,21 @@ const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userPro
 
             {/* Generate Anyway Button - Secondary Action */}
             <button 
-              onClick={simulateResumeGeneration}
-              disabled={isLoading}
-              className={`text-gray-700 border-2 border-gray-300 px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold flex-1 max-w-[180px] relative overflow-hidden ${
-                isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 hover:border-gray-400 transform hover:scale-105'
-              }`}
+              onClick={() => {
+                setShowProfileModal(false);
+                // Generate resume with existing data
+                console.log('Generating resume with existing data...');
+              }}
+              className="text-gray-700 border-2 border-gray-300 px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold hover:bg-gray-50 hover:border-gray-400 transform hover:scale-105 flex-1 max-w-[180px] relative overflow-hidden"
               onMouseEnter={(e) => {
-                if (!isLoading) {
-                  e.target.style.borderColor = '#9ca3af';
-                  e.target.style.backgroundColor = '#f9fafb';
-                  e.target.style.transform = 'scale(1.05) translateY(-2px)';
-                }
+                e.target.style.borderColor = '#9ca3af';
+                e.target.style.backgroundColor = '#f9fafb';
+                e.target.style.transform = 'scale(1.05) translateY(-2px)';
               }}
               onMouseLeave={(e) => {
-                if (!isLoading) {
-                  e.target.style.borderColor = '#d1d5db';
-                  e.target.style.backgroundColor = 'transparent';
-                  e.target.style.transform = 'scale(1)';
-                }
+                e.target.style.borderColor = '#d1d5db';
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.transform = 'scale(1)';
               }}
             >
               <span className="relative z-10">GENERATE ANYWAY</span>

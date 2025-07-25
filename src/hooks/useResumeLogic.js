@@ -30,11 +30,11 @@ export const useResumeLogic = () => {
       const defaultRole = uniqueRoles[0] || userProfile.role;
       setSelectedRole(defaultRole);
       
-      if (!checkProfileCompletion(userProfile)) {
-        setShowProfileModal(true);
-      } else {
+      if (checkProfileCompletion(userProfile)) {
         // Profile is complete - proceed with resume enhancement
         handleResumeEnhancement(defaultRole);
+      } else {
+        setShowProfileModal(true);
       }
     }
   };
@@ -43,30 +43,47 @@ export const useResumeLogic = () => {
     setSelectedRole(role);
     setShowRoleSelection(false);
     
-    if (!checkProfileCompletion(userProfile)) {
-      setShowProfileModal(true);
-    } else {
+    if (checkProfileCompletion(userProfile)) {
       // Profile is complete - proceed with resume enhancement
       handleResumeEnhancement(role);
+    } else {
+      setShowProfileModal(true);
     }
   };
 
   const handleResumeEnhancement = async (role) => {
-    // Show loading message popup
-    alert('iQua AI is generating your resume. This may take a few moments while we tailor your resume to your most relevant job role and skills.');
-    
     setIsLoading(true);
     
     try {
-      // Call the enhance resume API with user profile data
-      const response = await enhanceResumeAPI(role, userProfile);
+      // Create original resume from user profile
+      const originalResume = {
+        basicDetails: {
+          name: userProfile.name,
+          email: userProfile.email,
+          phone: userProfile.phone,
+          location: "New York, NY" // Default location
+        },
+        professionalSummary: userProfile.professionalSummary,
+        skills: userProfile.skills,
+        workExperience: userProfile.workExperience,
+        projects: userProfile.projects || []
+      };
+
+      // Call the enhance resume API with user profile data and original resume
+      const response = await enhanceResumeAPI(role, userProfile, originalResume);
       
       if (response.success) {
-        // Store in localStorage
-        localStorage.setItem('enhancedResumeData', JSON.stringify(response.data));
+        // Store both original and enhanced resume data
+        const resumeData = {
+          originalResume: originalResume,
+          enhancedResume: response.data.enhancedResume,
+          userRole: role
+        };
         
-        // Update state with enhanced resume data
-        setEnhancedResumeData(response.data.enhancedResume);
+        localStorage.setItem('resumeData', JSON.stringify(resumeData));
+        
+        // Update state with complete resume data
+        setEnhancedResumeData(resumeData);
         
         // Show the preview modal
         setShowPreview(true);

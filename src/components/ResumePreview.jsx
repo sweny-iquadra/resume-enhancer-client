@@ -5,40 +5,14 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const [selections, setSelections] = useState({});
   const [finalResume, setFinalResume] = useState(null);
 
-  // Original resume data (mock data for comparison) - styled like a real resume
-  const originalResume = {
-    basicDetails: {
-      name: "John Smith",
-      email: "john.smith@email.com",
-      phone: "+1 (555) 123-4567",
-      location: "New York, NY"
-    },
-    professionalSummary: "Experienced software developer with 2+ years in web development. Skilled in JavaScript and React with a passion for creating user-friendly applications.",
-    skills: ["JavaScript", "React", "Node.js", "Python", "SQL", "Git"],
-    workExperience: [
-      {
-        company: "Tech Solutions Inc",
-        position: "Junior Developer",
-        duration: "2020-2022",
-        responsibilities: [
-          "Developed web applications using React and JavaScript",
-          "Collaborated with cross-functional teams on various projects",
-          "Maintained and updated existing codebase for improved performance"
-        ]
-      }
-    ],
-    projects: [
-      {
-        name: "E-commerce Website",
-        description: "Created a responsive e-commerce website with shopping cart functionality",
-        technologies: ["HTML", "CSS", "JavaScript", "React"]
-      }
-    ]
-  };
+  // Extract data from the enhanced resume data structure
+  const originalResume = enhancedResumeData?.originalResume;
+  const enhancedResume = enhancedResumeData?.enhancedResume;
+  const userRole = enhancedResumeData?.userRole;
 
   // Build final resume based on selections
   useEffect(() => {
-    if (!enhancedResumeData) return;
+    if (!enhancedResume || !originalResume) return;
 
     const buildFinalResume = () => {
       const final = {
@@ -64,15 +38,15 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
       // Skills
       final.skills = selections['skills'] === 'enhanced'
-        ? enhancedResumeData.skills
+        ? enhancedResume.skills
         : originalResume.skills;
 
       // Work Experience
-      const maxWorkExp = Math.max(originalResume.workExperience.length, enhancedResumeData.workExperience.length);
+      const maxWorkExp = Math.max(originalResume.workExperience?.length || 0, enhancedResume.workExperience?.length || 0);
       for (let i = 0; i < maxWorkExp; i++) {
         const selectionKey = `workExperience.${i}`;
-        const originalExp = originalResume.workExperience[i];
-        const enhancedExp = enhancedResumeData.workExperience[i];
+        const originalExp = originalResume.workExperience?.[i];
+        const enhancedExp = enhancedResume.workExperience?.[i];
 
         if (selections[selectionKey] === 'enhanced' && enhancedExp) {
           final.workExperience.push(enhancedExp);
@@ -82,11 +56,11 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       }
 
       // Projects
-      const maxProjects = Math.max(originalResume.projects.length, enhancedResumeData.projects?.length || 0);
+      const maxProjects = Math.max(originalResume.projects?.length || 0, enhancedResume.projects?.length || 0);
       for (let i = 0; i < maxProjects; i++) {
         const selectionKey = `projects.${i}`;
-        const originalProject = originalResume.projects[i];
-        const enhancedProject = enhancedResumeData.projects?.[i];
+        const originalProject = originalResume.projects?.[i];
+        const enhancedProject = enhancedResume.projects?.[i];
 
         if (selections[selectionKey] === 'enhanced' && enhancedProject) {
           final.projects.push(enhancedProject);
@@ -99,9 +73,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     };
 
     buildFinalResume();
-  }, [selections, enhancedResumeData]);
+  }, [selections, enhancedResume, originalResume]);
 
-  if (!showPreview || !enhancedResumeData) return null;
+  if (!showPreview || !enhancedResumeData || !originalResume || !enhancedResume) return null;
 
   const handleOutsideClick = (e) => {
     if (e.target === e.currentTarget) {
@@ -607,7 +581,7 @@ Powered by iQua.ai
               </div>
               <InteractiveWordDocument 
                 resumeData={originalResume} 
-                enhancedData={enhancedResumeData}
+                enhancedData={enhancedResume}
                 title="Original_Resume.docx"
                 isOriginal={true}
               />
@@ -620,8 +594,8 @@ Powered by iQua.ai
                 <p className="text-sm text-gray-600">Click on any section to select it for your final resume</p>
               </div>
               <InteractiveWordDocument 
-                resumeData={enhancedResumeData} 
-                enhancedData={enhancedResumeData}
+                resumeData={enhancedResume} 
+                enhancedData={enhancedResume}
                 title="Enhanced_Resume.docx"
                 isOriginal={false}
               />

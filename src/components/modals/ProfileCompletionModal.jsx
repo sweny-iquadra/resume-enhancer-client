@@ -60,39 +60,58 @@ const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userPro
             </ul>
           </div>
 
-          <div className="flex flex-col space-y-3">
-            {/* Complete Profile Button */}
+          <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
+            {/* Complete Profile Button - Primary Action */}
             <button 
               onClick={() => {
                 setShowProfileModal(false);
                 // Redirect to dashboard
                 window.location.href = '/';
               }}
-              className="text-white px-6 py-3 rounded-xl transition-all duration-300 font-medium shadow-md hover:shadow-lg transform hover:scale-105"
+              className="text-white px-8 py-3.5 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto min-w-[160px]"
               style={{
                 backgroundColor: '#3935cd',
                 boxShadow: '0 8px 25px rgba(57, 53, 205, 0.3)'
               }}
               onMouseEnter={(e) => {
                 e.target.style.backgroundColor = '#2d28b8';
+                e.target.style.transform = 'scale(1.05) translateY(-2px)';
               }}
               onMouseLeave={(e) => {
                 e.target.style.backgroundColor = '#3935cd';
+                e.target.style.transform = 'scale(1)';
               }}
             >
               COMPLETE PROFILE
             </button>
 
-            {/* Generate Anyway Button */}
+            {/* Stylish Divider */}
+            <div className="hidden sm:flex flex-col items-center">
+              <div className="w-px h-8 bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
+              <div className="text-gray-400 text-xs font-medium py-1">OR</div>
+              <div className="w-px h-8 bg-gradient-to-t from-transparent via-gray-300 to-transparent"></div>
+            </div>
+
+            {/* Generate Anyway Button - Secondary Action */}
             <button 
               onClick={() => {
                 setShowProfileModal(false);
                 // Generate resume with existing data
                 console.log('Generating resume with existing data...');
               }}
-              className="text-gray-700 border border-gray-300 px-6 py-3 rounded-xl transition-all duration-300 font-medium hover:bg-gray-50 hover:border-gray-400 transform hover:scale-105"
+              className="text-gray-700 border-2 border-gray-300 px-8 py-3.5 rounded-xl transition-all duration-300 font-semibold hover:bg-gray-50 hover:border-gray-400 transform hover:scale-105 w-full sm:w-auto min-w-[160px] relative overflow-hidden"
+              onMouseEnter={(e) => {
+                e.target.style.borderColor = '#9ca3af';
+                e.target.style.backgroundColor = '#f9fafb';
+                e.target.style.transform = 'scale(1.05) translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.borderColor = '#d1d5db';
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.transform = 'scale(1)';
+              }}
             >
-              GENERATE ANYWAY
+              <span className="relative z-10">GENERATE ANYWAY</span>
             </button>
           </div>
         </div>

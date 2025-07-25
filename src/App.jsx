@@ -266,7 +266,7 @@ function App() {
           <div className="fixed bottom-4 right-4 z-50">
             <div className="bg-white rounded-2xl shadow-2xl w-96 h-[500px] flex flex-col animate-fade-in">
               {/* Chat Header */}
-              <div className="text-white p-4 rounded-t-2xl flex justify-between items-center" style={{background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)'}}></div>
+              <div className="text-white p-4 rounded-t-2xl flex justify-between items-center" style={{background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)'}}>
                 <div className="flex items-center space-x-2">
                   <span className="text-xl">📄</span>
                   <span className="font-semibold">Resume Enhancer</span>

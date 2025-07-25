@@ -308,15 +308,16 @@ function App() {
                 {!hasAttendedInterview && (
                   <button 
                     onClick={navigateToInterview}
-                    className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white px-8 py-4 rounded-2xl font-semibold text-sm uppercase tracking-wide shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-1 mb-4 border border-white border-opacity-20 backdrop-blur-sm"
+                    className="relative overflow-hidden px-8 py-4 rounded-2xl font-bold text-base uppercase tracking-wide shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-1 mb-4 border border-white border-opacity-20 backdrop-blur-sm"
                     style={{
                       background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)',
-                      boxShadow: '0 10px 30px rgba(57, 53, 205, 0.3), 0 4px 15px rgba(57, 53, 205, 0.2)'
+                      boxShadow: '0 10px 30px rgba(57, 53, 205, 0.3), 0 4px 15px rgba(57, 53, 205, 0.2)',
+                      color: '#ffffff'
                     }}
                   >
-                    <span className="relative z-10 flex items-center justify-center space-x-2">
+                    <span className="relative z-10 flex items-center justify-center space-x-2 text-white">
                       <span className="text-lg">🎤</span>
-                      <span>ATTEND INTERVIEW</span>
+                      <span className="font-bold text-white drop-shadow-sm">ATTEND INTERVIEW</span>
                     </span>
                     <div className="absolute inset-0 bg-gradient-to-r from-white to-transparent opacity-0 hover:opacity-10 transition-opacity duration-300"></div>
                   </button>

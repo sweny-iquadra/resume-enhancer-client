@@ -446,8 +446,8 @@ Powered by iQua.ai
         {/* Modal Header */}
         <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6 rounded-t-2xl flex justify-between items-center">
           <div>
-            <h3 className="text-xl font-semibold">Resume Preview & Comparison</h3>
-            <p className="text-sm opacity-90 mt-1">Microsoft Word-style document preview and comparison</p>
+            <h3 className="text-xl font-semibold">Smart Resume Builder</h3>
+            <p className="text-sm opacity-90 mt-1">AI-powered resume comparison and customization tool</p>
           </div>
           <button
             onClick={() => setShowPreview(false)}

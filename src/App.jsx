@@ -1,3 +1,4 @@
+
 import React from 'react';
 import './App.css';
 import Header from './components/Header';
@@ -5,9 +6,8 @@ import Dashboard from './components/Dashboard';
 import InterviewPage from './components/InterviewPage';
 import ResumeChat from './components/ResumeChat';
 import ResumePreview from './components/ResumePreview';
-import InterviewRequirementModal from './components/modals/InterviewRequirementModal';
 import ProfileCompletionModal from './components/modals/ProfileCompletionModal';
-import LoadingModal from './components/modals/LoadingModal';
+import InterviewRequirementModal from './components/modals/InterviewRequirementModal';
 import { useResumeLogic } from './hooks/useResumeLogic';
 
 function App() {

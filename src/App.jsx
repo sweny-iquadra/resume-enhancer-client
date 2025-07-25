@@ -1,9 +1,11 @@
+
 import React from 'react';
 import './App.css';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import InterviewPage from './components/InterviewPage';
 import ResumeChat from './components/ResumeChat';
+import ResumePreview from './components/ResumePreview';
 import ProfileCompletionModal from './components/modals/ProfileCompletionModal';
 import InterviewRequirementModal from './components/modals/InterviewRequirementModal';
 import { useResumeLogic } from './hooks/useResumeLogic';
@@ -17,12 +19,21 @@ function App() {
     currentPage,
     setCurrentPage,
     hasAttendedInterview,
-    setHasAttendedInterview,
     showProfileModal,
     setShowProfileModal,
     userProfile,
     handleCreateResumeClick,
-    navigateToInterview
+    navigateToInterview,
+    selectedRole,
+    showRoleSelection,
+    handleRoleSelection,
+    uniqueRoles,
+    isLoading,
+    setIsLoading,
+    enhancedResumeData,
+    setEnhancedResumeData,
+    showPreview,
+    setShowPreview
   } = useResumeLogic();
 
   return (
@@ -52,7 +63,6 @@ function App() {
                 setCurrentPage={setCurrentPage}
               />
               <InterviewPage 
-                setHasAttendedInterview={setHasAttendedInterview}
                 setCurrentPage={setCurrentPage}
               />
             </>
@@ -65,6 +75,20 @@ function App() {
           setShowResumeChat={setShowResumeChat}
           hasAttendedInterview={hasAttendedInterview}
           handleCreateResumeClick={handleCreateResumeClick}
+          showRoleSelection={showRoleSelection}
+          uniqueRoles={uniqueRoles}
+          handleRoleSelection={handleRoleSelection}
+          isLoading={isLoading}
+          enhancedResumeData={enhancedResumeData}
+          setShowPreview={setShowPreview}
+          setCurrentPage={setCurrentPage}
+        />
+
+        {/* Resume Preview Modal */}
+        <ResumePreview
+          showPreview={showPreview}
+          setShowPreview={setShowPreview}
+          enhancedResumeData={enhancedResumeData}
         />
 
         {/* Profile Completion Modal */}
@@ -72,6 +96,9 @@ function App() {
           showProfileModal={showProfileModal}
           setShowProfileModal={setShowProfileModal}
           userProfile={userProfile}
+          selectedRole={selectedRole}
+          setIsLoading={setIsLoading}
+          setEnhancedResumeData={setEnhancedResumeData}
         />
 
         {/* Interview Requirement Modal */}

@@ -1,5 +1,5 @@
 
-// Dummy user object
+// Dummy user object with interview history
 export const createUserProfile = () => ({
   name: "John Smith",
   email: "john.smith@email.com",
@@ -21,7 +21,33 @@ export const createUserProfile = () => ({
       responsibilities: ["Developed web applications", "Collaborated with team"]
     }
   ],
-  projects: null // Missing project information
+  projects: null, // Missing project information
+  interviewHistory: [
+    {
+      id: 1,
+      role: "Frontend Developer",
+      date: "2024-01-15",
+      completed: true
+    },
+    {
+      id: 2,
+      role: "Full Stack Developer",
+      date: "2024-01-20",
+      completed: true
+    },
+    {
+      id: 3,
+      role: "Backend Developer",
+      date: "2024-01-25",
+      completed: true
+    },
+    {
+      id: 4,
+      role: "DevOps Engineer",
+      date: "2024-01-30",
+      completed: true
+    }
+  ]
 });
 
 // Function to check if profile is complete
@@ -40,4 +66,78 @@ export const checkProfileCompletion = (userProfile) => {
   ];
 
   return requiredFields.every(field => field !== null && field !== undefined && field !== '');
+};
+
+// Function to get completed interviews count
+export const getCompletedInterviewsCount = (userProfile) => {
+  return userProfile.interviewHistory?.filter(interview => interview.completed).length || 0;
+};
+
+// Function to get unique job roles from interview history
+export const getUniqueJobRoles = (userProfile) => {
+  const completedInterviews = userProfile.interviewHistory?.filter(interview => interview.completed) || [];
+  const uniqueRoles = [...new Set(completedInterviews.map(interview => interview.role))];
+  return uniqueRoles;
+};
+
+// Dummy API call for enhancing resume
+export const enhanceResumeAPI = async (selectedRole, userProfile, originalResume = null) => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
+  // Mock API response
+  return {
+    success: true,
+    data: {
+      enhancedResume: {
+        basicDetails: {
+          name: userProfile.name,
+          email: userProfile.email,
+          phone: userProfile.phone,
+          location: "San Francisco, CA"
+        },
+        professionalSummary: `Experienced ${selectedRole} with 3+ years of expertise in modern web technologies. Proven track record of delivering scalable applications and leading cross-functional teams to achieve business objectives.`,
+        skills: [
+          ...userProfile.skills,
+          "TypeScript",
+          "Docker",
+          "AWS",
+          "GraphQL",
+          "MongoDB"
+        ],
+        roles: [selectedRole, "Software Engineer", "Technical Lead"],
+        workExperience: [
+          ...userProfile.workExperience,
+          {
+            company: "Innovation Labs",
+            position: selectedRole,
+            duration: "2022-Present",
+            responsibilities: [
+              `Led development of ${selectedRole.toLowerCase()} solutions`,
+              "Mentored junior developers",
+              "Implemented CI/CD pipelines"
+            ]
+          }
+        ],
+        projects: [
+          {
+            name: "E-commerce Platform",
+            description: `Built a scalable e-commerce platform as ${selectedRole}`,
+            technologies: ["React", "Node.js", "MongoDB", "AWS"]
+          },
+          {
+            name: "Task Management App",
+            description: "Developed a collaborative task management application",
+            technologies: ["Vue.js", "Express", "PostgreSQL"]
+          }
+        ]
+      },
+      originalResume: originalResume || {
+        basicDetails: userProfile,
+        professionalSummary: "Basic summary",
+        skills: userProfile.skills,
+        workExperience: userProfile.workExperience
+      }
+    }
+  };
 };

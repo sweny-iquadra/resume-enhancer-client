@@ -52,14 +52,14 @@ const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userPro
               }}
               className="text-white px-6 py-3 rounded-xl transition-all duration-300 font-medium shadow-md hover:shadow-lg transform hover:scale-105"
               style={{
-                background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)',
+                backgroundColor: '#3935cd',
                 boxShadow: '0 8px 25px rgba(57, 53, 205, 0.3)'
               }}
               onMouseEnter={(e) => {
-                e.target.style.background = 'linear-gradient(135deg, #2d28b8 0%, #4a3dd4 50%, #6859db 100%)';
+                e.target.style.backgroundColor = '#2d28b8';
               }}
               onMouseLeave={(e) => {
-                e.target.style.background = 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)';
+                e.target.style.backgroundColor = '#3935cd';
               }}
             >
               COMPLETE PROFILE

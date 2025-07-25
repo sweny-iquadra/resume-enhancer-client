@@ -304,12 +304,13 @@ function App() {
                       onClick={handleCreateResumeClick}
                       className={`group relative overflow-hidden px-6 py-3.5 rounded-xl transition-all duration-500 font-bold text-sm shadow-xl hover:shadow-2xl transform hover:scale-105 border-2 min-w-[140px] ${
                         hasAttendedInterview 
-                          ? 'bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600 text-white hover:from-emerald-500 hover:via-emerald-600 hover:to-emerald-700 cursor-pointer border-emerald-300 hover:border-emerald-200 hover:-translate-y-1' 
+                          ? 'text-white cursor-pointer border-indigo-300 hover:border-indigo-200 hover:-translate-y-1' 
                           : 'bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 text-gray-600 cursor-not-allowed border-gray-300 opacity-60'
                       }`}
                       style={hasAttendedInterview ? {
-                        boxShadow: '0 8px 25px rgba(16, 185, 129, 0.3), 0 0 20px rgba(16, 185, 129, 0.1)',
-                        filter: 'drop-shadow(0 4px 8px rgba(16, 185, 129, 0.2))'
+                        background: 'linear-gradient(135deg, #4f46e5 0%, #5b4de8 30%, #7c3aed 70%, #8b5cf6 100%)',
+                        boxShadow: '0 8px 25px rgba(79, 70, 229, 0.3), 0 0 20px rgba(79, 70, 229, 0.1)',
+                        filter: 'drop-shadow(0 4px 8px rgba(79, 70, 229, 0.2))'
                       } : {}}
                       disabled={!hasAttendedInterview}
                     >

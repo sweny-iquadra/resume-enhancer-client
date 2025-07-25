@@ -8,13 +8,63 @@ function App() {
 
   // Mock data - replace with actual API call to check interview attendance
   const [hasAttendedInterview, setHasAttendedInterview] = useState(true);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
+  // Dummy user object
+  const [userProfile] = useState({
+    name: "John Smith",
+    email: "john.smith@email.com",
+    phone: "+1 (555) 123-4567",
+    education: {
+      degree: "Bachelor of Science in Computer Science",
+      institution: "University of Technology",
+      graduationYear: "2020"
+    },
+    role: "Software Developer",
+    sector: "Technology",
+    skills: ["JavaScript", "React", "Node.js", "Python", "SQL"],
+    professionalSummary: null, // This will be auto-generated
+    workExperience: [
+      {
+        company: "Tech Solutions Inc",
+        position: "Junior Developer",
+        duration: "2020-2022",
+        responsibilities: ["Developed web applications", "Collaborated with team"]
+      }
+    ],
+    projects: null // Missing project information
+  });
+
+  // Function to check if profile is complete
+  const checkProfileCompletion = () => {
+    const requiredFields = [
+      userProfile.name,
+      userProfile.email,
+      userProfile.phone,
+      userProfile.education?.degree,
+      userProfile.role,
+      userProfile.sector,
+      userProfile.skills?.length > 0,
+      userProfile.professionalSummary,
+      userProfile.workExperience?.length > 0,
+      userProfile.projects
+    ];
+
+    return requiredFields.every(field => field !== null && field !== undefined && field !== '');
+  };
 
   const handleCreateResumeClick = () => {
     if (!hasAttendedInterview) {
       setShowInterviewModal(true);
     } else {
-      // Handle resume creation logic here
-      console.log('Creating resume...');
+      // Check if profile is complete
+      if (!checkProfileCompletion()) {
+        setShowProfileModal(true);
+      } else {
+        // Handle resume creation logic here
+        console.log('Creating resume...');
+        alert('Resume creation started!');
+      }
     }
   };
 
@@ -371,6 +421,70 @@ function App() {
                       <span className="text-sm">→</span>
                     </button>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Profile Completion Modal */}
+        {showProfileModal && (
+          <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-fade-in">
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-t-2xl text-center">
+                <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">📝</span>
+                </div>
+                <h3 className="text-xl font-semibold">Complete Your Profile</h3>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-6 text-center">
+                <p className="text-gray-700 text-lg leading-relaxed mb-4">
+                  Looks like you're almost there!
+                </p>
+                <p className="text-gray-600 text-base leading-relaxed mb-6">
+                  Complete your profile to build a perfect resume tailored for you.
+                </p>
+
+                {/* Missing fields list */}
+                <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left">
+                  <h4 className="font-semibold text-gray-800 mb-3">Missing Information:</h4>
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    {!userProfile.professionalSummary && (
+                      <li className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-red-400 rounded-full"></span>
+                        <span>Professional Summary</span>
+                      </li>
+                    )}
+                    {!userProfile.projects && (
+                      <li className="flex items-center space-x-2">
+                        <span className="w-2 h-2 bg-red-400 rounded-full"></span>
+                        <span>Projects Information</span>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+
+                <div className="flex flex-col space-y-3">
+                  <button 
+                    onClick={() => {
+                      setShowProfileModal(false);
+                      // Navigate to profile completion page (future implementation)
+                      console.log('Navigate to profile completion');
+                    }}
+                    className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 font-medium shadow-md hover:shadow-lg transform hover:scale-105"
+                  >
+                    COMPLETE PROFILE
+                  </button>
+
+                  <button 
+                    onClick={() => setShowProfileModal(false)}
+                    className="text-gray-500 hover:text-gray-700 transition-colors font-medium"
+                  >
+                    Close
+                  </button>
                 </div>
               </div>
             </div>

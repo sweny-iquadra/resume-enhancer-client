@@ -60,7 +60,7 @@ const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userPro
             </ul>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
+          <div className="flex flex-row gap-4 items-center justify-center">
             {/* Complete Profile Button - Primary Action */}
             <button 
               onClick={() => {
@@ -68,7 +68,7 @@ const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userPro
                 // Redirect to dashboard
                 window.location.href = '/';
               }}
-              className="text-white px-8 py-3.5 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 w-full sm:w-auto min-w-[160px]"
+              className="text-white px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex-1 max-w-[180px]"
               style={{
                 backgroundColor: '#3935cd',
                 boxShadow: '0 8px 25px rgba(57, 53, 205, 0.3)'
@@ -85,11 +85,9 @@ const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userPro
               COMPLETE PROFILE
             </button>
 
-            {/* Stylish Divider */}
-            <div className="hidden sm:flex flex-col items-center">
-              <div className="w-px h-8 bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
-              <div className="text-gray-400 text-xs font-medium py-1">OR</div>
-              <div className="w-px h-8 bg-gradient-to-t from-transparent via-gray-300 to-transparent"></div>
+            {/* Stylish Vertical Divider */}
+            <div className="flex items-center justify-center">
+              <div className="w-px h-12 bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
             </div>
 
             {/* Generate Anyway Button - Secondary Action */}
@@ -99,7 +97,7 @@ const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userPro
                 // Generate resume with existing data
                 console.log('Generating resume with existing data...');
               }}
-              className="text-gray-700 border-2 border-gray-300 px-8 py-3.5 rounded-xl transition-all duration-300 font-semibold hover:bg-gray-50 hover:border-gray-400 transform hover:scale-105 w-full sm:w-auto min-w-[160px] relative overflow-hidden"
+              className="text-gray-700 border-2 border-gray-300 px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold hover:bg-gray-50 hover:border-gray-400 transform hover:scale-105 flex-1 max-w-[180px] relative overflow-hidden"
               onMouseEnter={(e) => {
                 e.target.style.borderColor = '#9ca3af';
                 e.target.style.backgroundColor = '#f9fafb';

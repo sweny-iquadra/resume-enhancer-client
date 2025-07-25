@@ -57,22 +57,7 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <div className="w-16 bg-white border-r border-gray-200 flex flex-col items-center py-6 space-y-4">
-        <button
-          onClick={() => setShowResumeChat(!showResumeChat)}
-          className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 ${
-            showResumeChat 
-              ? 'bg-purple-600 text-white shadow-lg' 
-              : 'bg-gray-100 text-gray-600 hover:bg-purple-100'
-          }`}
-          title="Resume Enhancer"
-        >
-          <span className="text-lg">📄</span>
-        </button>
-      </div>
-
+    <div className="min-h-screen bg-gray-50">
       {/* Main Content Area */}
       <div className="flex-1 flex">
         {/* Dashboard */}

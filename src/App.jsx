@@ -7,7 +7,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState('dashboard'); // 'dashboard' or 'interview'
 
   // Mock data - replace with actual API call to check interview attendance
-  const [hasAttendedInterview, setHasAttendedInterview] = useState(false);
+  const [hasAttendedInterview, setHasAttendedInterview] = useState(true);
 
   const handleCreateResumeClick = () => {
     if (!hasAttendedInterview) {
@@ -334,37 +334,21 @@ function App() {
                       <div className="w-1 h-6 bg-gradient-to-t from-purple-300 via-purple-500 to-purple-700 rounded-full"></div>
                     </div>
 
-                    {/* Attend Interview Button */}
+                    {/* Attend Interview Button - Disabled */}
                     <button 
-                      onClick={() => {
-                        if (hasAttendedInterview) {
-                          navigateToInterview();
-                        } else {
-                          setShowInterviewModal(true);
-                        }
-                      }}
-                      className="group relative overflow-hidden px-6 py-3.5 rounded-xl font-bold text-sm shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 border-2 border-purple-300 hover:border-purple-200 backdrop-blur-sm cursor-pointer min-w-[140px]"
+                      disabled={true}
+                      className="group relative overflow-hidden px-6 py-3.5 rounded-xl font-bold text-sm shadow-lg transition-all duration-300 border-2 border-gray-300 backdrop-blur-sm cursor-not-allowed min-w-[140px] opacity-50"
                       style={{
-                        background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 30%, #7c69ef 70%, #9f7aea 100%)',
-                        boxShadow: '0 8px 25px rgba(57, 53, 205, 0.3), 0 0 20px rgba(57, 53, 205, 0.1)',
-                        filter: 'drop-shadow(0 4px 8px rgba(57, 53, 205, 0.2))'
+                        background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 50%, #4b5563 100%)',
+                        boxShadow: '0 4px 10px rgba(107, 114, 128, 0.2)'
                       }}
                     >
                       <span className="relative z-20 flex flex-col items-center justify-center space-y-1 text-white">
-                        <span className="text-xl">🎤</span>
-                        <span className="font-bold tracking-wider text-xs uppercase leading-tight drop-shadow-sm">
+                        <span className="text-xl">🔒</span>
+                        <span className="font-bold tracking-wider text-xs uppercase leading-tight">
                           ATTEND<br/>INTERVIEW
                         </span>
                       </span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-white/15 via-transparent to-white/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transform -rotate-45 transition-all duration-500"></div>
-                      
-                      {/* Animated border glow */}
-                      <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" 
-                           style={{
-                             background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%)',
-                             animation: 'shimmer 2s infinite'
-                           }}></div>
                     </button>
                   </div>
 

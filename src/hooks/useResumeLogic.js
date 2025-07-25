@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { createUserProfile, checkProfileCompletion, getCompletedInterviewsCount, getUniqueJobRoles } from '../utils/userProfile';
+import { createUserProfile, checkProfileCompletion, getCompletedInterviewsCount, getUniqueJobRoles, enhanceResumeAPI } from '../utils/userProfile';
 
 export const useResumeLogic = () => {
   const [showResumeChat, setShowResumeChat] = useState(false);
@@ -33,9 +33,8 @@ export const useResumeLogic = () => {
       if (!checkProfileCompletion(userProfile)) {
         setShowProfileModal(true);
       } else {
-        // Handle resume creation logic here
-        console.log('Creating resume...');
-        alert('Resume creation started!');
+        // Profile is complete - proceed with resume enhancement
+        handleResumeEnhancement(defaultRole);
       }
     }
   };
@@ -47,9 +46,39 @@ export const useResumeLogic = () => {
     if (!checkProfileCompletion(userProfile)) {
       setShowProfileModal(true);
     } else {
-      // Handle resume creation logic here
-      console.log('Creating resume with role:', role);
-      alert('Resume creation started!');
+      // Profile is complete - proceed with resume enhancement
+      handleResumeEnhancement(role);
+    }
+  };
+
+  const handleResumeEnhancement = async (role) => {
+    // Show loading message popup
+    alert('iQua AI is generating your resume. This may take a few moments while we tailor your resume to your most relevant job role and skills.');
+    
+    setIsLoading(true);
+    
+    try {
+      // Call the enhance resume API with user profile data
+      const response = await enhanceResumeAPI(role, userProfile);
+      
+      if (response.success) {
+        // Store in localStorage
+        localStorage.setItem('enhancedResumeData', JSON.stringify(response.data));
+        
+        // Update state with enhanced resume data
+        setEnhancedResumeData(response.data.enhancedResume);
+        
+        // Show the preview modal
+        setShowPreview(true);
+      } else {
+        console.error('API call failed');
+        alert('Failed to enhance resume. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error calling enhance resume API:', error);
+      alert('An error occurred while enhancing your resume. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -84,6 +113,7 @@ export const useResumeLogic = () => {
     enhancedResumeData,
     setEnhancedResumeData,
     showPreview,
-    setShowPreview
+    setShowPreview,
+    handleResumeEnhancement
   };
 };

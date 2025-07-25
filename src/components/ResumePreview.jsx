@@ -79,23 +79,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         } else if (originalExp) {
           final.workExperience.push(originalExp);
         }
-
-        // Handle individual responsibilities
-        if (originalExp && enhancedExp) {
-          const maxResp = Math.max(originalExp.responsibilities.length, enhancedExp.responsibilities.length);
-          const selectedExp = final.workExperience[final.workExperience.length - 1];
-          if (selectedExp) {
-            selectedExp.responsibilities = [];
-            for (let j = 0; j < maxResp; j++) {
-              const respKey = `workExperience.${i}.resp.${j}`;
-              if (selections[respKey] === 'enhanced' && enhancedExp.responsibilities[j]) {
-                selectedExp.responsibilities.push(enhancedExp.responsibilities[j]);
-              } else if (originalExp.responsibilities[j]) {
-                selectedExp.responsibilities.push(originalExp.responsibilities[j]);
-              }
-            }
-          }
-        }
       }
 
       // Projects
@@ -178,50 +161,8 @@ Powered by iQua.ai
     console.log(`Downloading resume as ${format}`);
   };
 
-  // Interactive Word Document component with inline accept/reject
-  const InteractiveWordDocument = ({ resumeData, enhancedData, title, isOriginal = false }) => {
-    const InlineSelector = ({ originalContent, enhancedContent, selectionKey, type = 'text' }) => {
-      const isSelected = selections[selectionKey];
-      const showEnhanced = isSelected === 'enhanced';
-      const showOriginal = isSelected !== 'enhanced';
-
-      return (
-        <div className="relative group">
-          {type === 'text' ? (
-            <span className={`${showEnhanced ? 'bg-green-100' : showOriginal ? 'bg-blue-50' : ''}`}>
-              {showEnhanced ? enhancedContent : originalContent}
-            </span>
-          ) : type === 'skills' ? (
-            <span>
-              {(showEnhanced ? enhancedContent : originalContent).join(' • ')}
-            </span>
-          ) : null}
-
-          {/* Hover Buttons */}
-          <div className="absolute -right-2 -top-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1 z-10">
-            <button
-              onClick={() => handleSelection(selectionKey, 'original')}
-              className={`px-2 py-1 text-xs rounded ${
-                showOriginal ? 'bg-blue-500 text-white' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-              }`}
-              title="Use Original"
-            >
-              O
-            </button>
-            <button
-              onClick={() => handleSelection(selectionKey, 'enhanced')}
-              className={`px-2 py-1 text-xs rounded ${
-                showEnhanced ? 'bg-green-500 text-white' : 'bg-green-100 text-green-700 hover:bg-green-200'
-              }`}
-              title="Use Enhanced"
-            >
-              E
-            </button>
-          </div>
-        </div>
-      );
-    };
-
+  // Microsoft Word-style document component
+  const WordDocument = ({ resumeData, title, isOriginal = false }) => {
     return (
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
         {/* Document Header - Word-style */}
@@ -252,30 +193,14 @@ Powered by iQua.ai
               fontSize: '18pt',
               fontWeight: 'bold'
             }}>
-              <InlineSelector
-                originalContent={resumeData.basicDetails.name}
-                enhancedContent={enhancedData.basicDetails.name}
-                selectionKey="basicDetails.name"
-              />
+              {resumeData.basicDetails.name}
             </h1>
             <div className="text-sm text-gray-700" style={{ fontSize: '11pt' }}>
-              <InlineSelector
-                originalContent={resumeData.basicDetails.email}
-                enhancedContent={enhancedData.basicDetails.email}
-                selectionKey="basicDetails.email"
-              />
+              <span>{resumeData.basicDetails.email}</span>
               <span className="mx-2">|</span>
-              <InlineSelector
-                originalContent={resumeData.basicDetails.phone}
-                enhancedContent={enhancedData.basicDetails.phone}
-                selectionKey="basicDetails.phone"
-              />
+              <span>{resumeData.basicDetails.phone}</span>
               <span className="mx-2">|</span>
-              <InlineSelector
-                originalContent={resumeData.basicDetails.location}
-                enhancedContent={enhancedData.basicDetails.location}
-                selectionKey="basicDetails.location"
-              />
+              <span>{resumeData.basicDetails.location}</span>
             </div>
           </div>
 
@@ -296,11 +221,7 @@ Powered by iQua.ai
               lineHeight: '1.15',
               textAlign: 'justify'
             }}>
-              <InlineSelector
-                originalContent={resumeData.professionalSummary}
-                enhancedContent={enhancedData.professionalSummary}
-                selectionKey="professionalSummary"
-              />
+              {resumeData.professionalSummary}
             </p>
           </div>
 
@@ -319,12 +240,7 @@ Powered by iQua.ai
               fontFamily: 'Times New Roman, serif',
               fontSize: '12pt'
             }}>
-              <InlineSelector
-                originalContent={resumeData.skills}
-                enhancedContent={enhancedData.skills}
-                selectionKey="skills"
-                type="skills"
-              />
+              {resumeData.skills.join(' • ')}
             </p>
           </div>
 
@@ -339,80 +255,43 @@ Powered by iQua.ai
             }}>
               WORK EXPERIENCE
             </h2>
-            {Math.max(resumeData.workExperience.length, enhancedData.workExperience.length) > 0 && 
-              Array.from({ length: Math.max(resumeData.workExperience.length, enhancedData.workExperience.length) }, (_, index) => {
-                const originalExp = resumeData.workExperience[index];
-                const enhancedExp = enhancedData.workExperience[index];
-
-                if (!originalExp && !enhancedExp) return null;
-
-                const displayExp = selections[`workExperience.${index}`] === 'enhanced' ? enhancedExp : originalExp;
-                if (!displayExp) return null;
-
-                return (
-                  <div key={index} className="mb-4 group relative">
-                    <div className="flex justify-between items-start mb-1">
-                      <h3 className="font-bold text-gray-900" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '12pt',
-                        fontWeight: 'bold'
-                      }}>
-                        <InlineSelector
-                          originalContent={originalExp?.position || ''}
-                          enhancedContent={enhancedExp?.position || ''}
-                          selectionKey={`workExperience.${index}.position`}
-                        />
-                      </h3>
-                      <span className="text-gray-700 text-right" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '12pt'
-                      }}>
-                        <InlineSelector
-                          originalContent={originalExp?.duration || ''}
-                          enhancedContent={enhancedExp?.duration || ''}
-                          selectionKey={`workExperience.${index}.duration`}
-                        />
-                      </span>
-                    </div>
-                    <div className="text-gray-800 mb-2 italic" style={{
+            {resumeData.workExperience.map((exp, index) => (
+              <div key={index} className="mb-4">
+                <div className="flex justify-between items-start mb-1">
+                  <h3 className="font-bold text-gray-900" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '12pt',
+                    fontWeight: 'bold'
+                  }}>
+                    {exp.position}
+                  </h3>
+                  <span className="text-gray-700 text-right" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '12pt'
+                  }}>
+                    {exp.duration}
+                  </span>
+                </div>
+                <div className="text-gray-800 mb-2 italic" style={{
+                  fontFamily: 'Times New Roman, serif',
+                  fontSize: '12pt',
+                  fontStyle: 'italic'
+                }}>
+                  {exp.company}
+                </div>
+                <ul className="ml-4" style={{ listStyleType: 'disc' }}>
+                  {exp.responsibilities.map((resp, respIndex) => (
+                    <li key={respIndex} className="text-gray-800 mb-1" style={{
                       fontFamily: 'Times New Roman, serif',
                       fontSize: '12pt',
-                      fontStyle: 'italic'
+                      lineHeight: '1.15'
                     }}>
-                      <InlineSelector
-                        originalContent={originalExp?.company || ''}
-                        enhancedContent={enhancedExp?.company || ''}
-                        selectionKey={`workExperience.${index}.company`}
-                      />
-                    </div>
-                    <ul className="ml-4" style={{ listStyleType: 'disc' }}>
-                      {Math.max(originalExp?.responsibilities?.length || 0, enhancedExp?.responsibilities?.length || 0) > 0 &&
-                        Array.from({ length: Math.max(originalExp?.responsibilities?.length || 0, enhancedExp?.responsibilities?.length || 0) }, (_, respIndex) => {
-                          const originalResp = originalExp?.responsibilities?.[respIndex];
-                          const enhancedResp = enhancedExp?.responsibilities?.[respIndex];
-                          
-                          if (!originalResp && !enhancedResp) return null;
-
-                          return (
-                            <li key={respIndex} className="text-gray-800 mb-1" style={{
-                              fontFamily: 'Times New Roman, serif',
-                              fontSize: '12pt',
-                              lineHeight: '1.15'
-                            }}>
-                              <InlineSelector
-                                originalContent={originalResp || ''}
-                                enhancedContent={enhancedResp || ''}
-                                selectionKey={`workExperience.${index}.resp.${respIndex}`}
-                              />
-                            </li>
-                          );
-                        })
-                      }
-                    </ul>
-                  </div>
-                );
-              })
-            }
+                      {resp}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
 
           {/* Projects */}
@@ -426,53 +305,31 @@ Powered by iQua.ai
             }}>
               PROJECTS
             </h2>
-            {Math.max(resumeData.projects.length, enhancedData.projects?.length || 0) > 0 &&
-              Array.from({ length: Math.max(resumeData.projects.length, enhancedData.projects?.length || 0) }, (_, index) => {
-                const originalProject = resumeData.projects[index];
-                const enhancedProject = enhancedData.projects?.[index];
-
-                if (!originalProject && !enhancedProject) return null;
-
-                return (
-                  <div key={index} className="mb-3">
-                    <h3 className="font-bold text-gray-900" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '12pt',
-                      fontWeight: 'bold'
-                    }}>
-                      <InlineSelector
-                        originalContent={originalProject?.name || ''}
-                        enhancedContent={enhancedProject?.name || ''}
-                        selectionKey={`projects.${index}.name`}
-                      />
-                    </h3>
-                    <p className="text-gray-800 mb-1" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '12pt',
-                      lineHeight: '1.15'
-                    }}>
-                      <InlineSelector
-                        originalContent={originalProject?.description || ''}
-                        enhancedContent={enhancedProject?.description || ''}
-                        selectionKey={`projects.${index}.description`}
-                      />
-                    </p>
-                    <p className="text-gray-700 text-sm" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '11pt',
-                      fontStyle: 'italic'
-                    }}>
-                      <span className="font-medium">Technologies:</span>{' '}
-                      <InlineSelector
-                        originalContent={originalProject?.technologies?.join(', ') || ''}
-                        enhancedContent={enhancedProject?.technologies?.join(', ') || ''}
-                        selectionKey={`projects.${index}.technologies`}
-                      />
-                    </p>
-                  </div>
-                );
-              })
-            }
+            {resumeData.projects.map((project, index) => (
+              <div key={index} className="mb-3">
+                <h3 className="font-bold text-gray-900" style={{
+                  fontFamily: 'Times New Roman, serif',
+                  fontSize: '12pt',
+                  fontWeight: 'bold'
+                }}>
+                  {project.name}
+                </h3>
+                <p className="text-gray-800 mb-1" style={{
+                  fontFamily: 'Times New Roman, serif',
+                  fontSize: '12pt',
+                  lineHeight: '1.15'
+                }}>
+                  {project.description}
+                </p>
+                <p className="text-gray-700 text-sm" style={{
+                  fontFamily: 'Times New Roman, serif',
+                  fontSize: '11pt',
+                  fontStyle: 'italic'
+                }}>
+                  <span className="font-medium">Technologies:</span> {project.technologies.join(', ')}
+                </p>
+              </div>
+            ))}
           </div>
 
           {/* Footer */}
@@ -489,6 +346,97 @@ Powered by iQua.ai
     );
   };
 
+  const LineComparison = ({ label, originalContent, enhancedContent, selectionKey }) => {
+    const isSelected = selections[selectionKey];
+
+    return (
+      <div className="border border-gray-200 rounded-lg overflow-hidden mb-4">
+        <div className="bg-gray-50 px-4 py-2 border-b border-gray-200">
+          <h5 className="font-medium text-gray-800">{label}</h5>
+        </div>
+        <div className="grid grid-cols-2 divide-x divide-gray-200">
+          {/* Original Side */}
+          <div className="p-4 bg-red-50">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-2">
+                <span className="w-3 h-3 bg-red-400 rounded-full"></span>
+                <span className="text-sm font-medium text-gray-600">Original</span>
+              </div>
+              <button
+                onClick={() => handleSelection(selectionKey, 'original')}
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  isSelected === 'original'
+                    ? 'bg-red-500 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-red-200'
+                }`}
+              >
+                {isSelected === 'original' ? 'Selected' : 'Select Original'}
+              </button>
+            </div>
+            <div className="bg-white border border-red-200 rounded-lg p-3">
+              {typeof originalContent === 'string' ? (
+                <p className="text-sm text-gray-700 whitespace-pre-wrap">{originalContent}</p>
+              ) : Array.isArray(originalContent) ? (
+                <div className="flex flex-wrap gap-1">
+                  {originalContent.map((item, index) => (
+                    <span key={index} className="px-2 py-1 bg-red-100 text-red-700 rounded-md text-xs">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-700">
+                  {Object.entries(originalContent).map(([key, value]) => (
+                    <p key={key}><span className="font-medium">{key}:</span> {value}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Enhanced Side */}
+          <div className="p-4 bg-green-50">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-2">
+                <span className="w-3 h-3 bg-green-400 rounded-full"></span>
+                <span className="text-sm font-medium text-gray-600">AI Enhanced</span>
+              </div>
+              <button
+                onClick={() => handleSelection(selectionKey, 'enhanced')}
+                className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                  isSelected === 'enhanced'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-green-200'
+                }`}
+              >
+                {isSelected === 'enhanced' ? 'Selected' : 'Select Enhanced'}
+              </button>
+            </div>
+            <div className="bg-white border border-green-200 rounded-lg p-3">
+              {typeof enhancedContent === 'string' ? (
+                <p className="text-sm text-gray-700 whitespace-pre-wrap">{enhancedContent}</p>
+              ) : Array.isArray(enhancedContent) ? (
+                <div className="flex flex-wrap gap-1">
+                  {enhancedContent.map((item, index) => (
+                    <span key={index} className="px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-700">
+                  {Object.entries(enhancedContent).map(([key, value]) => (
+                    <p key={key}><span className="font-medium">{key}:</span> {value}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div 
       className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
@@ -499,7 +447,7 @@ Powered by iQua.ai
         <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6 rounded-t-2xl flex justify-between items-center">
           <div>
             <h3 className="text-xl font-semibold">Smart Resume Builder</h3>
-            <p className="text-sm opacity-90 mt-1">Your resume, reimagined intelligently</p>
+            <p className="text-sm opacity-90 mt-1">AI-powered resume comparison and customization tool</p>
           </div>
           <button
             onClick={() => setShowPreview(false)}
@@ -511,209 +459,110 @@ Powered by iQua.ai
 
         {/* Content */}
         <div className="flex-1 overflow-hidden">
-          <div className="grid grid-cols-2 h-full">
-            {/* Left Panel - Interactive Document */}
-            <div className="overflow-y-auto p-4 border-r border-gray-200">
-              <div className="mb-4">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2 text-center">Interactive Resume</h4>
-                <p className="text-sm text-gray-600 text-center mb-4">
-                  Hover over content and click O (Original) or E (Enhanced) to choose your preferred version
-                </p>
+          <div className="grid grid-cols-3 h-full">
+            {/* Left Panel - Document Comparison */}
+            <div className="col-span-2 overflow-y-auto p-4 border-r border-gray-200">
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                {/* Original Resume Document */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 text-center">Original Resume</h4>
+                  <WordDocument 
+                    resumeData={originalResume} 
+                    title="Original_Resume.docx"
+                    isOriginal={true}
+                  />
+                </div>
+
+                {/* Enhanced Resume Document */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 text-center">AI Enhanced Resume</h4>
+                  <WordDocument 
+                    resumeData={enhancedResumeData} 
+                    title="Enhanced_Resume.docx"
+                  />
+                </div>
               </div>
-              <InteractiveWordDocument 
-                resumeData={originalResume} 
-                enhancedData={enhancedResumeData}
-                title="Interactive_Resume.docx"
-              />
+
+              {/* Line-by-Line Comparison Controls */}
+              <div className="border-t border-gray-200 pt-6">
+                <h4 className="text-lg font-semibold text-gray-800 mb-4">Choose Your Preferred Content</h4>
+                <div className="space-y-4">
+                  {/* Basic Details Comparison */}
+                  <LineComparison
+                    label="Contact Information"
+                    originalContent={originalResume.basicDetails}
+                    enhancedContent={enhancedResumeData.basicDetails}
+                    selectionKey="basicDetails"
+                  />
+
+                  {/* Professional Summary Comparison */}
+                  <LineComparison
+                    label="Professional Summary"
+                    originalContent={originalResume.professionalSummary}
+                    enhancedContent={enhancedResumeData.professionalSummary}
+                    selectionKey="professionalSummary"
+                  />
+
+                  {/* Skills Comparison */}
+                  <LineComparison
+                    label="Skills"
+                    originalContent={originalResume.skills}
+                    enhancedContent={enhancedResumeData.skills}
+                    selectionKey="skills"
+                  />
+
+                  {/* Work Experience Comparisons */}
+                  {Math.max(originalResume.workExperience.length, enhancedResumeData.workExperience.length) > 0 && 
+                    Array.from({ length: Math.max(originalResume.workExperience.length, enhancedResumeData.workExperience.length) }, (_, index) => {
+                      const originalExp = originalResume.workExperience[index];
+                      const enhancedExp = enhancedResumeData.workExperience[index];
+
+                      if (!originalExp && !enhancedExp) return null;
+
+                      return (
+                        <LineComparison
+                          key={`workExp-${index}`}
+                          label={`Work Experience ${index + 1}`}
+                          originalContent={originalExp ? `${originalExp.position} at ${originalExp.company}\n${originalExp.responsibilities.join('\n')}` : 'No experience entry'}
+                          enhancedContent={enhancedExp ? `${enhancedExp.position} at ${enhancedExp.company}\n${enhancedExp.responsibilities.join('\n')}` : 'No experience entry'}
+                          selectionKey={`workExperience.${index}`}
+                        />
+                      );
+                    })
+                  }
+
+                  {/* Projects Comparisons */}
+                  {Math.max(originalResume.projects.length, enhancedResumeData.projects?.length || 0) > 0 && 
+                    Array.from({ length: Math.max(originalResume.projects.length, enhancedResumeData.projects?.length || 0) }, (_, index) => {
+                      const originalProject = originalResume.projects[index];
+                      const enhancedProject = enhancedResumeData.projects?.[index];
+
+                      if (!originalProject && !enhancedProject) return null;
+
+                      return (
+                        <LineComparison
+                          key={`project-${index}`}
+                          label={`Project ${index + 1}`}
+                          originalContent={originalProject ? `${originalProject.name}\n${originalProject.description}\nTech: ${originalProject.technologies.join(', ')}` : 'No project entry'}
+                          enhancedContent={enhancedProject ? `${enhancedProject.name}\n${enhancedProject.description}\nTech: ${enhancedProject.technologies.join(', ')}` : 'No project entry'}
+                          selectionKey={`projects.${index}`}
+                        />
+                      );
+                    })
+                  }
+                </div>
+              </div>
             </div>
 
-            {/* Right Panel - Final Resume Preview */}
+            {/* Right Panel - Final Resume Preview (Same styling as original) */}
             <div className="overflow-y-auto p-4 bg-gray-50">
               <h4 className="text-lg font-semibold text-gray-800 mb-4 text-center">Final Resume Preview</h4>
-              {finalResume ? (
-                <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-                  {/* Document Header - Word-style */}
-                  <div className="bg-gray-100 px-4 py-2 border-b border-gray-300 flex items-center space-x-2">
-                    <div className="flex space-x-1">
-                      <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    </div>
-                    <span className="text-sm text-gray-600 font-medium">Final_Resume.docx</span>
-                    <div className="ml-auto flex items-center space-x-2">
-                      <span className="text-xs text-gray-500">📄</span>
-                      <span className="text-xs text-gray-500">100%</span>
-                    </div>
-                  </div>
-
-                  {/* Document Content - Styled like Microsoft Word */}
-                  <div className="p-8 min-h-[600px]" style={{
-                    fontFamily: 'Times New Roman, serif',
-                    fontSize: '12pt',
-                    lineHeight: '1.15',
-                    background: 'white'
-                  }}>
-                    {/* Header Section */}
-                    <div className="text-center mb-6 pb-3 border-b-2 border-gray-300">
-                      <h1 className="text-2xl font-bold text-gray-900 mb-2" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '18pt',
-                        fontWeight: 'bold'
-                      }}>
-                        {finalResume.basicDetails.name}
-                      </h1>
-                      <div className="text-sm text-gray-700" style={{ fontSize: '11pt' }}>
-                        <span>{finalResume.basicDetails.email}</span>
-                        <span className="mx-2">|</span>
-                        <span>{finalResume.basicDetails.phone}</span>
-                        <span className="mx-2">|</span>
-                        <span>{finalResume.basicDetails.location}</span>
-                      </div>
-                    </div>
-
-                    {/* Professional Summary */}
-                    <div className="mb-6">
-                      <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '14pt',
-                        fontWeight: 'bold',
-                        borderBottom: '1px solid #333',
-                        paddingBottom: '2px'
-                      }}>
-                        PROFESSIONAL SUMMARY
-                      </h2>
-                      <p className="text-gray-800 text-justify" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '12pt',
-                        lineHeight: '1.15',
-                        textAlign: 'justify'
-                      }}>
-                        {finalResume.professionalSummary}
-                      </p>
-                    </div>
-
-                    {/* Technical Skills */}
-                    <div className="mb-6">
-                      <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '14pt',
-                        fontWeight: 'bold',
-                        borderBottom: '1px solid #333',
-                        paddingBottom: '2px'
-                      }}>
-                        TECHNICAL SKILLS
-                      </h2>
-                      <p className="text-gray-800" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '12pt'
-                      }}>
-                        {finalResume.skills.join(' • ')}
-                      </p>
-                    </div>
-
-                    {/* Work Experience */}
-                    <div className="mb-6">
-                      <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '14pt',
-                        fontWeight: 'bold',
-                        borderBottom: '1px solid #333',
-                        paddingBottom: '2px'
-                      }}>
-                        WORK EXPERIENCE
-                      </h2>
-                      {finalResume.workExperience.map((exp, index) => (
-                        <div key={index} className="mb-4">
-                          <div className="flex justify-between items-start mb-1">
-                            <h3 className="font-bold text-gray-900" style={{
-                              fontFamily: 'Times New Roman, serif',
-                              fontSize: '12pt',
-                              fontWeight: 'bold'
-                            }}>
-                              {exp.position}
-                            </h3>
-                            <span className="text-gray-700 text-right" style={{
-                              fontFamily: 'Times New Roman, serif',
-                              fontSize: '12pt'
-                            }}>
-                              {exp.duration}
-                            </span>
-                          </div>
-                          <div className="text-gray-800 mb-2 italic" style={{
-                            fontFamily: 'Times New Roman, serif',
-                            fontSize: '12pt',
-                            fontStyle: 'italic'
-                          }}>
-                            {exp.company}
-                          </div>
-                          <ul className="ml-4" style={{ listStyleType: 'disc' }}>
-                            {exp.responsibilities.map((resp, respIndex) => (
-                              <li key={respIndex} className="text-gray-800 mb-1" style={{
-                                fontFamily: 'Times New Roman, serif',
-                                fontSize: '12pt',
-                                lineHeight: '1.15'
-                              }}>
-                                {resp}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Projects */}
-                    <div className="mb-6">
-                      <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '14pt',
-                        fontWeight: 'bold',
-                        borderBottom: '1px solid #333',
-                        paddingBottom: '2px'
-                      }}>
-                        PROJECTS
-                      </h2>
-                      {finalResume.projects.map((project, index) => (
-                        <div key={index} className="mb-3">
-                          <h3 className="font-bold text-gray-900" style={{
-                            fontFamily: 'Times New Roman, serif',
-                            fontSize: '12pt',
-                            fontWeight: 'bold'
-                          }}>
-                            {project.name}
-                          </h3>
-                          <p className="text-gray-800 mb-1" style={{
-                            fontFamily: 'Times New Roman, serif',
-                            fontSize: '12pt',
-                            lineHeight: '1.15'
-                          }}>
-                            {project.description}
-                          </p>
-                          <p className="text-gray-700 text-sm" style={{
-                            fontFamily: 'Times New Roman, serif',
-                            fontSize: '11pt',
-                            fontStyle: 'italic'
-                          }}>
-                            <span className="font-medium">Technologies:</span> {project.technologies.join(', ')}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Footer */}
-                    <div className="mt-8 pt-4 border-t border-gray-200 text-right">
-                      <p className="text-xs text-gray-400" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '9pt'
-                      }}>
-                        Powered by iQua.ai
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-white rounded-lg p-8 text-center text-gray-500">
-                  Make selections on the left to see your final resume
-                </div>
+              {finalResume && (
+                <WordDocument 
+                  resumeData={finalResume} 
+                  title="Final_Resume.docx"
+                  isOriginal={true}
+                />
               )}
             </div>
           </div>
@@ -723,7 +572,7 @@ Powered by iQua.ai
         <div className="border-t border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              Click O (Original) or E (Enhanced) on content elements to customize your resume
+              Select your preferred content from each comparison above to build your final resume
             </div>
             <div className="flex space-x-3">
               <button

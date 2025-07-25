@@ -71,11 +71,16 @@ function App() {
                 </div>
               </div>
               
-              {/* User Profile */}
-              <div className="flex items-center space-x-3">
-                <span className="text-gray-700 font-medium text-sm">John Smith</span>
-                <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-600 text-xs">👤</span>
+              {/* Resume Enhancer Icon & User Profile */}
+              <div className="flex items-center space-x-4">
+                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center hover:bg-purple-200 transition-colors cursor-pointer" title="Resume Enhancer">
+                  <span className="text-purple-600 text-sm">📄</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <span className="text-gray-700 font-medium text-sm">John Smith</span>
+                  <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <span className="text-gray-600 text-xs">👤</span>
+                  </div>
                 </div>
               </div>
             </div>

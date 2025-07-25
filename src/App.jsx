@@ -291,37 +291,69 @@ function App() {
                   </div>
                 </div>
 
-                {/* Create Resume Button */}
-                <button 
-                  onClick={handleCreateResumeClick}
-                  disabled={!hasAttendedInterview}
-                  className={`px-6 py-3 rounded-xl transition-all duration-300 font-medium shadow-md mb-4 ${
-                    hasAttendedInterview 
-                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800 hover:shadow-lg transform hover:scale-105 cursor-pointer' 
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
-                >
-                  Create Resume
-                </button>
-
-                {/* Attend Interview Button - only show if no interview attended */}
-                {!hasAttendedInterview && (
+                {/* Action Buttons Container */}
+                <div className="space-y-4">
+                  {/* Create Resume Button */}
                   <button 
-                    onClick={navigateToInterview}
-                    className="relative overflow-hidden px-8 py-4 rounded-2xl font-bold text-base uppercase tracking-wide shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-1 mb-4 border border-white border-opacity-20 backdrop-blur-sm"
-                    style={{
-                      background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)',
-                      boxShadow: '0 10px 30px rgba(57, 53, 205, 0.3), 0 4px 15px rgba(57, 53, 205, 0.2)',
-                      color: '#ffffff'
-                    }}
+                    onClick={handleCreateResumeClick}
+                    disabled={!hasAttendedInterview}
+                    className={`w-full group relative overflow-hidden px-8 py-4 rounded-xl transition-all duration-300 font-semibold text-base shadow-lg hover:shadow-xl transform ${
+                      hasAttendedInterview 
+                        ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 hover:scale-[1.02] hover:-translate-y-0.5 cursor-pointer border border-emerald-400/30' 
+                        : 'bg-gradient-to-r from-gray-200 to-gray-300 text-gray-400 cursor-not-allowed border border-gray-200'
+                    }`}
+                    style={hasAttendedInterview ? {
+                      boxShadow: '0 8px 25px rgba(16, 185, 129, 0.25), 0 4px 12px rgba(16, 185, 129, 0.15)'
+                    } : {}}
                   >
-                    <span className="relative z-10 flex items-center justify-center space-x-2 text-white">
-                      <span className="text-lg">🎤</span>
-                      <span className="font-bold text-white drop-shadow-sm">ATTEND INTERVIEW</span>
+                    <span className="relative z-10 flex items-center justify-center space-x-3">
+                      <span className="text-xl">{hasAttendedInterview ? '📄' : '🔒'}</span>
+                      <span className="font-bold tracking-wide">
+                        {hasAttendedInterview ? 'CREATE RESUME' : 'COMPLETE INTERVIEW FIRST'}
+                      </span>
                     </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-white to-transparent opacity-0 hover:opacity-10 transition-opacity duration-300"></div>
+                    {hasAttendedInterview && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-white to-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                    )}
                   </button>
-                )}
+
+                  {/* Attend Interview Button - only show if no interview attended */}
+                  {!hasAttendedInterview && (
+                    <button 
+                      onClick={navigateToInterview}
+                      className="w-full group relative overflow-hidden px-8 py-4 rounded-xl font-bold text-base uppercase tracking-wide shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-0.5 border border-white/20 backdrop-blur-sm"
+                      style={{
+                        background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)',
+                        boxShadow: '0 10px 30px rgba(57, 53, 205, 0.3), 0 4px 15px rgba(57, 53, 205, 0.2)'
+                      }}
+                    >
+                      <span className="relative z-10 flex items-center justify-center space-x-3 text-white">
+                        <span className="text-xl">🎤</span>
+                        <span className="font-bold drop-shadow-sm">ATTEND INTERVIEW</span>
+                      </span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      
+                      {/* Animated border effect */}
+                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-all duration-700"></div>
+                    </button>
+                  )}
+
+                  {/* Status Indicator */}
+                  <div className="text-center pt-2">
+                    <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium ${
+                      hasAttendedInterview 
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                        : 'bg-blue-50 text-blue-700 border border-blue-200'
+                    }`}>
+                      <span className={`w-2 h-2 rounded-full ${
+                        hasAttendedInterview ? 'bg-emerald-500' : 'bg-blue-500 animate-pulse'
+                      }`}></span>
+                      <span>
+                        {hasAttendedInterview ? 'Interview Completed ✓' : 'Interview Pending'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
                 {/* Chat Input Area */}
                 <div className="mt-auto pt-4 border-t border-gray-200">

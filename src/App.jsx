@@ -283,10 +283,11 @@ function App() {
                 </button>
               </div>
 
-              {/* Chat Messages Area with Scrolling */}
-              <div className="flex-1 p-6 flex flex-col overflow-hidden">
-                <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-gray-100">
-                  <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 mb-4 border border-purple-100">
+              {/* Chat Content with Full Scrolling */}
+              <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-gray-100 p-6">
+                <div className="space-y-6">
+                  {/* Welcome Message */}
+                  <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 border border-purple-100">
                     <h3 className="font-semibold text-purple-600 mb-3">
                       Welcome to iQua.AI Resume enhancer
                     </h3>
@@ -295,39 +296,45 @@ function App() {
                       <p>2. Click the Create Resume button to let iQua build a resume uniquely designed for you!</p>
                     </div>
                   </div>
-                </div>
 
-                {/* Action Buttons Container - Fixed at bottom */}
-                <div className="mt-4 space-y-4 border-t border-gray-100 pt-4">
-                  {/* Create Resume Button */}
-                  <button 
-                    onClick={handleCreateResumeClick}
-                    disabled={!hasAttendedInterview}
-                    className={`w-full group relative overflow-hidden px-8 py-4 rounded-xl transition-all duration-300 font-semibold text-base shadow-lg hover:shadow-xl transform ${
-                      hasAttendedInterview 
-                        ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 hover:scale-[1.02] hover:-translate-y-0.5 cursor-pointer border border-emerald-400/30' 
-                        : 'bg-gradient-to-r from-gray-200 to-gray-300 text-gray-400 cursor-not-allowed border border-gray-200'
-                    }`}
-                    style={hasAttendedInterview ? {
-                      boxShadow: '0 8px 25px rgba(16, 185, 129, 0.25), 0 4px 12px rgba(16, 185, 129, 0.15)'
-                    } : {}}
-                  >
-                    <span className="relative z-10 flex items-center justify-center space-x-3">
-                      <span className="text-xl">{hasAttendedInterview ? '📄' : '🔒'}</span>
-                      <span className="font-bold tracking-wide">
-                        {hasAttendedInterview ? 'CREATE RESUME' : 'COMPLETE INTERVIEW FIRST'}
-                      </span>
-                    </span>
-                    {hasAttendedInterview && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-white to-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                    )}
-                  </button>
-
-                  {/* Attend Interview Button - only show if no interview attended */}
-                  {!hasAttendedInterview && (
+                  {/* Action Buttons Container */}
+                  <div className="space-y-4">
+                    {/* Create Resume Button */}
                     <button 
-                      onClick={navigateToInterview}
-                      className="w-full group relative overflow-hidden px-8 py-4 rounded-xl font-bold text-base uppercase tracking-wide shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-0.5 border border-white/20 backdrop-blur-sm"
+                      onClick={handleCreateResumeClick}
+                      className={`w-full group relative overflow-hidden px-8 py-4 rounded-xl transition-all duration-300 font-semibold text-base shadow-lg hover:shadow-xl transform ${
+                        hasAttendedInterview 
+                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 hover:scale-[1.02] hover:-translate-y-0.5 cursor-pointer border border-emerald-400/30' 
+                          : 'bg-gradient-to-r from-gray-300 to-gray-400 text-gray-500 cursor-not-allowed border border-gray-300 opacity-50'
+                      }`}
+                      style={hasAttendedInterview ? {
+                        boxShadow: '0 8px 25px rgba(16, 185, 129, 0.25), 0 4px 12px rgba(16, 185, 129, 0.15)'
+                      } : {}}
+                      disabled={!hasAttendedInterview}
+                    >
+                      <span className="relative z-10 flex items-center justify-center space-x-3">
+                        <span className="text-xl">📄</span>
+                        <span className="font-bold tracking-wide">CREATE RESUME</span>
+                      </span>
+                      {hasAttendedInterview && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-white to-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                      )}
+                    </button>
+
+                    {/* Attend Interview Button */}
+                    <button 
+                      onClick={() => {
+                        if (hasAttendedInterview) {
+                          navigateToInterview();
+                        } else {
+                          setShowInterviewModal(true);
+                        }
+                      }}
+                      className={`w-full group relative overflow-hidden px-8 py-4 rounded-xl font-bold text-base uppercase tracking-wide shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-0.5 border border-white/20 backdrop-blur-sm ${
+                        !hasAttendedInterview 
+                          ? 'cursor-pointer' 
+                          : 'cursor-pointer'
+                      }`}
                       style={{
                         background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)',
                         boxShadow: '0 10px 30px rgba(57, 53, 205, 0.3), 0 4px 15px rgba(57, 53, 205, 0.2)'
@@ -342,27 +349,16 @@ function App() {
                       {/* Animated border effect */}
                       <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-all duration-700"></div>
                     </button>
-                  )}
+                  </div>
 
-                  {/* Status Indicator */}
-                  <div className="text-center pt-2">
-                    <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-medium ${
-                      hasAttendedInterview 
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                        : 'bg-blue-50 text-blue-700 border border-blue-200'
-                    }`}>
-                      <span className={`w-2 h-2 rounded-full ${
-                        hasAttendedInterview ? 'bg-emerald-500' : 'bg-blue-500 animate-pulse'
-                      }`}></span>
-                      <span>
-                        {hasAttendedInterview ? 'Interview Completed ✓' : 'Interview Pending'}
-                      </span>
-                    </div>
+                  {/* Chat Messages would go here in the future */}
+                  <div className="space-y-4">
+                    {/* Placeholder for future chat messages */}
                   </div>
                 </div>
 
-                {/* Chat Input Area */}
-                <div className="mt-auto pt-4 border-t border-gray-200">
+                {/* Chat Input Area - At bottom of scrollable content */}
+                <div className="mt-6 pt-4 border-t border-gray-200 sticky bottom-0 bg-white">
                   <div className="flex space-x-2">
                     <input
                       type="text"

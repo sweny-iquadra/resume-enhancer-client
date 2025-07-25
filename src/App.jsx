@@ -168,59 +168,57 @@ function App() {
         </div>
 
         {/* Resume Enhancer Chat Overlay */}
-      {showResumeChat && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50">
-          <div className="fixed bottom-4 right-4 bg-white rounded-2xl shadow-2xl w-96 h-[500px] flex flex-col animate-fade-in"></div>
-        </div>
-      )}
-            {/* Chat Header */}
-            <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4 rounded-t-2xl flex justify-between items-center">
-              <div className="flex items-center space-x-2">
-                <span className="text-xl">📄</span>
-                <span className="font-semibold">Resume Enhancer</span>
-              </div>
-              <button
-                onClick={() => setShowResumeChat(false)}
-                className="text-white hover:bg-purple-800 rounded-full p-2 transition-colors"
-              >
-                <span className="text-lg">✕</span>
-              </button>
-            </div>
-
-            {/* Welcome Message */}
-            <div className="flex-1 p-6 flex flex-col overflow-hidden">
-              <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 mb-4 border border-purple-100">
-                <h3 className="font-semibold text-purple-600 mb-2">
-                  Welcome to iQua.AI Resume enhancer
-                </h3>
-                <p className="text-gray-700 text-sm leading-relaxed mb-4">
-                  iQua.ai helps you create resumes tailored to your skills, job roles, and sectors you've explored through our interviews.
-                </p>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  Click the Create Resume button to let iQua build a resume uniquely designed for you!
-                </p>
+        {showResumeChat && (
+          <div className="fixed bottom-4 right-4 z-50">
+            <div className="bg-white rounded-2xl shadow-2xl w-96 h-[500px] flex flex-col animate-fade-in">
+              {/* Chat Header */}
+              <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4 rounded-t-2xl flex justify-between items-center">
+                <div className="flex items-center space-x-2">
+                  <span className="text-xl">📄</span>
+                  <span className="font-semibold">Resume Enhancer</span>
+                </div>
+                <button
+                  onClick={() => setShowResumeChat(false)}
+                  className="text-white hover:bg-purple-800 rounded-full p-2 transition-colors"
+                >
+                  <span className="text-lg">✕</span>
+                </button>
               </div>
 
-              {/* Create Resume Button */}
-              <button className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-medium shadow-md hover:shadow-lg transform hover:scale-105">
-                Create Resume
-              </button>
+              {/* Welcome Message */}
+              <div className="flex-1 p-6 flex flex-col overflow-hidden">
+                <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 mb-4 border border-purple-100">
+                  <h3 className="font-semibold text-purple-600 mb-3">
+                    Welcome to iQua.AI Resume enhancer
+                  </h3>
+                  <div className="text-gray-700 text-sm leading-relaxed space-y-2">
+                    <p>1. iQua.ai helps you create resumes tailored to your skills, job roles, and sectors you've explored through our interviews.</p>
+                    <p>2. Click the Create Resume button to let iQua build a resume uniquely designed for you!</p>
+                  </div>
+                </div>
 
-              {/* Chat Input Area */}
-              <div className="mt-auto pt-4 border-t border-gray-200">
-                <div className="flex space-x-2">
-                  <input
-                    type="text"
-                    placeholder="Ask me anything about resume building..."
-                    className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  />
-                  <button className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-3 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all shadow-md">
-                    <span className="text-sm">→</span>
-                  </button>
+                {/* Create Resume Button */}
+                <button className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-medium shadow-md hover:shadow-lg transform hover:scale-105 mb-4">
+                  Create Resume
+                </button>
+
+                {/* Chat Input Area */}
+                <div className="mt-auto pt-4 border-t border-gray-200">
+                  <div className="flex space-x-2">
+                    <input
+                      type="text"
+                      placeholder="Ask me anything about resume building..."
+                      className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    />
+                    <button className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-3 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all shadow-md">
+                      <span className="text-sm">→</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+        )}
     </div>
   );
 }

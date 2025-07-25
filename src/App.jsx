@@ -41,25 +41,25 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">🚀</span>
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 flex items-center justify-center">
+                <span className="text-2xl">🚀</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold text-gray-900">iQua.ai</span>
-                <span className="text-xs text-gray-500 -mt-0.5">AI that gets you</span>
+                <span className="text-lg font-semibold text-purple-600">iQua.ai</span>
+                <span className="text-xs text-gray-500 -mt-1">AI that gets you</span>
               </div>
             </div>
             
             {/* User Profile */}
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700 font-medium">Sweety Patel</span>
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-sm">S</span>
+            <div className="flex items-center space-x-3">
+              <span className="text-gray-700 font-medium text-sm">Sweety Patel</span>
+              <div className="w-8 h-8 bg-gray-300 rounded-lg flex items-center justify-center">
+                <span className="text-gray-600 font-medium text-sm">📄</span>
               </div>
             </div>
           </div>

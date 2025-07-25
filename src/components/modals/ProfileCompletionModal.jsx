@@ -47,8 +47,8 @@ const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userPro
             <button 
               onClick={() => {
                 setShowProfileModal(false);
-                // Navigate to profile completion page (future implementation)
-                console.log('Navigate to profile completion');
+                // Redirect to dashboard
+                window.location.href = '/';
               }}
               className="text-white px-6 py-3 rounded-xl transition-all duration-300 font-medium shadow-md hover:shadow-lg transform hover:scale-105"
               style={{

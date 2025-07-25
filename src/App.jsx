@@ -81,7 +81,11 @@ function App() {
               <div className="flex items-center space-x-4">
                 <div 
                   onClick={() => setShowResumeChat(!showResumeChat)}
-                  className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center hover:from-purple-600 hover:to-purple-700 transition-all cursor-pointer shadow-md animate-blink-glow" 
+                  className="w-10 h-10 rounded-lg flex items-center justify-center hover:shadow-lg transition-all cursor-pointer shadow-md animate-pulse" 
+                  style={{
+                    background: '#3935cd',
+                    animation: 'blink-glow-custom 1.5s ease-in-out infinite'
+                  }}
                   title="Resume Enhancer"
                 >
                   <span className="text-white text-base font-medium">📄</span>
@@ -279,20 +283,22 @@ function App() {
                 </button>
               </div>
 
-              {/* Welcome Message */}
+              {/* Chat Messages Area with Scrolling */}
               <div className="flex-1 p-6 flex flex-col overflow-hidden">
-                <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 mb-4 border border-purple-100">
-                  <h3 className="font-semibold text-purple-600 mb-3">
-                    Welcome to iQua.AI Resume enhancer
-                  </h3>
-                  <div className="text-gray-700 text-sm leading-relaxed space-y-2">
-                    <p>1. iQua.ai helps you create resumes tailored to your skills, job roles, and sectors you've explored through our interviews.</p>
-                    <p>2. Click the Create Resume button to let iQua build a resume uniquely designed for you!</p>
+                <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-gray-100">
+                  <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 mb-4 border border-purple-100">
+                    <h3 className="font-semibold text-purple-600 mb-3">
+                      Welcome to iQua.AI Resume enhancer
+                    </h3>
+                    <div className="text-gray-700 text-sm leading-relaxed space-y-2">
+                      <p>1. iQua.ai helps you create resumes tailored to your skills, job roles, and sectors you've explored through our interviews.</p>
+                      <p>2. Click the Create Resume button to let iQua build a resume uniquely designed for you!</p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Action Buttons Container */}
-                <div className="space-y-4">
+                {/* Action Buttons Container - Fixed at bottom */}
+                <div className="mt-4 space-y-4 border-t border-gray-100 pt-4">
                   {/* Create Resume Button */}
                   <button 
                     onClick={handleCreateResumeClick}

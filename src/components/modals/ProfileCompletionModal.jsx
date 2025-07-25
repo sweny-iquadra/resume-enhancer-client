@@ -4,11 +4,28 @@ import React from 'react';
 const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userProfile }) => {
   if (!showProfileModal) return null;
 
+  const handleOutsideClick = (e) => {
+    if (e.target === e.currentTarget) {
+      setShowProfileModal(false);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div 
+      className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+      onClick={handleOutsideClick}
+    >
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-fade-in">
         {/* Modal Header */}
-        <div className="text-white p-6 rounded-t-2xl text-center" style={{backgroundColor: '#3935cd'}}>
+        <div className="text-white p-6 rounded-t-2xl text-center relative" style={{backgroundColor: '#3935cd'}}>
+          {/* Close X Button */}
+          <button
+            onClick={() => setShowProfileModal(false)}
+            className="absolute top-4 right-4 text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors"
+          >
+            <span className="text-lg">✕</span>
+          </button>
+          
           <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-3xl">📝</span>
           </div>
@@ -44,6 +61,7 @@ const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userPro
           </div>
 
           <div className="flex flex-col space-y-3">
+            {/* Complete Profile Button */}
             <button 
               onClick={() => {
                 setShowProfileModal(false);
@@ -65,11 +83,16 @@ const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userPro
               COMPLETE PROFILE
             </button>
 
+            {/* Generate Anyway Button */}
             <button 
-              onClick={() => setShowProfileModal(false)}
-              className="text-gray-500 hover:text-gray-700 transition-colors font-medium"
+              onClick={() => {
+                setShowProfileModal(false);
+                // Generate resume with existing data
+                console.log('Generating resume with existing data...');
+              }}
+              className="text-gray-700 border border-gray-300 px-6 py-3 rounded-xl transition-all duration-300 font-medium hover:bg-gray-50 hover:border-gray-400 transform hover:scale-105"
             >
-              Close
+              GENERATE ANYWAY
             </button>
           </div>
         </div>

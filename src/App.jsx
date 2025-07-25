@@ -432,7 +432,7 @@ function App() {
           <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-fade-in">
               {/* Modal Header */}
-              <div className="text-white p-6 rounded-t-2xl text-center" style={{background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)'}}>
+              <div className="text-white p-6 rounded-t-2xl text-center" style={{backgroundColor: '#3935cd'}}>
                 <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">📝</span>
                 </div>

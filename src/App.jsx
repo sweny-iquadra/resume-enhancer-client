@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import './App.css';
 
@@ -6,10 +5,10 @@ function App() {
   const [showResumeChat, setShowResumeChat] = useState(false);
   const [showInterviewModal, setShowInterviewModal] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard'); // 'dashboard' or 'interview'
-  
+
   // Mock data - replace with actual API call to check interview attendance
   const [hasAttendedInterview, setHasAttendedInterview] = useState(false);
-  
+
   const handleCreateResumeClick = () => {
     if (!hasAttendedInterview) {
       setShowInterviewModal(true);
@@ -77,7 +76,7 @@ function App() {
                   <span className="text-xs text-gray-500 -mt-1">AI that gets you</span>
                 </div>
               </div>
-              
+
               {/* Resume Enhancer Icon & User Profile */}
               <div className="flex items-center space-x-4">
                 <div 
@@ -112,19 +111,19 @@ function App() {
                           <div className="w-6 h-6 bg-orange-300 rounded-full absolute -top-1 left-1/2 transform -translate-x-1/2"></div>
                         </div>
                       </div>
-                      
+
                       <div className="absolute bottom-16 left-12">
                         <div className="w-10 h-14 bg-blue-600 rounded-t-full relative">
                           <div className="w-5 h-5 bg-orange-300 rounded-full absolute -top-1 left-1/2 transform -translate-x-1/2"></div>
                         </div>
                       </div>
-                      
+
                       <div className="absolute bottom-16 right-12">
                         <div className="w-10 h-14 bg-orange-500 rounded-t-full relative">
                           <div className="w-5 h-5 bg-orange-300 rounded-full absolute -top-1 left-1/2 transform -translate-x-1/2"></div>
                         </div>
                       </div>
-                      
+
                       {/* Puzzle pieces in center */}
                       <div className="flex items-center justify-center">
                         <div className="grid grid-cols-2 gap-1">
@@ -134,7 +133,7 @@ function App() {
                           <div className="w-12 h-12 bg-blue-500 rounded-lg shadow-md"></div>
                         </div>
                       </div>
-                      
+
                       {/* Decorative elements */}
                       <div className="absolute bottom-4 left-8">
                         <div className="w-6 h-8 bg-green-400 rounded-t-full"></div>
@@ -142,7 +141,7 @@ function App() {
                       <div className="absolute bottom-4 right-8">
                         <div className="w-4 h-6 bg-green-400 rounded-t-full"></div>
                       </div>
-                      
+
                       {/* Background shapes */}
                       <div className="absolute top-16 left-16 w-16 h-16 bg-blue-200 rounded-lg transform rotate-12 opacity-60"></div>
                       <div className="absolute top-20 right-20 w-12 h-12 bg-orange-200 rounded-lg transform -rotate-12 opacity-60"></div>
@@ -190,7 +189,7 @@ function App() {
                       <span className="text-xs text-gray-500 -mt-1">AI that gets you</span>
                     </div>
                   </div>
-                  
+
                   {/* Back to Dashboard Button */}
                   <button
                     onClick={() => setCurrentPage('dashboard')}
@@ -209,16 +208,16 @@ function App() {
                     <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-8">
                       <span className="text-4xl text-white">🎤</span>
                     </div>
-                    
+
                     <h1 className="text-3xl font-bold text-gray-800 mb-6">
                       Welcome to iQua.AI Interview
                     </h1>
-                    
+
                     <p className="text-lg text-gray-600 mb-8 leading-relaxed">
                       Get ready for your personalized interview experience. Our AI will assess your skills, 
                       experience, and career goals to help you build the perfect resume.
                     </p>
-                    
+
                     <div className="grid md:grid-cols-3 gap-6 mb-10">
                       <div className="bg-blue-50 p-6 rounded-xl border border-blue-200">
                         <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-4">
@@ -227,7 +226,7 @@ function App() {
                         <h3 className="font-semibold text-blue-600 mb-2">Career Assessment</h3>
                         <p className="text-sm text-gray-600">Evaluate your professional background and goals</p>
                       </div>
-                      
+
                       <div className="bg-purple-50 p-6 rounded-xl border border-purple-200">
                         <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mx-auto mb-4">
                           <span className="text-white text-xl">🧠</span>
@@ -235,7 +234,7 @@ function App() {
                         <h3 className="font-semibold text-purple-600 mb-2">Skills Analysis</h3>
                         <p className="text-sm text-gray-600">Identify your strengths and areas for growth</p>
                       </div>
-                      
+
                       <div className="bg-green-50 p-6 rounded-xl border border-green-200">
                         <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mx-auto mb-4">
                           <span className="text-white text-xl">📄</span>
@@ -244,7 +243,7 @@ function App() {
                         <p className="text-sm text-gray-600">Create tailored resumes for your target roles</p>
                       </div>
                     </div>
-                    
+
                     <button 
                       onClick={() => {
                         // Mark interview as attended and go back to dashboard
@@ -267,14 +266,14 @@ function App() {
           <div className="fixed bottom-4 right-4 z-50">
             <div className="bg-white rounded-2xl shadow-2xl w-96 h-[500px] flex flex-col animate-fade-in">
               {/* Chat Header */}
-              <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4 rounded-t-2xl flex justify-between items-center">
+              <div className="text-white p-4 rounded-t-2xl flex justify-between items-center" style={{background: '#3935cd'}}>
                 <div className="flex items-center space-x-2">
                   <span className="text-xl">📄</span>
                   <span className="font-semibold">Resume Enhancer</span>
                 </div>
                 <button
                   onClick={() => setShowResumeChat(false)}
-                  className="text-white hover:bg-purple-800 rounded-full p-2 transition-colors"
+                  className="text-white hover:bg-black hover:bg-opacity-20 rounded-full p-2 transition-colors"
                 >
                   <span className="text-lg">✕</span>
                 </button>
@@ -304,7 +303,7 @@ function App() {
                 >
                   Create Resume
                 </button>
-                
+
                 {/* Attend Interview Button - only show if no interview attended */}
                 {!hasAttendedInterview && (
                   <button 
@@ -350,7 +349,7 @@ function App() {
                 <p className="text-gray-700 text-lg leading-relaxed mb-6">
                   Take your first step by attending an interview, and let iQua help you build a resume for your preferred job role!
                 </p>
-                
+
                 <div className="flex flex-col space-y-3">
                   <button 
                     onClick={navigateToInterview}
@@ -358,7 +357,7 @@ function App() {
                   >
                     ATTEND INTERVIEW
                   </button>
-                  
+
                   <button 
                     onClick={() => setShowInterviewModal(false)}
                     className="text-gray-500 hover:text-gray-700 transition-colors font-medium"

@@ -73,8 +73,8 @@ function App() {
               
               {/* Resume Enhancer Icon & User Profile */}
               <div className="flex items-center space-x-4">
-                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center hover:bg-purple-200 transition-colors cursor-pointer" title="Resume Enhancer">
-                  <span className="text-purple-600 text-sm">📄</span>
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center hover:from-purple-600 hover:to-purple-700 transition-all cursor-pointer shadow-md animate-blink-glow" title="Resume Enhancer">
+                  <span className="text-white text-base font-medium">📄</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <span className="text-gray-700 font-medium text-sm">John Smith</span>

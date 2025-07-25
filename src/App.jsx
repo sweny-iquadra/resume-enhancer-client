@@ -266,7 +266,7 @@ function App() {
           <div className="fixed bottom-4 right-4 z-50">
             <div className="bg-white rounded-2xl shadow-2xl w-96 h-[500px] flex flex-col animate-fade-in">
               {/* Chat Header */}
-              <div className="text-white p-4 rounded-t-2xl flex justify-between items-center" style={{background: '#3935cd'}}>
+              <div className="text-white p-4 rounded-t-2xl flex justify-between items-center" style={{background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)'}}></div>
                 <div className="flex items-center space-x-2">
                   <span className="text-xl">📄</span>
                   <span className="font-semibold">Resume Enhancer</span>
@@ -308,9 +308,17 @@ function App() {
                 {!hasAttendedInterview && (
                   <button 
                     onClick={navigateToInterview}
-                    className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 font-medium shadow-md hover:shadow-lg transform hover:scale-105 mb-4"
+                    className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white px-8 py-4 rounded-2xl font-semibold text-sm uppercase tracking-wide shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-1 mb-4 border border-white border-opacity-20 backdrop-blur-sm"
+                    style={{
+                      background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)',
+                      boxShadow: '0 10px 30px rgba(57, 53, 205, 0.3), 0 4px 15px rgba(57, 53, 205, 0.2)'
+                    }}
                   >
-                    ATTEND INTERVIEW
+                    <span className="relative z-10 flex items-center justify-center space-x-2">
+                      <span className="text-lg">🎤</span>
+                      <span>ATTEND INTERVIEW</span>
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-white to-transparent opacity-0 hover:opacity-10 transition-opacity duration-300"></div>
                   </button>
                 )}
 

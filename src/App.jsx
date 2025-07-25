@@ -297,24 +297,24 @@ function App() {
                     </div>
                   </div>
 
-                  {/* Action Buttons Container */}
-                  <div className="space-y-4">
+                  {/* Action Buttons Container - One Line */}
+                  <div className="flex space-x-3">
                     {/* Create Resume Button */}
                     <button 
                       onClick={handleCreateResumeClick}
-                      className={`w-full group relative overflow-hidden px-8 py-4 rounded-xl transition-all duration-300 font-semibold text-base shadow-lg hover:shadow-xl transform ${
+                      className={`flex-1 group relative overflow-hidden px-4 py-2.5 rounded-lg transition-all duration-300 font-medium text-sm shadow-md hover:shadow-lg transform ${
                         hasAttendedInterview 
-                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 hover:scale-[1.02] hover:-translate-y-0.5 cursor-pointer border border-emerald-400/30' 
+                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 hover:scale-[1.02] cursor-pointer border border-emerald-400/30' 
                           : 'bg-gradient-to-r from-gray-300 to-gray-400 text-gray-500 cursor-not-allowed border border-gray-300 opacity-50'
                       }`}
                       style={hasAttendedInterview ? {
-                        boxShadow: '0 8px 25px rgba(16, 185, 129, 0.25), 0 4px 12px rgba(16, 185, 129, 0.15)'
+                        boxShadow: '0 4px 15px rgba(16, 185, 129, 0.2)'
                       } : {}}
                       disabled={!hasAttendedInterview}
                     >
-                      <span className="relative z-10 flex items-center justify-center space-x-3">
-                        <span className="text-xl">📄</span>
-                        <span className="font-bold tracking-wide">CREATE RESUME</span>
+                      <span className="relative z-10 flex items-center justify-center space-x-2">
+                        <span className="text-base">📄</span>
+                        <span className="font-semibold tracking-wide">CREATE RESUME</span>
                       </span>
                       {hasAttendedInterview && (
                         <div className="absolute inset-0 bg-gradient-to-r from-white to-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
@@ -330,24 +330,17 @@ function App() {
                           setShowInterviewModal(true);
                         }
                       }}
-                      className={`w-full group relative overflow-hidden px-8 py-4 rounded-xl font-bold text-base uppercase tracking-wide shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] hover:-translate-y-0.5 border border-white/20 backdrop-blur-sm ${
-                        !hasAttendedInterview 
-                          ? 'cursor-pointer' 
-                          : 'cursor-pointer'
-                      }`}
+                      className="flex-1 group relative overflow-hidden px-4 py-2.5 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02] border border-white/20 backdrop-blur-sm cursor-pointer"
                       style={{
                         background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)',
-                        boxShadow: '0 10px 30px rgba(57, 53, 205, 0.3), 0 4px 15px rgba(57, 53, 205, 0.2)'
+                        boxShadow: '0 4px 15px rgba(57, 53, 205, 0.2)'
                       }}
                     >
-                      <span className="relative z-10 flex items-center justify-center space-x-3 text-white">
-                        <span className="text-xl">🎤</span>
-                        <span className="font-bold drop-shadow-sm">ATTEND INTERVIEW</span>
+                      <span className="relative z-10 flex items-center justify-center space-x-2 text-white">
+                        <span className="text-base">🎤</span>
+                        <span className="font-semibold drop-shadow-sm">ATTEND INTERVIEW</span>
                       </span>
                       <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      
-                      {/* Animated border effect */}
-                      <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-all duration-700"></div>
                     </button>
                   </div>
 

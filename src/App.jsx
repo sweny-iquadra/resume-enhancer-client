@@ -8,6 +8,7 @@ import ResumeChat from './components/ResumeChat';
 import ResumePreview from './components/ResumePreview';
 import ProfileCompletionModal from './components/modals/ProfileCompletionModal';
 import InterviewRequirementModal from './components/modals/InterviewRequirementModal';
+import LoadingModal from './components/modals/LoadingModal';
 import { useResumeLogic } from './hooks/useResumeLogic';
 
 function App() {
@@ -106,6 +107,12 @@ function App() {
           showInterviewModal={showInterviewModal}
           setShowInterviewModal={setShowInterviewModal}
           navigateToInterview={navigateToInterview}
+        />
+
+        {/* Loading Modal */}
+        <LoadingModal 
+          isVisible={isLoading}
+          message="iQua AI is generating your resume. This may take a few moments while we tailor your resume to your most relevant job role and skills."
         />
       </div>
     </div>

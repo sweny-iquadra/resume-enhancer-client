@@ -52,9 +52,7 @@ export const useResumeLogic = () => {
   };
 
   const handleResumeEnhancement = async (role) => {
-    // Show loading message popup
-    alert('iQua AI is generating your resume. This may take a few moments while we tailor your resume to your most relevant job role and skills.');
-    
+    // Show loading modal instead of alert
     setIsLoading(true);
     
     try {

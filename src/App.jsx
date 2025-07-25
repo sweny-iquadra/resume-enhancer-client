@@ -297,29 +297,42 @@ function App() {
                     </div>
                   </div>
 
-                  {/* Action Buttons Container - One Line */}
-                  <div className="flex space-x-3">
+                  {/* Action Buttons Container - Enhanced Creative Styling */}
+                  <div className="flex gap-4 items-center justify-center">
                     {/* Create Resume Button */}
                     <button 
                       onClick={handleCreateResumeClick}
-                      className={`flex-1 group relative overflow-hidden px-4 py-2.5 rounded-lg transition-all duration-300 font-medium text-sm shadow-md hover:shadow-lg transform ${
+                      className={`group relative overflow-hidden px-6 py-3.5 rounded-xl transition-all duration-500 font-bold text-sm shadow-xl hover:shadow-2xl transform hover:scale-105 border-2 min-w-[140px] ${
                         hasAttendedInterview 
-                          ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:from-emerald-600 hover:to-emerald-700 hover:scale-[1.02] cursor-pointer border border-emerald-400/30' 
-                          : 'bg-gradient-to-r from-gray-300 to-gray-400 text-gray-500 cursor-not-allowed border border-gray-300 opacity-50'
+                          ? 'bg-gradient-to-br from-emerald-400 via-emerald-500 to-emerald-600 text-white hover:from-emerald-500 hover:via-emerald-600 hover:to-emerald-700 cursor-pointer border-emerald-300 hover:border-emerald-200 hover:-translate-y-1' 
+                          : 'bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 text-gray-600 cursor-not-allowed border-gray-300 opacity-60'
                       }`}
                       style={hasAttendedInterview ? {
-                        boxShadow: '0 4px 15px rgba(16, 185, 129, 0.2)'
+                        boxShadow: '0 8px 25px rgba(16, 185, 129, 0.3), 0 0 20px rgba(16, 185, 129, 0.1)',
+                        filter: 'drop-shadow(0 4px 8px rgba(16, 185, 129, 0.2))'
                       } : {}}
                       disabled={!hasAttendedInterview}
                     >
-                      <span className="relative z-10 flex items-center justify-center space-x-2">
-                        <span className="text-base">📄</span>
-                        <span className="font-semibold tracking-wide">CREATE RESUME</span>
+                      <span className="relative z-20 flex flex-col items-center justify-center space-y-1">
+                        <span className="text-xl">{hasAttendedInterview ? '📄' : '🔒'}</span>
+                        <span className="font-bold tracking-wider text-xs uppercase leading-tight">
+                          CREATE<br/>RESUME
+                        </span>
                       </span>
                       {hasAttendedInterview && (
-                        <div className="absolute inset-0 bg-gradient-to-r from-white to-transparent opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+                        <>
+                          <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transform rotate-45 transition-all duration-500"></div>
+                        </>
                       )}
                     </button>
+
+                    {/* Stylish Divider */}
+                    <div className="flex flex-col items-center space-y-1">
+                      <div className="w-1 h-6 bg-gradient-to-b from-purple-300 via-purple-500 to-purple-700 rounded-full"></div>
+                      <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                      <div className="w-1 h-6 bg-gradient-to-t from-purple-300 via-purple-500 to-purple-700 rounded-full"></div>
+                    </div>
 
                     {/* Attend Interview Button */}
                     <button 
@@ -330,17 +343,28 @@ function App() {
                           setShowInterviewModal(true);
                         }
                       }}
-                      className="flex-1 group relative overflow-hidden px-4 py-2.5 rounded-lg font-medium text-sm shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02] border border-white/20 backdrop-blur-sm cursor-pointer"
+                      className="group relative overflow-hidden px-6 py-3.5 rounded-xl font-bold text-sm shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 border-2 border-purple-300 hover:border-purple-200 backdrop-blur-sm cursor-pointer min-w-[140px]"
                       style={{
-                        background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)',
-                        boxShadow: '0 4px 15px rgba(57, 53, 205, 0.2)'
+                        background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 30%, #7c69ef 70%, #9f7aea 100%)',
+                        boxShadow: '0 8px 25px rgba(57, 53, 205, 0.3), 0 0 20px rgba(57, 53, 205, 0.1)',
+                        filter: 'drop-shadow(0 4px 8px rgba(57, 53, 205, 0.2))'
                       }}
                     >
-                      <span className="relative z-10 flex items-center justify-center space-x-2 text-white">
-                        <span className="text-base">🎤</span>
-                        <span className="font-semibold drop-shadow-sm">ATTEND INTERVIEW</span>
+                      <span className="relative z-20 flex flex-col items-center justify-center space-y-1 text-white">
+                        <span className="text-xl">🎤</span>
+                        <span className="font-bold tracking-wider text-xs uppercase leading-tight drop-shadow-sm">
+                          ATTEND<br/>INTERVIEW
+                        </span>
                       </span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/15 via-transparent to-white/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transform -rotate-45 transition-all duration-500"></div>
+                      
+                      {/* Animated border glow */}
+                      <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" 
+                           style={{
+                             background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%)',
+                             animation: 'shimmer 2s infinite'
+                           }}></div>
                     </button>
                   </div>
 

@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 
 const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const [selections, setSelections] = useState({});
   const [finalResume, setFinalResume] = useState(null);
 
-  // Original resume data (mock data for comparison)
+  // Original resume data (mock data for comparison) - styled like a real resume
   const originalResume = {
     basicDetails: {
       name: "John Smith",
@@ -12,25 +13,25 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       phone: "+1 (555) 123-4567",
       location: "New York, NY"
     },
-    professionalSummary: "Experienced software developer with 2+ years in web development. Skilled in JavaScript and React.",
-    skills: ["JavaScript", "React", "Node.js", "Python", "SQL"],
+    professionalSummary: "Experienced software developer with 2+ years in web development. Skilled in JavaScript and React with a passion for creating user-friendly applications.",
+    skills: ["JavaScript", "React", "Node.js", "Python", "SQL", "Git"],
     workExperience: [
       {
         company: "Tech Solutions Inc",
         position: "Junior Developer",
         duration: "2020-2022",
         responsibilities: [
-          "Developed web applications using React",
-          "Collaborated with team members on projects",
-          "Maintained existing codebase"
+          "Developed web applications using React and JavaScript",
+          "Collaborated with cross-functional teams on various projects",
+          "Maintained and updated existing codebase for improved performance"
         ]
       }
     ],
     projects: [
       {
-        name: "Basic Website",
-        description: "Created a simple website with HTML/CSS",
-        technologies: ["HTML", "CSS", "JavaScript"]
+        name: "E-commerce Website",
+        description: "Created a responsive e-commerce website with shopping cart functionality",
+        technologies: ["HTML", "CSS", "JavaScript", "React"]
       }
     ]
   };
@@ -127,12 +128,12 @@ ${finalResume.basicDetails.location}
 PROFESSIONAL SUMMARY
 ${finalResume.professionalSummary}
 
-SKILLS
-${finalResume.skills.join(', ')}
+TECHNICAL SKILLS
+${finalResume.skills.join(' • ')}
 
 WORK EXPERIENCE
 ${finalResume.workExperience.map(exp => `
-${exp.position} at ${exp.company} (${exp.duration})
+${exp.position} | ${exp.company} | ${exp.duration}
 ${exp.responsibilities.map(resp => `• ${resp}`).join('\n')}
 `).join('\n')}
 
@@ -158,6 +159,191 @@ Powered by iQua.ai
     URL.revokeObjectURL(url);
 
     console.log(`Downloading resume as ${format}`);
+  };
+
+  // Microsoft Word-style document component
+  const WordDocument = ({ resumeData, title, isOriginal = false }) => {
+    return (
+      <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+        {/* Document Header - Word-style */}
+        <div className="bg-gray-100 px-4 py-2 border-b border-gray-300 flex items-center space-x-2">
+          <div className="flex space-x-1">
+            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+          </div>
+          <span className="text-sm text-gray-600 font-medium">{title}</span>
+          <div className="ml-auto flex items-center space-x-2">
+            <span className="text-xs text-gray-500">📄</span>
+            <span className="text-xs text-gray-500">100%</span>
+          </div>
+        </div>
+
+        {/* Document Content - Styled like Microsoft Word */}
+        <div className="p-8 min-h-[600px]" style={{
+          fontFamily: 'Times New Roman, serif',
+          fontSize: '12pt',
+          lineHeight: '1.15',
+          background: 'white'
+        }}>
+          {/* Header Section */}
+          <div className="text-center mb-6 pb-3 border-b-2 border-gray-300">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2" style={{
+              fontFamily: 'Times New Roman, serif',
+              fontSize: '18pt',
+              fontWeight: 'bold'
+            }}>
+              {resumeData.basicDetails.name}
+            </h1>
+            <div className="text-sm text-gray-700" style={{ fontSize: '11pt' }}>
+              <span>{resumeData.basicDetails.email}</span>
+              <span className="mx-2">|</span>
+              <span>{resumeData.basicDetails.phone}</span>
+              <span className="mx-2">|</span>
+              <span>{resumeData.basicDetails.location}</span>
+            </div>
+          </div>
+
+          {/* Professional Summary */}
+          <div className="mb-6">
+            <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
+              fontFamily: 'Times New Roman, serif',
+              fontSize: '14pt',
+              fontWeight: 'bold',
+              borderBottom: '1px solid #333',
+              paddingBottom: '2px'
+            }}>
+              PROFESSIONAL SUMMARY
+            </h2>
+            <p className="text-gray-800 text-justify" style={{
+              fontFamily: 'Times New Roman, serif',
+              fontSize: '12pt',
+              lineHeight: '1.15',
+              textAlign: 'justify'
+            }}>
+              {resumeData.professionalSummary}
+            </p>
+          </div>
+
+          {/* Technical Skills */}
+          <div className="mb-6">
+            <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
+              fontFamily: 'Times New Roman, serif',
+              fontSize: '14pt',
+              fontWeight: 'bold',
+              borderBottom: '1px solid #333',
+              paddingBottom: '2px'
+            }}>
+              TECHNICAL SKILLS
+            </h2>
+            <p className="text-gray-800" style={{
+              fontFamily: 'Times New Roman, serif',
+              fontSize: '12pt'
+            }}>
+              {resumeData.skills.join(' • ')}
+            </p>
+          </div>
+
+          {/* Work Experience */}
+          <div className="mb-6">
+            <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
+              fontFamily: 'Times New Roman, serif',
+              fontSize: '14pt',
+              fontWeight: 'bold',
+              borderBottom: '1px solid #333',
+              paddingBottom: '2px'
+            }}>
+              WORK EXPERIENCE
+            </h2>
+            {resumeData.workExperience.map((exp, index) => (
+              <div key={index} className="mb-4">
+                <div className="flex justify-between items-start mb-1">
+                  <h3 className="font-bold text-gray-900" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '12pt',
+                    fontWeight: 'bold'
+                  }}>
+                    {exp.position}
+                  </h3>
+                  <span className="text-gray-700 text-right" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '12pt'
+                  }}>
+                    {exp.duration}
+                  </span>
+                </div>
+                <div className="text-gray-800 mb-2 italic" style={{
+                  fontFamily: 'Times New Roman, serif',
+                  fontSize: '12pt',
+                  fontStyle: 'italic'
+                }}>
+                  {exp.company}
+                </div>
+                <ul className="ml-4" style={{ listStyleType: 'disc' }}>
+                  {exp.responsibilities.map((resp, respIndex) => (
+                    <li key={respIndex} className="text-gray-800 mb-1" style={{
+                      fontFamily: 'Times New Roman, serif',
+                      fontSize: '12pt',
+                      lineHeight: '1.15'
+                    }}>
+                      {resp}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Projects */}
+          <div className="mb-6">
+            <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
+              fontFamily: 'Times New Roman, serif',
+              fontSize: '14pt',
+              fontWeight: 'bold',
+              borderBottom: '1px solid #333',
+              paddingBottom: '2px'
+            }}>
+              PROJECTS
+            </h2>
+            {resumeData.projects.map((project, index) => (
+              <div key={index} className="mb-3">
+                <h3 className="font-bold text-gray-900" style={{
+                  fontFamily: 'Times New Roman, serif',
+                  fontSize: '12pt',
+                  fontWeight: 'bold'
+                }}>
+                  {project.name}
+                </h3>
+                <p className="text-gray-800 mb-1" style={{
+                  fontFamily: 'Times New Roman, serif',
+                  fontSize: '12pt',
+                  lineHeight: '1.15'
+                }}>
+                  {project.description}
+                </p>
+                <p className="text-gray-700 text-sm" style={{
+                  fontFamily: 'Times New Roman, serif',
+                  fontSize: '11pt',
+                  fontStyle: 'italic'
+                }}>
+                  <span className="font-medium">Technologies:</span> {project.technologies.join(', ')}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer */}
+          <div className="mt-8 pt-4 border-t border-gray-200 text-right">
+            <p className="text-xs text-gray-400" style={{
+              fontFamily: 'Times New Roman, serif',
+              fontSize: '9pt'
+            }}>
+              Powered by iQua.ai
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const LineComparison = ({ label, originalContent, enhancedContent, selectionKey }) => {
@@ -261,7 +447,7 @@ Powered by iQua.ai
         <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6 rounded-t-2xl flex justify-between items-center">
           <div>
             <h3 className="text-xl font-semibold">Resume Preview & Comparison</h3>
-            <p className="text-sm opacity-90 mt-1">Compare line-by-line and build your final resume</p>
+            <p className="text-sm opacity-90 mt-1">Microsoft Word-style document preview and comparison</p>
           </div>
           <button
             onClick={() => setShowPreview(false)}
@@ -274,141 +460,109 @@ Powered by iQua.ai
         {/* Content */}
         <div className="flex-1 overflow-hidden">
           <div className="grid grid-cols-3 h-full">
-            {/* Left Panel - Comparisons */}
-            <div className="col-span-2 overflow-y-auto p-6 border-r border-gray-200">
-              <h4 className="text-lg font-semibold text-gray-800 mb-4">Line-by-Line Comparison</h4>
-              <div className="space-y-4">
-                {/* Basic Details Comparison */}
-                <LineComparison
-                  label="Contact Information"
-                  originalContent={originalResume.basicDetails}
-                  enhancedContent={enhancedResumeData.basicDetails}
-                  selectionKey="basicDetails"
-                />
+            {/* Left Panel - Document Comparison */}
+            <div className="col-span-2 overflow-y-auto p-4 border-r border-gray-200">
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                {/* Original Resume Document */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 text-center">Original Resume</h4>
+                  <WordDocument 
+                    resumeData={originalResume} 
+                    title="Original_Resume.docx"
+                    isOriginal={true}
+                  />
+                </div>
 
-                {/* Professional Summary Comparison */}
-                <LineComparison
-                  label="Professional Summary"
-                  originalContent={originalResume.professionalSummary}
-                  enhancedContent={enhancedResumeData.professionalSummary}
-                  selectionKey="professionalSummary"
-                />
+                {/* Enhanced Resume Document */}
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-800 mb-4 text-center">AI Enhanced Resume</h4>
+                  <WordDocument 
+                    resumeData={enhancedResumeData} 
+                    title="Enhanced_Resume.docx"
+                  />
+                </div>
+              </div>
 
-                {/* Skills Comparison */}
-                <LineComparison
-                  label="Skills"
-                  originalContent={originalResume.skills}
-                  enhancedContent={enhancedResumeData.skills}
-                  selectionKey="skills"
-                />
+              {/* Line-by-Line Comparison Controls */}
+              <div className="border-t border-gray-200 pt-6">
+                <h4 className="text-lg font-semibold text-gray-800 mb-4">Choose Your Preferred Content</h4>
+                <div className="space-y-4">
+                  {/* Basic Details Comparison */}
+                  <LineComparison
+                    label="Contact Information"
+                    originalContent={originalResume.basicDetails}
+                    enhancedContent={enhancedResumeData.basicDetails}
+                    selectionKey="basicDetails"
+                  />
 
-                {/* Work Experience Comparisons */}
-                {Math.max(originalResume.workExperience.length, enhancedResumeData.workExperience.length) > 0 && 
-                  Array.from({ length: Math.max(originalResume.workExperience.length, enhancedResumeData.workExperience.length) }, (_, index) => {
-                    const originalExp = originalResume.workExperience[index];
-                    const enhancedExp = enhancedResumeData.workExperience[index];
+                  {/* Professional Summary Comparison */}
+                  <LineComparison
+                    label="Professional Summary"
+                    originalContent={originalResume.professionalSummary}
+                    enhancedContent={enhancedResumeData.professionalSummary}
+                    selectionKey="professionalSummary"
+                  />
 
-                    if (!originalExp && !enhancedExp) return null;
+                  {/* Skills Comparison */}
+                  <LineComparison
+                    label="Skills"
+                    originalContent={originalResume.skills}
+                    enhancedContent={enhancedResumeData.skills}
+                    selectionKey="skills"
+                  />
 
-                    return (
-                      <LineComparison
-                        key={`workExp-${index}`}
-                        label={`Work Experience ${index + 1}`}
-                        originalContent={originalExp ? `${originalExp.position} at ${originalExp.company}\n${originalExp.responsibilities.join('\n')}` : 'No experience entry'}
-                        enhancedContent={enhancedExp ? `${enhancedExp.position} at ${enhancedExp.company}\n${enhancedExp.responsibilities.join('\n')}` : 'No experience entry'}
-                        selectionKey={`workExperience.${index}`}
-                      />
-                    );
-                  })
-                }
+                  {/* Work Experience Comparisons */}
+                  {Math.max(originalResume.workExperience.length, enhancedResumeData.workExperience.length) > 0 && 
+                    Array.from({ length: Math.max(originalResume.workExperience.length, enhancedResumeData.workExperience.length) }, (_, index) => {
+                      const originalExp = originalResume.workExperience[index];
+                      const enhancedExp = enhancedResumeData.workExperience[index];
 
-                {/* Projects Comparisons */}
-                {Math.max(originalResume.projects.length, enhancedResumeData.projects?.length || 0) > 0 && 
-                  Array.from({ length: Math.max(originalResume.projects.length, enhancedResumeData.projects?.length || 0) }, (_, index) => {
-                    const originalProject = originalResume.projects[index];
-                    const enhancedProject = enhancedResumeData.projects?.[index];
+                      if (!originalExp && !enhancedExp) return null;
 
-                    if (!originalProject && !enhancedProject) return null;
+                      return (
+                        <LineComparison
+                          key={`workExp-${index}`}
+                          label={`Work Experience ${index + 1}`}
+                          originalContent={originalExp ? `${originalExp.position} at ${originalExp.company}\n${originalExp.responsibilities.join('\n')}` : 'No experience entry'}
+                          enhancedContent={enhancedExp ? `${enhancedExp.position} at ${enhancedExp.company}\n${enhancedExp.responsibilities.join('\n')}` : 'No experience entry'}
+                          selectionKey={`workExperience.${index}`}
+                        />
+                      );
+                    })
+                  }
 
-                    return (
-                      <LineComparison
-                        key={`project-${index}`}
-                        label={`Project ${index + 1}`}
-                        originalContent={originalProject ? `${originalProject.name}\n${originalProject.description}\nTech: ${originalProject.technologies.join(', ')}` : 'No project entry'}
-                        enhancedContent={enhancedProject ? `${enhancedProject.name}\n${enhancedProject.description}\nTech: ${enhancedProject.technologies.join(', ')}` : 'No project entry'}
-                        selectionKey={`projects.${index}`}
-                      />
-                    );
-                  })
-                }
+                  {/* Projects Comparisons */}
+                  {Math.max(originalResume.projects.length, enhancedResumeData.projects?.length || 0) > 0 && 
+                    Array.from({ length: Math.max(originalResume.projects.length, enhancedResumeData.projects?.length || 0) }, (_, index) => {
+                      const originalProject = originalResume.projects[index];
+                      const enhancedProject = enhancedResumeData.projects?.[index];
+
+                      if (!originalProject && !enhancedProject) return null;
+
+                      return (
+                        <LineComparison
+                          key={`project-${index}`}
+                          label={`Project ${index + 1}`}
+                          originalContent={originalProject ? `${originalProject.name}\n${originalProject.description}\nTech: ${originalProject.technologies.join(', ')}` : 'No project entry'}
+                          enhancedContent={enhancedProject ? `${enhancedProject.name}\n${enhancedProject.description}\nTech: ${enhancedProject.technologies.join(', ')}` : 'No project entry'}
+                          selectionKey={`projects.${index}`}
+                        />
+                      );
+                    })
+                  }
+                </div>
               </div>
             </div>
 
-            {/* Right Panel - Final Resume Preview */}
-            <div className="overflow-y-auto p-6 bg-gray-50">
-              <h4 className="text-lg font-semibold text-gray-800 mb-4">Final Resume Preview</h4>
+            {/* Right Panel - Final Resume Preview (Same styling as original) */}
+            <div className="overflow-y-auto p-4 bg-gray-50">
+              <h4 className="text-lg font-semibold text-gray-800 mb-4 text-center">Final Resume Preview</h4>
               {finalResume && (
-                <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                  {/* Header */}
-                  <div className="text-center mb-6 pb-4 border-b border-gray-200">
-                    <h2 className="text-2xl font-bold text-gray-800">{finalResume.basicDetails.name}</h2>
-                    <p className="text-gray-600 mt-1">
-                      {finalResume.basicDetails.email} | {finalResume.basicDetails.phone}
-                    </p>
-                    <p className="text-gray-600">{finalResume.basicDetails.location}</p>
-                  </div>
-
-                  {/* Professional Summary */}
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Professional Summary</h3>
-                    <p className="text-gray-700 text-sm leading-relaxed">{finalResume.professionalSummary}</p>
-                  </div>
-
-                  {/* Skills */}
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Skills</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {finalResume.skills.map((skill, index) => (
-                        <span key={index} className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs">
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Work Experience */}
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Work Experience</h3>
-                    {finalResume.workExperience.map((exp, index) => (
-                      <div key={index} className="mb-4 last:mb-0">
-                        <h4 className="font-medium text-gray-800">{exp.position}</h4>
-                        <p className="text-gray-600 text-sm">{exp.company} | {exp.duration}</p>
-                        <ul className="text-sm text-gray-700 mt-2 ml-4">
-                          {exp.responsibilities.map((resp, respIndex) => (
-                            <li key={respIndex} className="list-disc">{resp}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Projects */}
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Projects</h3>
-                    {finalResume.projects.map((project, index) => (
-                      <div key={index} className="mb-4 last:mb-0">
-                        <h4 className="font-medium text-gray-800">{project.name}</h4>
-                        <p className="text-gray-700 text-sm">{project.description}</p>
-                        <p className="text-gray-600 text-xs mt-1">Tech: {project.technologies.join(', ')}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Watermark */}
-                  <div className="text-right text-xs text-gray-400 mt-8 pt-4 border-t border-gray-100">
-                    Powered by iQua.ai
-                  </div>
-                </div>
+                <WordDocument 
+                  resumeData={finalResume} 
+                  title="Final_Resume.docx"
+                  isOriginal={true}
+                />
               )}
             </div>
           </div>

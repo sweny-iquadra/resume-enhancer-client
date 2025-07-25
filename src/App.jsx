@@ -4,6 +4,19 @@ import './App.css';
 
 function App() {
   const [showResumeChat, setShowResumeChat] = useState(false);
+  const [showInterviewModal, setShowInterviewModal] = useState(false);
+  
+  // Mock data - replace with actual API call to check interview attendance
+  const [hasAttendedInterview, setHasAttendedInterview] = useState(false);
+  
+  const handleCreateResumeClick = () => {
+    if (!hasAttendedInterview) {
+      setShowInterviewModal(true);
+    } else {
+      // Handle resume creation logic here
+      console.log('Creating resume...');
+    }
+  };
 
   const features = [
     {
@@ -198,9 +211,24 @@ function App() {
                 </div>
 
                 {/* Create Resume Button */}
-                <button className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-medium shadow-md hover:shadow-lg transform hover:scale-105 mb-4">
+                <button 
+                  onClick={handleCreateResumeClick}
+                  disabled={!hasAttendedInterview}
+                  className={`px-6 py-3 rounded-xl transition-all duration-300 font-medium shadow-md mb-4 ${
+                    hasAttendedInterview 
+                      ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800 hover:shadow-lg transform hover:scale-105 cursor-pointer' 
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                >
                   Create Resume
                 </button>
+                
+                {/* Attend Interview Button - only show if no interview attended */}
+                {!hasAttendedInterview && (
+                  <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 font-medium shadow-md hover:shadow-lg transform hover:scale-105 mb-4">
+                    ATTEND INTERVIEW
+                  </button>
+                )}
 
                 {/* Chat Input Area */}
                 <div className="mt-auto pt-4 border-t border-gray-200">
@@ -214,6 +242,48 @@ function App() {
                       <span className="text-sm">→</span>
                     </button>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Interview Requirement Modal */}
+        {showInterviewModal && (
+          <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-fade-in">
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-t-2xl text-center">
+                <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">🎯</span>
+                </div>
+                <h3 className="text-xl font-semibold">Interview Required</h3>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-6 text-center">
+                <p className="text-gray-700 text-lg leading-relaxed mb-6">
+                  Take your first step by attending an interview, and let iQua help you build a resume for your preferred job role!
+                </p>
+                
+                <div className="flex flex-col space-y-3">
+                  <button 
+                    onClick={() => {
+                      setShowInterviewModal(false);
+                      // Add logic to navigate to interview section
+                      console.log('Navigate to interview...');
+                    }}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 font-medium shadow-md hover:shadow-lg transform hover:scale-105"
+                  >
+                    ATTEND INTERVIEW
+                  </button>
+                  
+                  <button 
+                    onClick={() => setShowInterviewModal(false)}
+                    className="text-gray-500 hover:text-gray-700 transition-colors font-medium"
+                  >
+                    Close
+                  </button>
                 </div>
               </div>
             </div>

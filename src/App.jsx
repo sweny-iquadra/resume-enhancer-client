@@ -169,8 +169,10 @@ function App() {
 
         {/* Resume Enhancer Chat Overlay */}
       {showResumeChat && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-96 h-[500px] flex flex-col animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50">
+          <div className="fixed bottom-4 right-4 bg-white rounded-2xl shadow-2xl w-96 h-[500px] flex flex-col animate-fade-in"></div>
+        </div>
+      )}
             {/* Chat Header */}
             <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4 rounded-t-2xl flex justify-between items-center">
               <div className="flex items-center space-x-2">
@@ -219,9 +221,6 @@ function App() {
               </div>
             </div>
           </div>
-        </div>
-      )}
-      </div>
     </div>
   );
 }

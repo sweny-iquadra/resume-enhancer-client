@@ -167,26 +167,27 @@ function App() {
           </main>
         </div>
 
-        {/* Resume Enhancer Chat Interface */}
-        {showResumeChat && (
-          <div className="w-96 bg-white border-l border-gray-200 flex flex-col">
+        {/* Resume Enhancer Chat Overlay */}
+      {showResumeChat && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-2xl shadow-2xl w-96 h-[500px] flex flex-col animate-fade-in">
             {/* Chat Header */}
-            <div className="bg-purple-600 text-white p-4 flex justify-between items-center">
+            <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-4 rounded-t-2xl flex justify-between items-center">
               <div className="flex items-center space-x-2">
                 <span className="text-xl">📄</span>
                 <span className="font-semibold">Resume Enhancer</span>
               </div>
               <button
                 onClick={() => setShowResumeChat(false)}
-                className="text-white hover:bg-purple-700 rounded-lg p-1 transition-colors"
+                className="text-white hover:bg-purple-800 rounded-full p-2 transition-colors"
               >
-                ✕
+                <span className="text-lg">✕</span>
               </button>
             </div>
 
             {/* Welcome Message */}
-            <div className="flex-1 p-6 flex flex-col">
-              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+            <div className="flex-1 p-6 flex flex-col overflow-hidden">
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 mb-4 border border-purple-100">
                 <h3 className="font-semibold text-purple-600 mb-2">
                   Welcome to iQua.AI Resume enhancer
                 </h3>
@@ -199,7 +200,7 @@ function App() {
               </div>
 
               {/* Create Resume Button */}
-              <button className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors duration-300 font-medium">
+              <button className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-3 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-medium shadow-md hover:shadow-lg transform hover:scale-105">
                 Create Resume
               </button>
 
@@ -209,16 +210,17 @@ function App() {
                   <input
                     type="text"
                     placeholder="Ask me anything about resume building..."
-                    className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   />
-                  <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">
+                  <button className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-3 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all shadow-md">
                     <span className="text-sm">→</span>
                   </button>
                 </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
       </div>
     </div>
   );

@@ -432,7 +432,7 @@ function App() {
           <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-fade-in">
               {/* Modal Header */}
-              <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-t-2xl text-center">
+              <div className="text-white p-6 rounded-t-2xl text-center" style={{background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)'}}>
                 <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-3xl">📝</span>
                 </div>
@@ -474,7 +474,17 @@ function App() {
                       // Navigate to profile completion page (future implementation)
                       console.log('Navigate to profile completion');
                     }}
-                    className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-6 py-3 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all duration-300 font-medium shadow-md hover:shadow-lg transform hover:scale-105"
+                    className="text-white px-6 py-3 rounded-xl transition-all duration-300 font-medium shadow-md hover:shadow-lg transform hover:scale-105"
+                    style={{
+                      background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)',
+                      boxShadow: '0 8px 25px rgba(57, 53, 205, 0.3)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'linear-gradient(135deg, #2d28b8 0%, #4a3dd4 50%, #6859db 100%)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)';
+                    }}
                   >
                     COMPLETE PROFILE
                   </button>

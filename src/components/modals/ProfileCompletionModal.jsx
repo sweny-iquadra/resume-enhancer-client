@@ -37,11 +37,13 @@ const ProfileCompletionModal = ({ showProfileModal, setShowProfileModal, userPro
       setTimeout(() => {
         setSuccessMessage("Your resume is ready!");
         
-        // After another 2 seconds, close modal
+        // After another 2 seconds, close modal and trigger ResumeChat
         setTimeout(() => {
           setIsLoading(false);
           setShowSuccess(false);
           setShowProfileModal(false);
+          // Trigger ResumeChat to show enhanced UI
+          window.dispatchEvent(new CustomEvent('resumeReady'));
         }, 2000);
       }, 2000);
       

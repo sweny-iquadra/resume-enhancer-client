@@ -36,6 +36,19 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
   const [successTitle, setSuccessTitle] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteEducationId, setDeleteEducationId] = useState(null);
+  const [certificates, setCertificates] = useState([]);
+  const [showCertificateModal, setShowCertificateModal] = useState(false);
+  const [certificateForm, setCertificateForm] = useState({
+    name: '',
+    organization: '',
+    credentialId: '',
+    credentialUrl: '',
+    doesntExpire: false,
+    startDate: '',
+    endDate: ''
+  });
+  const [certificateErrors, setCertificateErrors] = useState({});
+  const [editingCertificateId, setEditingCertificateId] = useState(null);
 
   // Available skills for dropdown
   const availableSkills = [
@@ -177,6 +190,129 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
   const cancelDeleteEducation = () => {
     setShowDeleteModal(false);
     setDeleteEducationId(null);
+  };
+
+  const handleAddCertificate = () => {
+    setShowCertificateModal(true);
+    setEditingCertificateId(null);
+    setCertificateForm({
+      name: '',
+      organization: '',
+      credentialId: '',
+      credentialUrl: '',
+      doesntExpire: false,
+      startDate: '',
+      endDate: ''
+    });
+    setCertificateErrors({});
+  };
+
+  const handleCloseCertificateModal = () => {
+    setShowCertificateModal(false);
+    setEditingCertificateId(null);
+    setCertificateForm({
+      name: '',
+      organization: '',
+      credentialId: '',
+      credentialUrl: '',
+      doesntExpire: false,
+      startDate: '',
+      endDate: ''
+    });
+    setCertificateErrors({});
+  };
+
+  const handleEditCertificate = (cert) => {
+    setEditingCertificateId(cert.id);
+    setCertificateForm({
+      name: cert.name,
+      organization: cert.organization,
+      credentialId: cert.credentialId,
+      credentialUrl: cert.credentialUrl,
+      doesntExpire: cert.doesntExpire,
+      startDate: cert.startDate,
+      endDate: cert.endDate
+    });
+    setCertificateErrors({});
+    setShowCertificateModal(true);
+  };
+
+  const handleCertificateInputChange = (field, value) => {
+    setCertificateForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    if (certificateErrors[field]) {
+      setCertificateErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
+    }
+  };
+
+  const validateCertificateForm = () => {
+    const errors = {};
+    
+    if (!certificateForm.name.trim()) {
+      errors.name = 'Please enter your certificate name.';
+    }
+    
+    if (!certificateForm.organization.trim()) {
+      errors.organization = 'Please enter your issued organization.';
+    }
+    
+    if (!certificateForm.credentialId.trim()) {
+      errors.credentialId = 'Please enter your credential Id.';
+    }
+    
+    if (!certificateForm.credentialUrl.trim()) {
+      errors.credentialUrl = 'Please enter your credential URL.';
+    }
+    
+    if (!certificateForm.startDate) {
+      errors.startDate = 'Please select start date.';
+    }
+    
+    if (!certificateForm.doesntExpire && !certificateForm.endDate) {
+      errors.endDate = 'Please specify end date.';
+    }
+    
+    return errors;
+  };
+
+  const handleCertificateSubmit = () => {
+    const errors = validateCertificateForm();
+    
+    if (Object.keys(errors).length > 0) {
+      setCertificateErrors(errors);
+      setErrorMessage('Please fix the validation errors and try again.');
+      setShowErrorToast(true);
+      return;
+    }
+    
+    try {
+      if (editingCertificateId) {
+        setCertificates(prev => prev.map(cert => 
+          cert.id === editingCertificateId 
+            ? { ...certificateForm, id: editingCertificateId }
+            : cert
+        ));
+        setSuccessTitle('Certificate Updated!');
+        setSuccessMessage('Your certificate details have been updated successfully.');
+        setShowSuccessToast(true);
+      } else {
+        setCertificates(prev => [...prev, { ...certificateForm, id: Date.now() }]);
+        setSuccessTitle('Certificate Added!');
+        setSuccessMessage('Your certificate details have been saved successfully.');
+        setShowSuccessToast(true);
+      }
+      
+      handleCloseCertificateModal();
+    } catch (error) {
+      setErrorMessage('Failed to save certificate details. Please try again.');
+      setShowErrorToast(true);
+    }
   };
 
   const handleEducationInputChange = (field, value) => {
@@ -721,14 +857,252 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
               )}
 
               {activeTab === 'Certificates' && (
-                <div className="text-center py-12">
-                  <p className="text-gray-500">Certificates will be displayed here</p>
+                <div className="relative h-full min-h-[400px]">
+                  {/* Floating + Button */}
+                  <button
+                    onClick={handleAddCertificate}
+                    className="absolute top-0 right-0 w-14 h-14 rounded-xl text-white font-bold text-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center z-10"
+                    style={{
+                      background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)',
+                      boxShadow: '0 4px 20px rgba(79, 70, 229, 0.3)'
+                    }}
+                  >
+                    +
+                  </button>
+                  
+                  {certificates.length === 0 ? (
+                    <>
+                      {/* Empty state - no content */}
+                      <div className="h-full"></div>
+                    </>
+                  ) : (
+                    <div className="pt-16 space-y-4">
+                      {certificates.map((cert) => (
+                        <div key={cert.id} className="bg-white border-b border-gray-200 pb-4">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="font-bold text-gray-900 text-base mb-1">
+                                {cert.name}
+                              </div>
+                              <div className="text-gray-700 text-sm mb-1">
+                                {cert.organization}
+                              </div>
+                              <div className="text-gray-700 text-sm mb-1">
+                                Credential ID: {cert.credentialId}
+                              </div>
+                              <div className="text-blue-600 text-sm mb-2 hover:underline">
+                                <a href={cert.credentialUrl} target="_blank" rel="noopener noreferrer">
+                                  {cert.credentialUrl}
+                                </a>
+                              </div>
+                              <div className="text-gray-500 text-sm">
+                                {new Date(cert.startDate).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'short', 
+                                  day: 'numeric' 
+                                })} to {cert.doesntExpire ? 'Present' : new Date(cert.endDate).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'short', 
+                                  day: 'numeric' 
+                                })}
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2 ml-4">
+                              <button 
+                                onClick={() => handleEditCertificate(cert)}
+                                className="text-gray-600 hover:text-gray-800 p-1"
+                              >
+                                ✏️
+                              </button>
+                              <button 
+                                onClick={() => {
+                                  setCertificates(prev => prev.filter(c => c.id !== cert.id));
+                                  setSuccessTitle('Certificate Deleted!');
+                                  setSuccessMessage('Certificate has been deleted successfully.');
+                                  setShowSuccessToast(true);
+                                }}
+                                className="text-red-500 hover:text-red-700 p-1"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Certificate Modal */}
+      {showCertificateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            {/* Header */}
+            <div 
+              className="text-white p-6 rounded-t-xl text-center"
+              style={{
+                background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)'
+              }}
+            >
+              <h3 className="text-xl font-semibold">
+                Certificate Details
+              </h3>
+            </div>
+
+            {/* Form Content */}
+            <div className="p-6 space-y-4">
+              {/* Certificate Name Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Certificate Name*
+                </label>
+                <input
+                  type="text"
+                  value={certificateForm.name}
+                  onChange={(e) => handleCertificateInputChange('name', e.target.value)}
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50 ${
+                    certificateErrors.name ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {certificateErrors.name && (
+                  <p className="text-red-500 text-sm mt-1">{certificateErrors.name}</p>
+                )}
+              </div>
+
+              {/* Issued Organization Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Issued Organization*
+                </label>
+                <input
+                  type="text"
+                  value={certificateForm.organization}
+                  onChange={(e) => handleCertificateInputChange('organization', e.target.value)}
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50 ${
+                    certificateErrors.organization ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {certificateErrors.organization && (
+                  <p className="text-red-500 text-sm mt-1">{certificateErrors.organization}</p>
+                )}
+              </div>
+
+              {/* Credential Id Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Credential Id*
+                </label>
+                <input
+                  type="text"
+                  value={certificateForm.credentialId}
+                  onChange={(e) => handleCertificateInputChange('credentialId', e.target.value)}
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50 ${
+                    certificateErrors.credentialId ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {certificateErrors.credentialId && (
+                  <p className="text-red-500 text-sm mt-1">{certificateErrors.credentialId}</p>
+                )}
+              </div>
+
+              {/* Credential URL Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Credential URL*
+                </label>
+                <input
+                  type="url"
+                  value={certificateForm.credentialUrl}
+                  onChange={(e) => handleCertificateInputChange('credentialUrl', e.target.value)}
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50 ${
+                    certificateErrors.credentialUrl ? 'border-red-500' : 'border-gray-300'
+                  }`}
+                />
+                {certificateErrors.credentialUrl && (
+                  <p className="text-red-500 text-sm mt-1">{certificateErrors.credentialUrl}</p>
+                )}
+              </div>
+
+              {/* Doesn't Expire Checkbox */}
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="doesntExpire"
+                  checked={certificateForm.doesntExpire}
+                  onChange={(e) => handleCertificateInputChange('doesntExpire', e.target.checked)}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="doesntExpire" className="ml-2 text-sm text-gray-700">
+                  This certificate doesn't expire
+                </label>
+              </div>
+
+              {/* Date Fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Start Date*
+                  </label>
+                  <input
+                    type="date"
+                    value={certificateForm.startDate}
+                    onChange={(e) => handleCertificateInputChange('startDate', e.target.value)}
+                    className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50 ${
+                      certificateErrors.startDate ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                  {certificateErrors.startDate && (
+                    <p className="text-red-500 text-sm mt-1">{certificateErrors.startDate}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    End Date*
+                  </label>
+                  <input
+                    type="date"
+                    value={certificateForm.endDate}
+                    onChange={(e) => handleCertificateInputChange('endDate', e.target.value)}
+                    disabled={certificateForm.doesntExpire}
+                    className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50 ${
+                      certificateForm.doesntExpire ? 'bg-gray-200 cursor-not-allowed' : ''
+                    } ${
+                      certificateErrors.endDate ? 'border-red-500' : 'border-gray-300'
+                    }`}
+                  />
+                  {certificateErrors.endDate && (
+                    <p className="text-red-500 text-sm mt-1">{certificateErrors.endDate}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-3 pt-4">
+                <button
+                  onClick={handleCloseCertificateModal}
+                  className="flex-1 bg-white text-black border border-gray-300 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCertificateSubmit}
+                  className="flex-1 text-white py-3 rounded-lg font-medium transition-colors"
+                  style={{
+                    background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)'
+                  }}
+                >
+                  {editingCertificateId ? 'Update' : 'Submit'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Education Modal */}
       {showEducationModal && (

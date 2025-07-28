@@ -570,22 +570,22 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
 
               {activeTab === 'Education' && (
                 <div className="relative h-full min-h-[400px]">
+                  {/* Floating + Button */}
+                  <button
+                    onClick={handleAddEducation}
+                    className="absolute top-0 right-0 w-14 h-14 rounded-xl text-white font-bold text-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center z-10"
+                    style={{
+                      background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)',
+                      boxShadow: '0 4px 20px rgba(79, 70, 229, 0.3)'
+                    }}
+                  >
+                    +
+                  </button>
+                  
                   {education.length === 0 ? (
                     <>
                       {/* Empty state - no content */}
                       <div className="h-full"></div>
-                      
-                      {/* Floating + Button */}
-                      <button
-                        onClick={handleAddEducation}
-                        className="absolute bottom-6 right-6 w-14 h-14 rounded-xl text-white font-bold text-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center z-10"
-                        style={{
-                          background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)',
-                          boxShadow: '0 4px 20px rgba(79, 70, 229, 0.3)'
-                        }}
-                      >
-                        +
-                      </button>
                     </>
                   ) : (
                     <div className="text-center py-12">

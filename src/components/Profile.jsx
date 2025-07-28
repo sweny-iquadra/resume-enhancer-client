@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
+import Header from './Header';
 
-const Profile = ({ setCurrentPage }) => {
+const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }) => {
   const [activeTab, setActiveTab] = useState('Active Interview');
   const [professionalSummary, setProfessionalSummary] = useState('');
 
@@ -15,22 +16,23 @@ const Profile = ({ setCurrentPage }) => {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#6366f1' }}>
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="p-6">
-        <button
-          onClick={() => setCurrentPage('dashboard')}
-          className="text-white hover:text-gray-200 transition-colors mb-4 flex items-center space-x-2"
-        >
-          <span className="text-lg">←</span>
-          <span className="font-medium">Back to Dashboard</span>
-        </button>
-        
-        <h1 className="text-white text-2xl font-medium">My Profile</h1>
+      <Header 
+        showResumeChat={showResumeChat}
+        setShowResumeChat={setShowResumeChat}
+        currentPage="profile"
+        setCurrentPage={setCurrentPage}
+        onLogout={onLogout}
+      />
+      
+      {/* Page Title */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <h1 className="text-2xl font-semibold text-gray-800">My Profile</h1>
       </div>
 
       {/* Main Content */}
-      <div className="px-6 pb-6">
+      <div className="px-6 py-6">
         <div className="bg-white rounded-lg shadow-sm" style={{ minHeight: '600px' }}>
           <div className="flex">
             {/* Left Sidebar */}

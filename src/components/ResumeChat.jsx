@@ -308,25 +308,25 @@ const ResumeChat = ({
           <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
             <div className="flex space-x-3">
               <button
-                onClick={handleCreateResumeWithFeedback}
-                disabled={!hasAttendedInterview || isButtonLoading}
-                className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${hasAttendedInterview && !isButtonLoading
-                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
-                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                  }`}
-              >
-                {isButtonLoading ? (
-                  <div className="flex items-center justify-center space-x-2">
-                    <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    <span>Creating...</span>
-                  </div>
-                ) : (
-                  <span className="flex items-center justify-center space-x-2">
-                    <span>📄</span>
-                    <span>Create Resume</span>
-                  </span>
-                )}
-              </button>
+                    onClick={handleCreateResumeWithFeedback}
+                    disabled={!hasAttendedInterview || isButtonLoading}
+                    className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${hasAttendedInterview && !isButtonLoading
+                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
+                        : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                      }`}
+                  >
+                    {isButtonLoading ? (
+                      <div className="flex items-center justify-center space-x-2">
+                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                        <span>Enhancing...</span>
+                      </div>
+                    ) : (
+                      <span className="flex items-center justify-center space-x-2">
+                        <span>✨</span>
+                        <span>Enhance Resume</span>
+                      </span>
+                    )}
+                  </button>
 
               {!hasAttendedInterview && (
                 <button

@@ -58,15 +58,19 @@ const ProfileCompletionModal = ({
         // Update state
         setEnhancedResumeData(response.data.enhancedResume);
 
-        // Show success toast
-        setShowSuccessToast(true);
-
-        // IMMEDIATELY close the modal and reset all states - this must happen synchronously
+        // IMMEDIATELY close the modal FIRST - this must happen before any other state updates
         setShowProfileModal(false);
+        
+        // Clean up all internal modal states immediately
         setShowRoleSelection(false);
         setShowSuccessContent(false);
         setIsGenerating(false);
-        setIsLoading(false);
+        
+        // Use setTimeout to ensure modal closes before showing success toast
+        setTimeout(() => {
+          setShowSuccessToast(true);
+          setIsLoading(false);
+        }, 0);
 
         return; // Exit early on success
       } else {

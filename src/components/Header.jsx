@@ -61,7 +61,7 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
             )}
           </div>
           <div className="flex items-center space-x-3">
-            <span className="text-gray-700 font-medium text-sm">Sweny Patel</span>
+            <span className="text-gray-700 font-medium text-sm">John Smith</span>
             <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
               <span className="text-gray-600 text-xs">👤</span>
             </div>

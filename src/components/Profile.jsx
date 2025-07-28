@@ -9,10 +9,10 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
   const tabs = ['Active Interview', 'Education', 'Certificates'];
 
   const profileData = {
-    name: 'Sweny Patel',
-    email: 'sweny09@gmail.com',
-    phone: '3082028481',
-    linkedin: 'SwenyPatel_Angular13FrontendDeveloper_Res'
+    name: 'John Smith',
+    email: 'john.smith@email.com',
+    phone: '+1 (555) 123-4567',
+    linkedin: 'john-smith-developer'
   };
 
   return (
@@ -156,12 +156,12 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                     <div className="bg-gray-50 rounded-lg p-4">
                       <h5 className="text-xs font-medium text-gray-600 mb-2">Self Introduction Transcript</h5>
                       <p className="text-xs text-gray-600 leading-relaxed">
-                        Sure. My name is Vadim Patel, and I'm a first-time developer 
-                        specializing in building the web application using Angular 
-                        framework. In Angular, I have strong experience in building the 
-                        reusable responsive UI components using the TypeScript, 
-                        Bootstrap, Angular material, prime control, and flex layout. I also 
-                        work with the RESTful API integration to talk with the back-end
+                        Sure. My name is John Smith, and I'm a software developer 
+                        specializing in building web applications using modern 
+                        frameworks. I have strong experience in building 
+                        reusable responsive UI components using JavaScript, 
+                        React, TypeScript, and CSS frameworks. I also 
+                        work with RESTful API integration and backend services.
                       </p>
                     </div>
                   </div>

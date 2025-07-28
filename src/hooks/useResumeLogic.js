@@ -22,11 +22,8 @@ export const useResumeLogic = () => {
   const handleCreateResumeClick = () => {
     if (!hasAttendedInterview) {
       setShowInterviewModal(true);
-    } else if (uniqueRoles.length >= 3) {
-      // Show role selection in chat
-      setShowRoleSelection(true);
     } else {
-      // Proceed with single role or check profile completion
+      // Proceed with single role or default role
       const defaultRole = uniqueRoles[0] || userProfile.role;
       setSelectedRole(defaultRole);
       

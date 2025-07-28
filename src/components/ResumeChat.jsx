@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const ResumeChat = ({ 
@@ -42,7 +41,7 @@ const ResumeChat = ({
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-gray-100 p-6">
           <div className="space-y-6">
             {/* Welcome Message */}
-            {!showRoleSelection && !isLoading && !enhancedResumeData && (
+            {!isLoading && !enhancedResumeData && (
               <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 border border-purple-100">
                 <h3 className="font-semibold text-purple-600 mb-3">
                   Welcome to iQua.AI Resume enhancer
@@ -177,7 +176,7 @@ const ResumeChat = ({
             )}
 
             {/* Action Buttons Container - Only show if not in special states */}
-            {!showRoleSelection && !isLoading && !enhancedResumeData && (
+            {!isLoading && !enhancedResumeData && (
               <div className="flex gap-4 items-center justify-center">
                 {/* Create Resume Button */}
                 <button 

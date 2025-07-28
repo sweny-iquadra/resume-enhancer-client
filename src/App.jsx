@@ -26,6 +26,7 @@ function App() {
     handleCreateResumeClick,
     navigateToInterview,
     selectedRole,
+    setSelectedRole,
     showRoleSelection,
     handleRoleSelection,
     uniqueRoles,
@@ -83,6 +84,8 @@ function App() {
           enhancedResumeData={enhancedResumeData}
           setShowPreview={setShowPreview}
           setCurrentPage={setCurrentPage}
+          setEnhancedResumeData={setEnhancedResumeData}
+          setSelectedRole={setSelectedRole}
         />
 
         {/* Resume Preview Modal */}

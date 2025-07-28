@@ -11,7 +11,9 @@ const ResumeChat = ({
   isLoading,
   enhancedResumeData,
   setShowPreview,
-  setCurrentPage
+  setCurrentPage,
+  setEnhancedResumeData,
+  setSelectedRole
 }) => {
   if (!showResumeChat) return null;
 
@@ -180,12 +182,28 @@ const ResumeChat = ({
                   <h3 className="font-semibold text-green-600 mb-3">
                     🎉 Your resume is ready!
                   </h3>
-                  <button
-                    onClick={() => setShowPreview(true)}
-                    className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-700 hover:to-purple-800 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
-                  >
-                    Preview & Compare
-                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowPreview(true)}
+                      className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-700 hover:to-purple-800 transition-all shadow-md hover:shadow-lg transform hover:scale-105 flex-1"
+                    >
+                      Preview & Compare
+                    </button>
+                    <button
+                      onClick={() => {
+                        // Reset all states to go back to initial view
+                        setEnhancedResumeData(null);
+                        setShowRoleSelection(false);
+                        setSelectedRole(null);
+                        // Clear localStorage
+                        localStorage.removeItem('enhancedResumeData');
+                      }}
+                      className="bg-gray-500 text-white px-4 py-3 rounded-lg font-medium hover:bg-gray-600 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
+                      title="Start a new resume"
+                    >
+                      🔄
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

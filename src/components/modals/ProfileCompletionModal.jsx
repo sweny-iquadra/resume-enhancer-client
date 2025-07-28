@@ -34,15 +34,7 @@ const ProfileCompletionModal = ({
     }
   };
 
-  const handleRoleSelection = (role) => {
-    // Format role to industry-standard format (lowercase, hyphenated)
-    const formattedRole = role.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    setCurrentSelectedRole(formattedRole);
-    setShowRoleSelection(false);
-    
-    // Proceed with resume generation using the original role for display
-    proceedWithGeneration(role);
-  };
+  
 
   const proceedWithGeneration = async (roleToUse) => {
     setShowProfileModal(false);

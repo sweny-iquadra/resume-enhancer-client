@@ -219,6 +219,72 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     });
   };
 
+  // Function to get all possible keys for a resume
+  const getAllKeysForResume = (resumeData, prefix) => {
+    const keys = [];
+    
+    // Basic details
+    Object.keys(resumeData.basicDetails).forEach(key => {
+      keys.push(`${prefix}.basicDetails.${key}`);
+    });
+    
+    // Professional summary
+    keys.push(`${prefix}.professionalSummary`);
+    
+    // Skills
+    resumeData.skills.forEach((_, index) => {
+      keys.push(`${prefix}.skills.${index}`);
+    });
+    
+    // Work experience
+    resumeData.workExperience.forEach((exp, index) => {
+      keys.push(`${prefix}.workExperience.${index}.position`);
+      keys.push(`${prefix}.workExperience.${index}.company`);
+      keys.push(`${prefix}.workExperience.${index}.duration`);
+      exp.responsibilities.forEach((_, respIndex) => {
+        keys.push(`${prefix}.workExperience.${index}.responsibilities.${respIndex}`);
+      });
+    });
+    
+    // Projects
+    resumeData.projects.forEach((project, index) => {
+      keys.push(`${prefix}.projects.${index}.name`);
+      keys.push(`${prefix}.projects.${index}.description`);
+      project.technologies.forEach((_, techIndex) => {
+        keys.push(`${prefix}.projects.${index}.technologies.${techIndex}`);
+      });
+    });
+    
+    return keys;
+  };
+
+  // Function to select all from one resume and deselect all from the other
+  const handleSelectAll = (resumeType) => {
+    setSelections(prev => {
+      const newSelections = { ...prev };
+      const otherResumeType = resumeType === 'original' ? 'enhanced' : 'original';
+      
+      // Get all keys for both resumes
+      const selectedResumeData = resumeType === 'original' ? originalResume : enhancedResumeData;
+      const otherResumeData = resumeType === 'original' ? enhancedResumeData : originalResume;
+      
+      const selectedKeys = getAllKeysForResume(selectedResumeData, resumeType);
+      const otherKeys = getAllKeysForResume(otherResumeData, otherResumeType);
+      
+      // Select all from chosen resume
+      selectedKeys.forEach(key => {
+        newSelections[key] = true;
+      });
+      
+      // Deselect all from other resume
+      otherKeys.forEach(key => {
+        newSelections[key] = false;
+      });
+      
+      return newSelections;
+    });
+  };
+
   const downloadResume = (format) => {
     if (!finalResume) return;
 
@@ -1036,7 +1102,14 @@ Powered by iQua.ai
             <div className="overflow-y-auto p-4 border-r border-gray-200">
               <div className="text-center mb-4">
                 <h4 className="text-lg font-semibold text-gray-800 mb-2">Original Resume</h4>
-                <p className="text-sm text-gray-600">Check lines to include in your final resume</p>
+                <p className="text-sm text-gray-600 mb-3">Check lines to include in your final resume</p>
+                <button
+                  onClick={() => handleSelectAll('original')}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg flex items-center space-x-2 mx-auto"
+                >
+                  <span>✓</span>
+                  <span>Select All Original</span>
+                </button>
               </div>
               <InteractiveWordDocument 
                 resumeData={originalResume} 
@@ -1050,7 +1123,14 @@ Powered by iQua.ai
             <div className="overflow-y-auto p-4 border-r border-gray-200">
               <div className="text-center mb-4">
                 <h4 className="text-lg font-semibold text-gray-800 mb-2">AI Enhanced Resume</h4>
-                <p className="text-sm text-gray-600">Check lines to include in your final resume</p>
+                <p className="text-sm text-gray-600 mb-3">Check lines to include in your final resume</p>
+                <button
+                  onClick={() => handleSelectAll('enhanced')}
+                  className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg flex items-center space-x-2 mx-auto"
+                >
+                  <span>✓</span>
+                  <span>Select All Enhanced</span>
+                </button>
               </div>
               <InteractiveWordDocument 
                 resumeData={enhancedResumeData} 
@@ -1081,7 +1161,7 @@ Powered by iQua.ai
         <div className="border-t border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              Check individual lines to customize your resume with granular control
+              Check individual lines or use "Select All" buttons to customize your resume with granular control
             </div>
             <div className="flex space-x-3">
               <button

@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const Dashboard = () => {
@@ -32,6 +31,11 @@ const Dashboard = () => {
       borderColor: 'border-blue-200'
     }
   ];
+
+  const handleFeatureClick = (id) => {
+    // Handle click events for each feature
+    console.log(`Clicked feature with ID: ${id}`);
+  };
 
   return (
     <main className="flex items-center justify-center min-h-[calc(100vh-80px)] px-6 py-12">
@@ -92,6 +96,7 @@ const Dashboard = () => {
             {features.map((feature) => (
               <div
                 key={feature.id}
+                onClick={() => handleFeatureClick(feature.id)}
                 className={`${feature.bgColor} ${feature.borderColor} border-2 p-8 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group hover:-translate-y-1`}
               >
                 <div className="flex flex-col items-center text-center space-y-4">

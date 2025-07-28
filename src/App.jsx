@@ -7,6 +7,7 @@ import InterviewPage from './components/InterviewPage';
 import ResumeChat from './components/ResumeChat';
 import ResumePreview from './components/ResumePreview';
 import Login from './components/Login';
+import Profile from './components/Profile';
 import ProfileCompletionModal from './components/modals/ProfileCompletionModal';
 import InterviewRequirementModal from './components/modals/InterviewRequirementModal';
 import LoadingModal from './components/modals/LoadingModal';
@@ -84,7 +85,7 @@ function App() {
                 setCurrentPage={setCurrentPage}
                 onLogout={handleLogout}
               />
-              <Dashboard />
+              <Dashboard setCurrentPage={setCurrentPage} />
             </>
           )}
 
@@ -101,6 +102,12 @@ function App() {
                 setCurrentPage={setCurrentPage}
               />
             </>
+          )}
+
+          {currentPage === 'profile' && (
+            <Profile 
+              setCurrentPage={setCurrentPage}
+            />
           )}
         </div>
 

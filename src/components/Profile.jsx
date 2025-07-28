@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Header from './Header';
 import SuccessToast from './modals/SuccessToast';
 import ErrorToast from './modals/ErrorToast';
+import DeleteConfirmationModal from './modals/DeleteConfirmationModal';
 
 const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }) => {
   const [activeTab, setActiveTab] = useState('Active Interview');
@@ -33,6 +34,8 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [successTitle, setSuccessTitle] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteEducationId, setDeleteEducationId] = useState(null);
 
   // Available skills for dropdown
   const availableSkills = [
@@ -146,9 +149,34 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
   };
 
   const handleDeleteEducation = (id) => {
-    if (window.confirm('Are you sure you want to delete this education entry?')) {
-      setEducation(prev => prev.filter(edu => edu.id !== id));
+    setDeleteEducationId(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteEducation = () => {
+    try {
+      // Remove the record from the UI
+      setEducation(prev => prev.filter(edu => edu.id !== deleteEducationId));
+      
+      // Close the confirmation popup
+      setShowDeleteModal(false);
+      setDeleteEducationId(null);
+      
+      // Show success message
+      setSuccessTitle('Education Deleted!');
+      setSuccessMessage('Education record has been deleted successfully.');
+      setShowSuccessToast(true);
+    } catch (error) {
+      setErrorMessage('Failed to delete education record. Please try again.');
+      setShowErrorToast(true);
+      setShowDeleteModal(false);
+      setDeleteEducationId(null);
     }
+  };
+
+  const cancelDeleteEducation = () => {
+    setShowDeleteModal(false);
+    setDeleteEducationId(null);
   };
 
   const handleEducationInputChange = (field, value) => {
@@ -889,6 +917,13 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
         showErrorToast={showErrorToast} 
         setShowErrorToast={setShowErrorToast} 
         errorMessage={errorMessage}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onConfirm={confirmDeleteEducation}
+        onCancel={cancelDeleteEducation}
       />
     </div>
   );

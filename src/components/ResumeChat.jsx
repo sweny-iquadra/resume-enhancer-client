@@ -281,9 +281,12 @@ const ResumeChat = ({
                   <div className="flex space-x-3">
                     <button
                       onClick={handleEditProfile}
-                      className="flex-1 bg-gray-100 text-gray-700 py-2.5 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                      className="flex-1 bg-white text-gray-700 py-3 px-4 rounded-xl font-semibold border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-[1.02]"
                     >
-                      Edit Profile
+                      <span className="flex items-center justify-center space-x-2">
+                        <span>📝</span>
+                        <span>Edit Info</span>
+                      </span>
                     </button>
                     <button
                       onClick={() => {
@@ -292,9 +295,12 @@ const ResumeChat = ({
                         setSelectedRole(null);
                         localStorage.removeItem('enhancedResumeData');
                       }}
-                      className="flex-1 bg-gray-100 text-gray-700 py-2.5 px-4 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+                      className="flex-1 bg-white text-gray-700 py-3 px-4 rounded-xl font-semibold border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-[1.02]"
                     >
-                      Create New
+                      <span className="flex items-center justify-center space-x-2">
+                        <span>✨</span>
+                        <span>Enhance Again</span>
+                      </span>
                     </button>
                   </div>
                 </div>

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { createUserProfile, checkProfileCompletion, getCompletedInterviewsCount, getUniqueJobRoles, enhanceResumeAPI } from '../utils/userProfile';
 
@@ -26,6 +27,7 @@ export const useResumeLogic = () => {
       const defaultRole = uniqueRoles[0] || userProfile.role;
       setSelectedRole(defaultRole);
 
+      // Check if profile is complete first
       if (!checkProfileCompletion(userProfile)) {
         setShowProfileModal(true);
       } else {

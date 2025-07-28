@@ -29,8 +29,9 @@ const ProfileCompletionModal = ({
     if (uniqueRoles.length >= 3) {
       setShowRoleSelection(true);
     } else {
-      // Proceed with normal generation
-      proceedWithGeneration(currentSelectedRole);
+      // Proceed with normal generation using the first available role or current selected role
+      const roleToUse = currentSelectedRole || uniqueRoles[0] || userProfile.role;
+      proceedWithGeneration(roleToUse);
     }
   };
 

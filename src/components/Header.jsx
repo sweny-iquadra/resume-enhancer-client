@@ -7,13 +7,11 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
         <div className="flex justify-between items-center">
           {/* Logo */}
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-sm font-bold">iQ</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-lg font-semibold text-gray-800">iQua.ai Interview</span>
-              <span className="text-xs text-gray-500 -mt-1">AI that gets you</span>
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="iQua.ai Interview" 
+              className="h-10 w-auto"
+            />
           </div>
 
           {/* Back to Dashboard Button */}
@@ -34,13 +32,11 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
       <div className="flex justify-between items-center">
         {/* Logo */}
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-sm font-bold">iQ</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-lg font-semibold text-gray-800">iQua.ai</span>
-            <span className="text-xs text-gray-500 -mt-1">AI that gets you</span>
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="iQua.ai" 
+            className="h-10 w-auto"
+          />
         </div>
 
         {/* Resume Enhancer Icon & User Profile */}

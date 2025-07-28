@@ -183,21 +183,8 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const downloadResume = (format) => {
     if (!finalResume) return;
 
-    // Use edited content from the Final Resume Preview if available, otherwise generate from finalResume
-    let resumeContent = '';
-    
-    // Check if there's edited content in the Final Resume Preview
-    const finalResumeElement = document.querySelector('.final-resume-content');
-    if (finalResumeElement) {
-      const preElement = finalResumeElement.querySelector('pre');
-      if (preElement) {
-        resumeContent = preElement.textContent || preElement.innerText;
-      }
-    }
-    
-    // Fallback to generating content from finalResume object
-    if (!resumeContent.trim()) {
-      resumeContent = `
+    // Generate content from finalResume object with proper formatting
+    const resumeContent = `
 ${finalResume.basicDetails.name || ''}
 ${finalResume.basicDetails.email || ''} | ${finalResume.basicDetails.phone || ''}
 ${finalResume.basicDetails.location || ''}
@@ -210,20 +197,20 @@ ${finalResume.skills.join(' • ')}
 
 WORK EXPERIENCE
 ${finalResume.workExperience.map(exp => `
-${exp.position || ''} | ${exp.company || ''} | ${exp.duration || ''}
+${exp.position || ''}
+${exp.company || ''} | ${exp.duration || ''}
 ${exp.responsibilities?.map(resp => `• ${resp}`).join('\n') || ''}
 `).join('\n')}
 
 PROJECTS
-${finalResume.projects.map(project => `
+${finalResume.projects?.map(project => `
 ${project.name || ''}
 ${project.description || ''}
 Technologies: ${project.technologies?.join(', ') || ''}
-`).join('\n')}
+`).join('\n') || ''}
 
 Powered by iQua.ai
-      `;
-    }
+    `.trim();
 
     // Create and download file
     const blob = new Blob([resumeContent], { type: 'text/plain' });
@@ -501,76 +488,186 @@ Powered by iQua.ai
   // Final Resume Preview Component
   const FinalResumePreview = ({ resumeData }) => {
     const [isEditing, setIsEditing] = useState(false);
-    const [editableContent, setEditableContent] = useState('');
+    const [editedResumeData, setEditedResumeData] = useState(null);
 
-    // Generate editable text content from resume data
+    // Initialize edited resume data with the final resume data
     useEffect(() => {
-      if (!resumeData) return;
-
-      const generateEditableContent = () => {
-        let content = '';
-
-        // Header
-        if (resumeData.basicDetails.name || resumeData.basicDetails.email || resumeData.basicDetails.phone || resumeData.basicDetails.location) {
-          if (resumeData.basicDetails.name) content += `${resumeData.basicDetails.name}\n`;
-          
-          const contactInfo = [
-            resumeData.basicDetails.email,
-            resumeData.basicDetails.phone,
-            resumeData.basicDetails.location
-          ].filter(Boolean).join(' | ');
-          
-          if (contactInfo) content += `${contactInfo}\n\n`;
-        }
-
-        // Professional Summary
-        if (resumeData.professionalSummary) {
-          content += `PROFESSIONAL SUMMARY\n`;
-          content += `${resumeData.professionalSummary}\n\n`;
-        }
-
-        // Technical Skills
-        if (resumeData.skills.length > 0) {
-          content += `TECHNICAL SKILLS\n`;
-          content += `${resumeData.skills.join(' • ')}\n\n`;
-        }
-
-        // Work Experience
-        if (resumeData.workExperience.length > 0) {
-          content += `WORK EXPERIENCE\n`;
-          resumeData.workExperience.forEach(job => {
-            content += `${job.position || ''}\n`;
-            content += `${job.company || ''} | ${job.duration || ''}\n`;
-            if (job.responsibilities) {
-              job.responsibilities.forEach(resp => {
-                content += `• ${resp}\n`;
-              });
-            }
-            content += '\n';
-          });
-        }
-
-        // Projects
-        if (resumeData.projects.length > 0) {
-          content += `PROJECTS\n`;
-          resumeData.projects.forEach(project => {
-            content += `${project.name || ''}\n`;
-            content += `${project.description || ''}\n`;
-            if (project.technologies) {
-              content += `Technologies: ${project.technologies.join(', ')}\n`;
-            }
-            content += '\n';
-          });
-        }
-
-        content += `Powered by iQua.ai`;
-        return content;
-      };
-
-      setEditableContent(generateEditableContent());
+      if (resumeData) {
+        setEditedResumeData({ ...resumeData });
+      }
     }, [resumeData]);
 
     if (!resumeData) return null;
+
+    const displayData = editedResumeData || resumeData;
+
+    const handleFieldEdit = (section, field, value, index = null, subIndex = null) => {
+      setEditedResumeData(prev => {
+        const updated = { ...prev };
+        
+        if (section === 'basicDetails') {
+          updated.basicDetails = { ...updated.basicDetails, [field]: value };
+        } else if (section === 'professionalSummary') {
+          updated.professionalSummary = value;
+        } else if (section === 'skills') {
+          const newSkills = [...updated.skills];
+          if (index !== null) {
+            newSkills[index] = value;
+          }
+          updated.skills = newSkills;
+        } else if (section === 'workExperience') {
+          const newWorkExp = [...updated.workExperience];
+          if (field === 'responsibilities' && subIndex !== null) {
+            newWorkExp[index].responsibilities[subIndex] = value;
+          } else {
+            newWorkExp[index][field] = value;
+          }
+          updated.workExperience = newWorkExp;
+        } else if (section === 'projects') {
+          const newProjects = [...updated.projects];
+          if (field === 'technologies' && subIndex !== null) {
+            newProjects[index].technologies[subIndex] = value;
+          } else {
+            newProjects[index][field] = value;
+          }
+          updated.projects = newProjects;
+        }
+        
+        return updated;
+      });
+    };
+
+    const addNewItem = (section, type) => {
+      setEditedResumeData(prev => {
+        const updated = { ...prev };
+        
+        if (section === 'skills') {
+          updated.skills = [...updated.skills, 'New Skill'];
+        } else if (section === 'workExperience') {
+          updated.workExperience = [...updated.workExperience, {
+            position: 'New Position',
+            company: 'New Company',
+            duration: 'Duration',
+            responsibilities: ['New responsibility']
+          }];
+        } else if (section === 'projects') {
+          updated.projects = [...updated.projects, {
+            name: 'New Project',
+            description: 'Project description',
+            technologies: ['Technology']
+          }];
+        } else if (section === 'responsibilities') {
+          const newWorkExp = [...updated.workExperience];
+          newWorkExp[type].responsibilities.push('New responsibility');
+          updated.workExperience = newWorkExp;
+        } else if (section === 'technologies') {
+          const newProjects = [...updated.projects];
+          newProjects[type].technologies.push('New Technology');
+          updated.projects = newProjects;
+        }
+        
+        return updated;
+      });
+    };
+
+    const removeItem = (section, index, subIndex = null) => {
+      setEditedResumeData(prev => {
+        const updated = { ...prev };
+        
+        if (section === 'skills') {
+          updated.skills = updated.skills.filter((_, i) => i !== index);
+        } else if (section === 'workExperience') {
+          updated.workExperience = updated.workExperience.filter((_, i) => i !== index);
+        } else if (section === 'projects') {
+          updated.projects = updated.projects.filter((_, i) => i !== index);
+        } else if (section === 'responsibilities') {
+          const newWorkExp = [...updated.workExperience];
+          newWorkExp[index].responsibilities = newWorkExp[index].responsibilities.filter((_, i) => i !== subIndex);
+          updated.workExperience = newWorkExp;
+        } else if (section === 'technologies') {
+          const newProjects = [...updated.projects];
+          newProjects[index].technologies = newProjects[index].technologies.filter((_, i) => i !== subIndex);
+          updated.projects = newProjects;
+        }
+        
+        return updated;
+      });
+    };
+
+    const EditableField = ({ value, onSave, multiline = false, placeholder = "", className = "" }) => {
+      const [isFieldEditing, setIsFieldEditing] = useState(false);
+      const [fieldValue, setFieldValue] = useState(value);
+
+      const handleSave = () => {
+        onSave(fieldValue);
+        setIsFieldEditing(false);
+      };
+
+      const handleCancel = () => {
+        setFieldValue(value);
+        setIsFieldEditing(false);
+      };
+
+      if (isFieldEditing) {
+        return (
+          <div className="relative group">
+            {multiline ? (
+              <textarea
+                value={fieldValue}
+                onChange={(e) => setFieldValue(e.target.value)}
+                className={`w-full border border-blue-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${className}`}
+                style={{
+                  fontFamily: 'Times New Roman, serif',
+                  fontSize: '12pt',
+                  lineHeight: '1.15'
+                }}
+                placeholder={placeholder}
+                rows={3}
+                autoFocus
+              />
+            ) : (
+              <input
+                type="text"
+                value={fieldValue}
+                onChange={(e) => setFieldValue(e.target.value)}
+                className={`w-full border border-blue-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
+                style={{
+                  fontFamily: 'Times New Roman, serif',
+                  fontSize: '12pt',
+                  lineHeight: '1.15'
+                }}
+                placeholder={placeholder}
+                autoFocus
+              />
+            )}
+            <div className="flex gap-1 mt-1">
+              <button
+                onClick={handleSave}
+                className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
+              >
+                ✓
+              </button>
+              <button
+                onClick={handleCancel}
+                className="px-2 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div
+          onClick={() => isEditing && setIsFieldEditing(true)}
+          className={`${isEditing ? 'cursor-pointer hover:bg-blue-50 border border-transparent hover:border-blue-200 rounded px-1' : ''} ${className}`}
+          title={isEditing ? "Click to edit" : ""}
+        >
+          {value || (isEditing ? <span className="text-gray-400 italic">{placeholder}</span> : "")}
+        </div>
+      );
+    };
 
     return (
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
@@ -591,109 +688,283 @@ Powered by iQua.ai
                   : 'bg-blue-500 text-white hover:bg-blue-600'
               }`}
             >
-              {isEditing ? '💾 Save' : '✏️ Edit'}
+              {isEditing ? '💾 Done Editing' : '✏️ Edit'}
             </button>
             <span className="text-xs text-gray-500">📄</span>
             <span className="text-xs text-gray-500">100%</span>
           </div>
         </div>
 
-        {/* Document Content */}
-        <div className="min-h-[600px]" style={{ background: 'white' }}>
-          {isEditing ? (
-            /* Edit Mode - Textarea */
-            <div className="p-4">
-              <div className="mb-3">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">✏️ Edit Your Resume Content</span>
-                  <span className="text-xs text-gray-500">Plain text editing mode</span>
-                </div>
-                <p className="text-xs text-gray-600 mb-3">
-                  Make any changes to your resume content below. Click Save to apply changes and return to preview mode.
-                </p>
-              </div>
-              <textarea
-                value={editableContent}
-                onChange={(e) => setEditableContent(e.target.value)}
-                className="w-full h-[550px] p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                style={{
-                  fontFamily: 'Times New Roman, serif',
-                  fontSize: '12px',
-                  lineHeight: '1.4'
-                }}
-                placeholder="Start typing your resume content..."
+        {/* Document Content - Following Original Resume Layout */}
+        <div className="p-8 min-h-[600px] space-y-4 final-resume-content" style={{
+          fontFamily: 'Times New Roman, serif',
+          fontSize: '12pt',
+          lineHeight: '1.15',
+          background: 'white'
+        }}>
+          {/* Header Section - Same as Original */}
+          <div className="text-center mb-6 pb-3 border-b-2 border-gray-300 space-y-2">
+            <EditableField
+              value={displayData.basicDetails.name}
+              onSave={(value) => handleFieldEdit('basicDetails', 'name', value)}
+              placeholder="Your Name"
+              className="text-2xl font-bold text-gray-900 text-center"
+            />
+            <div className="text-sm text-gray-700 space-y-1">
+              <EditableField
+                value={displayData.basicDetails.email}
+                onSave={(value) => handleFieldEdit('basicDetails', 'email', value)}
+                placeholder="email@example.com"
+                className="block"
               />
-              <div className="mt-3 flex justify-between items-center">
-                <span className="text-xs text-gray-500">
-                  💡 Tip: Use clear headings and bullet points for better formatting
-                </span>
-                <div className="flex gap-2">
+              <EditableField
+                value={displayData.basicDetails.phone}
+                onSave={(value) => handleFieldEdit('basicDetails', 'phone', value)}
+                placeholder="Phone Number"
+                className="block"
+              />
+              <EditableField
+                value={displayData.basicDetails.location}
+                onSave={(value) => handleFieldEdit('basicDetails', 'location', value)}
+                placeholder="Location"
+                className="block"
+              />
+            </div>
+          </div>
+
+          {/* Professional Summary - Same as Original */}
+          <div className="mb-6 space-y-2">
+            <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
+              fontFamily: 'Times New Roman, serif',
+              fontSize: '14pt',
+              fontWeight: 'bold',
+              borderBottom: '1px solid #333',
+              paddingBottom: '2px'
+            }}>
+              PROFESSIONAL SUMMARY
+            </h2>
+            <EditableField
+              value={displayData.professionalSummary}
+              onSave={(value) => handleFieldEdit('professionalSummary', '', value)}
+              multiline={true}
+              placeholder="Write your professional summary here..."
+              className="text-gray-800 text-justify"
+            />
+          </div>
+
+          {/* Technical Skills - Same as Original */}
+          <div className="mb-6 space-y-2">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
+                fontFamily: 'Times New Roman, serif',
+                fontSize: '14pt',
+                fontWeight: 'bold',
+                borderBottom: '1px solid #333',
+                paddingBottom: '2px'
+              }}>
+                TECHNICAL SKILLS
+              </h2>
+              {isEditing && (
+                <button
+                  onClick={() => addNewItem('skills')}
+                  className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
+                >
+                  + Add Skill
+                </button>
+              )}
+            </div>
+            <div className="space-y-1">
+              {displayData.skills.map((skill, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <EditableField
+                    value={skill}
+                    onSave={(value) => handleFieldEdit('skills', '', value, index)}
+                    placeholder="Skill name"
+                    className="inline-block bg-gray-100 px-2 py-1 rounded text-sm"
+                  />
+                  {isEditing && (
+                    <button
+                      onClick={() => removeItem('skills', index)}
+                      className="px-1 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Work Experience - Same as Original */}
+          <div className="mb-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
+                fontFamily: 'Times New Roman, serif',
+                fontSize: '14pt',
+                fontWeight: 'bold',
+                borderBottom: '1px solid #333',
+                paddingBottom: '2px'
+              }}>
+                WORK EXPERIENCE
+              </h2>
+              {isEditing && (
+                <button
+                  onClick={() => addNewItem('workExperience')}
+                  className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
+                >
+                  + Add Experience
+                </button>
+              )}
+            </div>
+            {displayData.workExperience.map((exp, index) => (
+              <div key={index} className="space-y-2 border-l-2 border-gray-200 pl-4 relative">
+                {isEditing && (
                   <button
-                    onClick={() => {
-                      // Reset to original generated content
-                      const generateOriginalContent = () => {
-                        let content = '';
-                        if (resumeData.basicDetails.name) content += `${resumeData.basicDetails.name}\n`;
-                        const contactInfo = [
-                          resumeData.basicDetails.email,
-                          resumeData.basicDetails.phone,
-                          resumeData.basicDetails.location
-                        ].filter(Boolean).join(' | ');
-                        if (contactInfo) content += `${contactInfo}\n\n`;
-                        if (resumeData.professionalSummary) {
-                          content += `PROFESSIONAL SUMMARY\n${resumeData.professionalSummary}\n\n`;
-                        }
-                        if (resumeData.skills.length > 0) {
-                          content += `TECHNICAL SKILLS\n${resumeData.skills.join(' • ')}\n\n`;
-                        }
-                        if (resumeData.workExperience.length > 0) {
-                          content += `WORK EXPERIENCE\n`;
-                          resumeData.workExperience.forEach(job => {
-                            content += `${job.position || ''}\n${job.company || ''} | ${job.duration || ''}\n`;
-                            if (job.responsibilities) {
-                              job.responsibilities.forEach(resp => content += `• ${resp}\n`);
-                            }
-                            content += '\n';
-                          });
-                        }
-                        if (resumeData.projects.length > 0) {
-                          content += `PROJECTS\n`;
-                          resumeData.projects.forEach(project => {
-                            content += `${project.name || ''}\n${project.description || ''}\n`;
-                            if (project.technologies) {
-                              content += `Technologies: ${project.technologies.join(', ')}\n`;
-                            }
-                            content += '\n';
-                          });
-                        }
-                        content += `Powered by iQua.ai`;
-                        return content;
-                      };
-                      setEditableContent(generateOriginalContent());
-                    }}
-                    className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 transition-colors"
+                    onClick={() => removeItem('workExperience', index)}
+                    className="absolute -left-8 top-0 px-1 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
                   >
-                    🔄 Reset
+                    ✕
                   </button>
+                )}
+                <EditableField
+                  value={exp.position}
+                  onSave={(value) => handleFieldEdit('workExperience', 'position', value, index)}
+                  placeholder="Job Position"
+                  className="font-bold text-gray-900 text-lg"
+                />
+                <EditableField
+                  value={exp.company}
+                  onSave={(value) => handleFieldEdit('workExperience', 'company', value, index)}
+                  placeholder="Company Name"
+                  className="text-gray-800 italic"
+                />
+                <EditableField
+                  value={exp.duration}
+                  onSave={(value) => handleFieldEdit('workExperience', 'duration', value, index)}
+                  placeholder="Duration"
+                  className="text-gray-700"
+                />
+                <div className="ml-4 space-y-1">
+                  {exp.responsibilities?.map((resp, respIndex) => (
+                    <div key={respIndex} className="flex items-start gap-2">
+                      <span className="text-gray-800">•</span>
+                      <EditableField
+                        value={resp}
+                        onSave={(value) => handleFieldEdit('workExperience', 'responsibilities', value, index, respIndex)}
+                        placeholder="Responsibility description"
+                        className="text-gray-800 flex-1"
+                      />
+                      {isEditing && (
+                        <button
+                          onClick={() => removeItem('responsibilities', index, respIndex)}
+                          className="px-1 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  {isEditing && (
+                    <button
+                      onClick={() => addNewItem('responsibilities', index)}
+                      className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 ml-4"
+                    >
+                      + Add Responsibility
+                    </button>
+                  )}
                 </div>
               </div>
-            </div>
-          ) : (
-            /* Preview Mode - Formatted Display */
-            <div className="p-8 final-resume-content" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '12pt',
-              lineHeight: '1.15'
-            }}>
-              <pre className="whitespace-pre-wrap text-gray-800" style={{
+            ))}
+          </div>
+
+          {/* Projects - Same as Original */}
+          <div className="mb-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
                 fontFamily: 'Times New Roman, serif',
-                fontSize: '12pt',
-                lineHeight: '1.4'
+                fontSize: '14pt',
+                fontWeight: 'bold',
+                borderBottom: '1px solid #333',
+                paddingBottom: '2px'
               }}>
-                {editableContent}
-              </pre>
+                PROJECTS
+              </h2>
+              {isEditing && (
+                <button
+                  onClick={() => addNewItem('projects')}
+                  className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
+                >
+                  + Add Project
+                </button>
+              )}
             </div>
-          )}
+            {displayData.projects?.map((project, index) => (
+              <div key={index} className="space-y-2 border-l-2 border-gray-200 pl-4 relative">
+                {isEditing && (
+                  <button
+                    onClick={() => removeItem('projects', index)}
+                    className="absolute -left-8 top-0 px-1 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
+                  >
+                    ✕
+                  </button>
+                )}
+                <EditableField
+                  value={project.name}
+                  onSave={(value) => handleFieldEdit('projects', 'name', value, index)}
+                  placeholder="Project Name"
+                  className="font-bold text-gray-900 text-lg"
+                />
+                <EditableField
+                  value={project.description}
+                  onSave={(value) => handleFieldEdit('projects', 'description', value, index)}
+                  multiline={true}
+                  placeholder="Project description"
+                  className="text-gray-800"
+                />
+                <div className="space-y-1">
+                  <span className="font-medium text-gray-700">Technologies: </span>
+                  <div className="flex flex-wrap gap-2">
+                    {project.technologies?.map((tech, techIndex) => (
+                      <div key={techIndex} className="flex items-center gap-1">
+                        <EditableField
+                          value={tech}
+                          onSave={(value) => handleFieldEdit('projects', 'technologies', value, index, techIndex)}
+                          placeholder="Technology"
+                          className="inline-block bg-blue-100 px-2 py-1 rounded text-sm"
+                        />
+                        {isEditing && (
+                          <button
+                            onClick={() => removeItem('technologies', index, techIndex)}
+                            className="px-1 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    {isEditing && (
+                      <button
+                        onClick={() => addNewItem('technologies', index)}
+                        className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
+                      >
+                        + Add Tech
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Footer - Same as Original */}
+          <div className="mt-8 pt-4 border-t border-gray-200 text-right">
+            <p className="text-xs text-gray-400" style={{
+              fontFamily: 'Times New Roman, serif',
+              fontSize: '9pt'
+            }}>
+              Powered by iQua.ai
+            </p>
+          </div>
         </div>
       </div>
     );

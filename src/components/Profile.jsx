@@ -13,6 +13,8 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
   const [selectedSkill, setSelectedSkill] = useState('');
   const [skillError, setSkillError] = useState(false);
   const [tempSkills, setTempSkills] = useState([]);
+  const [education, setEducation] = useState([]);
+  const [showEducationModal, setShowEducationModal] = useState(false);
 
   // Available skills for dropdown
   const availableSkills = [
@@ -77,6 +79,14 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
   const handleCancelSkillsEdit = () => {
     setTempSkills([]);
     setIsEditingSkills(false);
+  };
+
+  const handleAddEducation = () => {
+    setShowEducationModal(true);
+  };
+
+  const handleCloseEducationModal = () => {
+    setShowEducationModal(false);
   };
 
   return (
@@ -457,8 +467,28 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
               )}
 
               {activeTab === 'Education' && (
-                <div className="text-center py-12">
-                  <p className="text-gray-500">Education information will be displayed here</p>
+                <div className="relative h-full min-h-[400px]">
+                  {education.length === 0 ? (
+                    <>
+                      {/* Empty state - no content */}
+                      <div className="h-full"></div>
+                      
+                      {/* Floating + Button */}
+                      <button
+                        onClick={handleAddEducation}
+                        className="fixed bottom-8 right-8 w-12 h-12 rounded-full text-white font-bold text-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 flex items-center justify-center"
+                        style={{
+                          background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)'
+                        }}
+                      >
+                        +
+                      </button>
+                    </>
+                  ) : (
+                    <div className="text-center py-12">
+                      <p className="text-gray-500">Education records will be displayed here</p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -471,6 +501,30 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
           </div>
         </div>
       </div>
+
+      {/* Education Modal */}
+      {showEducationModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-md">
+            <h3 className="text-lg font-medium mb-4">Add Education</h3>
+            <p className="text-gray-600 mb-4">Education form will be implemented here</p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={handleCloseEducationModal}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCloseEducationModal}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

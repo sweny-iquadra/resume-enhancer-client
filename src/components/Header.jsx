@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage }) => {
+const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage, onLogout }) => {
   if (currentPage === 'interview') {
     return (
       <header className="bg-white border-b border-gray-200 px-6 py-4">

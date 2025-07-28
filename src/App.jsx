@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import InterviewPage from './components/InterviewPage';
 import ResumeChat from './components/ResumeChat';
 import ResumePreview from './components/ResumePreview';
+import Login from './components/Login';
 import ProfileCompletionModal from './components/modals/ProfileCompletionModal';
 import InterviewRequirementModal from './components/modals/InterviewRequirementModal';
 import LoadingModal from './components/modals/LoadingModal';
@@ -13,6 +14,7 @@ import SuccessToast from './components/modals/SuccessToast';
 import { useResumeLogic } from './hooks/useResumeLogic';
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const {
     showResumeChat,
     setShowResumeChat,
@@ -42,6 +44,31 @@ function App() {
     setShowSuccessToast
   } = useResumeLogic();
 
+  // Check authentication status on component mount
+  useEffect(() => {
+    const authStatus = localStorage.getItem('isAuthenticated');
+    setIsAuthenticated(authStatus === 'true');
+  }, []);
+
+  // Handle successful login
+  const handleLoginSuccess = () => {
+    setIsAuthenticated(true);
+    setCurrentPage('dashboard');
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('userEmail');
+    setIsAuthenticated(false);
+    setCurrentPage('dashboard');
+  };
+
+  // If not authenticated, show login component
+  if (!isAuthenticated) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Main Content Area */}
@@ -55,6 +82,7 @@ function App() {
                 setShowResumeChat={setShowResumeChat}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
+                onLogout={handleLogout}
               />
               <Dashboard />
             </>
@@ -67,6 +95,7 @@ function App() {
                 setShowResumeChat={setShowResumeChat}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
+                onLogout={handleLogout}
               />
               <InterviewPage 
                 setCurrentPage={setCurrentPage}

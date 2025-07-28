@@ -476,7 +476,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                       {/* Floating + Button */}
                       <button
                         onClick={handleAddEducation}
-                        className="fixed bottom-8 right-8 w-12 h-12 rounded-full text-white font-bold text-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 flex items-center justify-center"
+                        className="absolute bottom-8 right-8 w-12 h-12 rounded-full text-white font-bold text-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 flex items-center justify-center z-10"
                         style={{
                           background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)'
                         }}

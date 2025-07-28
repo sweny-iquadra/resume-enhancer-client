@@ -62,16 +62,17 @@ const ProfileCompletionModal = ({
           setShowSuccessToast(true);
         }
         
-        // Modal will stay closed as resume was successful
+        // Ensure modal stays closed after successful generation
+        // Do not reopen modal on success
       } else {
-        // Show error and reopen modal for retry
+        // Only reopen modal on actual failure
         setShowProfileModal(true);
         alert('❌ Failed to enhance resume. Please try again or complete your profile for better results.');
       }
     } catch (error) {
       console.error('Error calling enhance resume API:', error);
       
-      // Show error and reopen modal for retry
+      // Only reopen modal on error
       setShowProfileModal(true);
       alert('⚠️ An error occurred while enhancing your resume. Please check your connection and try again.');
     } finally {

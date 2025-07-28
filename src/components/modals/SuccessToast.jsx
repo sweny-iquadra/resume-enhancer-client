@@ -1,3 +1,7 @@
+` tags.
+
+```python
+<replit_final_file>
 import React, { useEffect } from 'react';
 
 const SuccessToast = ({ showSuccessToast, setShowSuccessToast }) => {
@@ -15,36 +19,32 @@ const SuccessToast = ({ showSuccessToast, setShowSuccessToast }) => {
   if (!showSuccessToast) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-[60]" style={{
-      animation: 'slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
-    }}>
-      <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-4 rounded-xl shadow-2xl flex items-center space-x-3 max-w-md border border-green-400" style={{
-        boxShadow: '0 20px 50px rgba(34, 197, 94, 0.3), 0 0 20px rgba(34, 197, 94, 0.1)'
-      }}>
-        <div className="flex-shrink-0 w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center animate-pulse">
-          <span className="text-white text-xl">🎉</span>
+    <div 
+      className={`fixed top-4 right-4 z-50 transform transition-all duration-500 ease-out ${
+        showSuccessToast 
+          ? 'translate-y-0 opacity-100 scale-100' 
+          : '-translate-y-full opacity-0 scale-95 pointer-events-none'
+      }`}
+    >
+      <div className="text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 max-w-sm border border-purple-400" 
+           style={{
+             background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)',
+             boxShadow: '0 8px 25px rgba(57, 53, 205, 0.3)'
+           }}>
+        <div className="flex-shrink-0">
+          <div className="w-6 h-6 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+            <span className="text-white text-sm font-bold">✓</span>
+          </div>
         </div>
         <div className="flex-1">
-          <h3 className="font-bold text-base">Resume Enhanced Successfully!</h3>
-          <p className="text-green-100 text-sm mt-1 leading-relaxed">Your AI-powered resume is ready for preview and download</p>
-
-          {/* Progress bar */}
-          <div className="w-full bg-green-400 bg-opacity-30 rounded-full h-1 mt-3 overflow-hidden">
-            <div 
-              className="bg-white h-full rounded-full transition-all duration-[4000ms] ease-linear"
-              style={{
-                width: showSuccessToast ? '0%' : '100%',
-                animation: showSuccessToast ? 'shrink 4s linear forwards' : 'none'
-              }}
-            ></div>
-          </div>
+          <h4 className="font-semibold text-sm">Resume Created Successfully!</h4>
+          <p className="text-purple-100 text-xs mt-1">Your enhanced resume is ready for preview</p>
         </div>
         <button
           onClick={() => setShowSuccessToast(false)}
-          className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-all duration-200 hover:scale-110 active:scale-95"
-          title="Close"
+          className="flex-shrink-0 text-purple-200 hover:text-white transition-colors"
         >
-          <span className="text-lg">✕</span>
+          <span className="text-lg">×</span>
         </button>
       </div>
     </div>

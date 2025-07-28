@@ -1,7 +1,4 @@
-` tags.
 
-```python
-<replit_final_file>
 import React, { useEffect } from 'react';
 
 const SuccessToast = ({ showSuccessToast, setShowSuccessToast }) => {

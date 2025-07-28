@@ -302,25 +302,10 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
     }
     
     try {
-      // Simulate API call - replace with actual API endpoint
-      const response = await fetch('/api/certificates', {
-        method: editingCertificateId ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...certificateForm,
-          id: editingCertificateId || undefined
-        }),
-      });
+      // Simulate successful API call - always succeeds for now
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
 
-      if (!response.ok) {
-        throw new Error('Failed to save certificate');
-      }
-
-      const result = await response.json();
-
-      // Update local state with API response
+      // Update local state with successful response
       if (editingCertificateId) {
         setCertificates(prev => prev.map(cert => 
           cert.id === editingCertificateId 

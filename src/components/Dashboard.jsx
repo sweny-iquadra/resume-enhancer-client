@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Dashboard = () => {
+const Dashboard = ({ setCurrentPage }) => {
   const features = [
     {
       id: 1,
@@ -33,8 +33,13 @@ const Dashboard = () => {
   ];
 
   const handleFeatureClick = (id) => {
-    // Handle click events for each feature
-    console.log(`Clicked feature with ID: ${id}`);
+    if (id === 1) {
+      // Navigate to Profile component
+      setCurrentPage('profile');
+    } else {
+      // Handle click events for other features
+      console.log(`Clicked feature with ID: ${id}`);
+    }
   };
 
   return (

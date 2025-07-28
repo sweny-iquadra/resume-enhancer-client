@@ -65,15 +65,13 @@ const ProfileCompletionModal = ({
         // Update state
         setEnhancedResumeData(response.data.enhancedResume);
 
-        // Store generated resume data for modal display
-        setGeneratedResumeData(response.data.enhancedResume);
+        // Show success toast
+        setShowSuccessToast(true);
 
-        // Show success content in modal instead of closing it
-        setShowSuccessContent(true);
+        // Close the modal automatically on success
+        setShowProfileModal(false);
         setShowRoleSelection(false);
-
-        // Keep the modal open with success content
-        setShowProfileModal(true);
+        setShowSuccessContent(false);
 
         return; // Exit early on success
       } else {

@@ -89,11 +89,6 @@ const ProfileCompletionModal = ({
             <span className="text-3xl">📝</span>
           </div>
           <h3 className="text-xl font-semibold">Complete Your Profile</h3>
-          {selectedRole && (
-            <p className="text-sm opacity-90 mt-2">
-              For: {selectedRole}
-            </p>
-          )}
         </div>
 
         {/* Modal Body */}

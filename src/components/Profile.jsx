@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import Header from './Header';
 
 const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }) => {
   const [activeTab, setActiveTab] = useState('Active Interview');
@@ -15,47 +16,23 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#6366f1' }}>
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 bg-transparent">
-        {/* Logo */}
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-            <span className="text-purple-600 text-sm font-bold">iQ</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-lg font-semibold text-white">iQua.ai</span>
-            <span className="text-xs text-white opacity-70 -mt-1">AI that gets you</span>
-          </div>
-        </div>
-
-        {/* User Profile Section */}
-        <div className="flex items-center space-x-4">
-          <span className="text-white font-medium text-sm">Sweny Patel</span>
-          <div className="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
-            <span className="text-white text-xs">👤</span>
-          </div>
-          <button
-            onClick={onLogout}
-            className="text-white hover:text-gray-200 transition-colors p-2 hover:bg-white hover:bg-opacity-10 rounded-lg"
-            title="Logout"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M16 17L21 12L16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        </div>
-      </div>
+      <Header 
+        showResumeChat={showResumeChat}
+        setShowResumeChat={setShowResumeChat}
+        currentPage="profile"
+        setCurrentPage={setCurrentPage}
+        onLogout={onLogout}
+      />
 
       {/* Page Title */}
-      <div className="px-6 pb-4">
+      <div className="px-6 py-4" style={{ backgroundColor: '#6366f1' }}>
         <h1 className="text-white text-2xl font-medium">My Profile</h1>
       </div>
 
       {/* Main Content */}
-      <div className="px-6 pb-6">
+      <div className="px-6 pb-6" style={{ backgroundColor: '#6366f1' }}>
         <div className="bg-white rounded-lg shadow-sm" style={{ minHeight: '600px' }}>
           <div className="flex">
             {/* Left Sidebar */}

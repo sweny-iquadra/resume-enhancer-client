@@ -304,8 +304,8 @@ const ProfileCompletionModal = ({
                   <button
                     onClick={() => {
                       setShowProfileModal(false);
-                      // Redirect to dashboard
-                      window.location.href = "/";
+                      // Redirect to profile page
+                      setCurrentPage('profile');
                     }}
                     className="text-white px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex-1 max-w-[180px]"
                     style={{

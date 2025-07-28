@@ -12,6 +12,14 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
   const [selectedSkill, setSelectedSkill] = useState('');
   const [skillError, setSkillError] = useState(false);
 
+  // Available skills for dropdown
+  const availableSkills = [
+    'React', 'Angular', 'Vue.js', 'JavaScript', 'TypeScript', 'Node.js', 
+    'Python', 'Java', 'C++', 'HTML/CSS', 'MongoDB', 'PostgreSQL', 
+    'AWS', 'Docker', 'Kubernetes', '3D-Printing', 'Machine Learning', 
+    'Git', 'REST APIs', 'GraphQL'
+  ];
+
   const tabs = ['Active Interview', 'Education', 'Certificates'];
 
   const profileData = {
@@ -39,6 +47,12 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
     setSelectedSkill('');
     setSkillError(false);
     setIsEditingSkills(false);
+  };
+
+  const handleAddSkillClick = () => {
+    setIsEditingSkills(true);
+    setSkillError(false);
+    setSelectedSkill('');
   };
 
   const handleRemoveSkill = (indexToRemove) => {
@@ -157,7 +171,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                   <h3 className="text-sm font-medium pb-2" style={{ color: '#7f90fa', borderBottom: '1px solid #d1d5db' }}>Skill Set:</h3>
                   <div className="absolute top-0 right-0 flex items-center space-x-2">
                     <button 
-                      onClick={() => setIsEditingSkills(true)}
+                      onClick={handleAddSkillClick}
                       className="hover:text-blue-700"
                       style={{ color: '#7f90fa' }}
                     >
@@ -173,41 +187,69 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                   </div>
                 </div>
 
-                {/* Edit mode - show skills with delete icons and Cancel/Save buttons */}
+                {/* Edit mode - dropdown and buttons as per screenshot */}
                 {isEditingSkills ? (
                   <div className="space-y-3">
-                    {/* Skills with delete icons */}
-                    <div className="space-y-2">
-                      {skills.map((skill, index) => (
-                        <div key={index} className="flex items-center justify-between px-3 py-2 bg-gray-100 rounded-md">
-                          <span className="text-sm text-gray-800">{skill}</span>
-                          <button 
-                            onClick={() => handleRemoveSkill(index)}
-                            className="text-red-500 hover:text-red-600 ml-2"
-                          >
-                            <span className="text-sm">❌</span>
-                          </button>
-                        </div>
-                      ))}
+                    {/* Error message */}
+                    {skillError && (
+                      <div className="text-red-500 text-xs">
+                        * At least select one skill
+                      </div>
+                    )}
+
+                    {/* Skills dropdown */}
+                    <div className="relative">
+                      <select
+                        value={selectedSkill}
+                        onChange={(e) => {
+                          setSelectedSkill(e.target.value);
+                          setSkillError(false);
+                        }}
+                        className="w-full px-3 py-3 bg-white border border-gray-300 rounded-md text-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+                        style={{ color: selectedSkill ? '#000' : '#9CA3AF' }}
+                      >
+                        <option value="" disabled>Select Skills</option>
+                        {availableSkills
+                          .filter(skill => !skills.includes(skill))
+                          .map((skill, index) => (
+                            <option key={index} value={skill} className="text-black">
+                              {skill}
+                            </option>
+                          ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
                     </div>
 
                     {/* Cancel and Save buttons */}
-                    <div className="space-y-2 pt-2">
+                    <div className="space-y-2 pt-1">
                       <button
                         onClick={handleCancelSkillEdit}
-                        className="w-full py-2 px-4 bg-gray-200 text-gray-700 rounded-md font-medium hover:bg-gray-300 transition-colors"
+                        className="w-full py-3 px-4 bg-gray-200 text-black rounded-md font-medium hover:bg-gray-300 transition-colors text-sm"
                       >
                         Cancel
                       </button>
                       <button
-                        onClick={() => setIsEditingSkills(false)}
-                        className="w-full py-2 px-4 text-white rounded-md font-medium transition-colors"
+                        onClick={handleSaveSkill}
+                        className="w-full py-3 px-4 text-white rounded-md font-bold transition-colors text-sm"
                         style={{
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                          background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)'
                         }}
                       >
                         Save
                       </button>
+                    </div>
+
+                    {/* Current skills list below buttons */}
+                    <div className="space-y-2 pt-2">
+                      {skills.map((skill, index) => (
+                        <div key={index}>
+                          <span className="text-sm font-bold text-black">{skill}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ) : (
@@ -221,7 +263,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                     
                     {skills.length === 0 && (
                       <button 
-                        onClick={() => setIsEditingSkills(true)}
+                        onClick={handleAddSkillClick}
                         className="w-full mt-3 py-2 text-center text-gray-400 hover:text-gray-600 text-sm"
                       >
                         + Add more skills

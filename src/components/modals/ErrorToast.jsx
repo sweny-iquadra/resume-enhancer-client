@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 
 const ErrorToast = ({ showErrorToast, setShowErrorToast, errorMessage }) => {

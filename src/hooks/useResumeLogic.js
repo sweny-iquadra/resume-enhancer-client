@@ -30,22 +30,26 @@ export const useResumeLogic = () => {
       if (!checkProfileCompletion(userProfile)) {
         setShowProfileModal(true);
       } else {
-        // Profile is complete - proceed with resume enhancement
-        handleResumeEnhancement(defaultRole);
+        // Profile is complete - check for multiple roles
+        if (uniqueRoles.length >= 3) {
+          // Show role selection for users with 3+ different roles
+          setShowRoleSelection(true);
+        } else {
+          // Proceed with resume enhancement for single role or less than 3 roles
+          handleResumeEnhancement(defaultRole);
+        }
       }
     }
   };
 
   const handleRoleSelection = (role) => {
-    setSelectedRole(role);
+    // Format role to industry-standard format (lowercase, hyphenated)
+    const formattedRole = role.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    setSelectedRole(formattedRole);
     setShowRoleSelection(false);
     
-    if (!checkProfileCompletion(userProfile)) {
-      setShowProfileModal(true);
-    } else {
-      // Profile is complete - proceed with resume enhancement
-      handleResumeEnhancement(role);
-    }
+    // Profile is already confirmed complete at this point - proceed with resume enhancement
+    handleResumeEnhancement(role); // Use original role for display purposes
   };
 
   const handleResumeEnhancement = async (role) => {

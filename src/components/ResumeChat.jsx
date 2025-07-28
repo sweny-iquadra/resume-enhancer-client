@@ -56,23 +56,38 @@ const ResumeChat = ({
             {/* Role Selection Message */}
             {showRoleSelection && (
               <div className="space-y-4">
-                <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                  <h3 className="font-semibold text-blue-600 mb-3">
-                    🎯 Multiple Roles Detected
+                <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-5 border border-blue-200">
+                  <h3 className="font-semibold text-blue-600 mb-3 flex items-center">
+                    <span className="text-xl mr-2">🎯</span>
+                    Multiple Roles Detected
                   </h3>
-                  <p className="text-gray-700 text-sm mb-4">
+                  <p className="text-gray-700 text-sm mb-4 leading-relaxed">
                     We noticed you've explored multiple job roles with iQua.ai. Please select the role you'd like us to tailor this resume for:
                   </p>
-                  <div className="space-y-2">
-                    {uniqueRoles.map((role, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleRoleSelection(role)}
-                        className="w-full text-left p-3 bg-white rounded-lg border border-blue-200 hover:border-blue-400 hover:bg-blue-50 transition-all duration-200"
-                      >
-                        <span className="font-medium text-blue-700">{role}</span>
-                      </button>
-                    ))}
+                  
+                  {/* Dropdown Style Selection */}
+                  <div className="bg-white rounded-lg border border-blue-200 overflow-hidden shadow-sm">
+                    <div className="p-3 bg-blue-50 border-b border-blue-200">
+                      <span className="text-sm font-medium text-blue-700">Select Role:</span>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto">
+                      {uniqueRoles.map((role, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleRoleSelection(role)}
+                          className="w-full text-left p-4 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200 border-b border-gray-100 last:border-b-0 group"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium text-gray-800 group-hover:text-blue-700 transition-colors">
+                              {role}
+                            </span>
+                            <span className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                              →
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>

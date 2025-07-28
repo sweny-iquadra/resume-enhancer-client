@@ -7,7 +7,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
   const [professionalSummary, setProfessionalSummary] = useState('');
   const [isEditingProfessionalSummary, setIsEditingProfessionalSummary] = useState(false);
   const [tempProfessionalSummary, setTempProfessionalSummary] = useState('');
-  const [skills, setSkills] = useState(['Angular']);
+  const [skills, setSkills] = useState(['Angular', '3D-Printing']);
   const [isEditingSkills, setIsEditingSkills] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState('');
   const [skillError, setSkillError] = useState(false);
@@ -153,18 +153,20 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
 
               {/* Skill Set */}
               <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-medium" style={{ color: '#7f90fa' }}>Skill Set:</h3>
-                  <div className="flex items-center space-x-2">
+                <div className="relative mb-3">
+                  <h3 className="text-sm font-medium pb-2" style={{ color: '#7f90fa', borderBottom: '1px solid #d1d5db' }}>Skill Set:</h3>
+                  <div className="absolute top-0 right-0 flex items-center space-x-2">
                     <button 
                       onClick={() => setIsEditingSkills(true)}
-                      className="text-blue-600 hover:text-blue-700"
+                      className="hover:text-blue-700"
+                      style={{ color: '#7f90fa' }}
                     >
                       <span className="text-lg">+</span>
                     </button>
                     <button 
                       onClick={() => setIsEditingSkills(!isEditingSkills)}
-                      className="text-blue-600 hover:text-blue-700"
+                      className="hover:text-blue-700"
+                      style={{ color: '#7f90fa' }}
                     >
                       <span className="text-sm">✏️</span>
                     </button>
@@ -209,11 +211,11 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                     </div>
                   </div>
                 ) : (
-                  /* View mode - normal skills list */
+                  /* View mode - skills list matching screenshot */
                   <div className="space-y-2">
                     {skills.map((skill, index) => (
-                      <div key={index} className="px-3 py-2 bg-gray-50 rounded-md">
-                        <span className="text-sm text-gray-700">{skill}</span>
+                      <div key={index}>
+                        <span className="text-sm font-bold text-black">{skill}</span>
                       </div>
                     ))}
                     

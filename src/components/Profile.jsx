@@ -155,77 +155,51 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-medium" style={{ color: '#7f90fa' }}>Skill Set:</h3>
-                  <button 
-                    onClick={() => setIsEditingSkills(true)}
-                    className="text-blue-600 hover:text-blue-700"
-                  >
-                    <span className="text-lg">+</span>
-                  </button>
+                  <div className="flex items-center space-x-2">
+                    <button 
+                      onClick={() => setIsEditingSkills(true)}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      <span className="text-lg">+</span>
+                    </button>
+                    <button 
+                      onClick={() => setIsEditingSkills(!isEditingSkills)}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      <span className="text-sm">✏️</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* Error message */}
-                {skillError && (
-                  <div className="mb-3">
-                    <p className="text-red-500 text-sm">At least select one skill</p>
-                  </div>
-                )}
-
-                {/* Skills dropdown and buttons (edit mode) */}
-                {isEditingSkills && (
-                  <div className="mb-4">
-                    <div className="relative mb-3">
-                      <select
-                        value={selectedSkill}
-                        onChange={(e) => setSelectedSkill(e.target.value)}
-                        className="w-full p-3 border border-gray-300 rounded-md text-gray-600 bg-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="">Select Skills</option>
-                        <option value="JavaScript">JavaScript</option>
-                        <option value="React">React</option>
-                        <option value="Angular">Angular</option>
-                        <option value="Vue.js">Vue.js</option>
-                        <option value="Node.js">Node.js</option>
-                        <option value="Python">Python</option>
-                        <option value="Java">Java</option>
-                        <option value="C++">C++</option>
-                        <option value="HTML/CSS">HTML/CSS</option>
-                        <option value="TypeScript">TypeScript</option>
-                        <option value="SQL">SQL</option>
-                        <option value="MongoDB">MongoDB</option>
-                        <option value="Express.js">Express.js</option>
-                        <option value="Spring Boot">Spring Boot</option>
-                        <option value="Django">Django</option>
-                        <option value="Flask">Flask</option>
-                        <option value="Docker">Docker</option>
-                        <option value="Kubernetes">Kubernetes</option>
-                        <option value="AWS">AWS</option>
-                        <option value="Azure">Azure</option>
-                        <option value="Git">Git</option>
-                        <option value="Jenkins">Jenkins</option>
-                        <option value="REST APIs">REST APIs</option>
-                        <option value="GraphQL">GraphQL</option>
-                        <option value="Machine Learning">Machine Learning</option>
-                        <option value="Data Analysis">Data Analysis</option>
-                        <option value="UI/UX Design">UI/UX Design</option>
-                        <option value="Agile/Scrum">Agile/Scrum</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
+                {/* Edit mode - show skills with delete icons and Cancel/Save buttons */}
+                {isEditingSkills ? (
+                  <div className="space-y-3">
+                    {/* Skills with delete icons */}
+                    <div className="space-y-2">
+                      {skills.map((skill, index) => (
+                        <div key={index} className="flex items-center justify-between px-3 py-2 bg-gray-100 rounded-md">
+                          <span className="text-sm text-gray-800">{skill}</span>
+                          <button 
+                            onClick={() => handleRemoveSkill(index)}
+                            className="text-red-500 hover:text-red-600 ml-2"
+                          >
+                            <span className="text-sm">❌</span>
+                          </button>
+                        </div>
+                      ))}
                     </div>
 
-                    <div className="space-y-2">
+                    {/* Cancel and Save buttons */}
+                    <div className="space-y-2 pt-2">
                       <button
                         onClick={handleCancelSkillEdit}
-                        className="w-full py-3 px-4 bg-gray-200 text-gray-700 rounded-md font-medium hover:bg-gray-300 transition-colors"
+                        className="w-full py-2 px-4 bg-gray-200 text-gray-700 rounded-md font-medium hover:bg-gray-300 transition-colors"
                       >
                         Cancel
                       </button>
                       <button
-                        onClick={handleSaveSkill}
-                        className="w-full py-3 px-4 text-white rounded-md font-medium transition-colors"
+                        onClick={() => setIsEditingSkills(false)}
+                        className="w-full py-2 px-4 text-white rounded-md font-medium transition-colors"
                         style={{
                           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                         }}
@@ -234,30 +208,24 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                       </button>
                     </div>
                   </div>
-                )}
-                
-                {/* Skills list */}
-                <div className="space-y-2">
-                  {skills.map((skill, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                      <span className="text-sm text-gray-700">{skill}</span>
+                ) : (
+                  /* View mode - normal skills list */
+                  <div className="space-y-2">
+                    {skills.map((skill, index) => (
+                      <div key={index} className="px-3 py-2 bg-gray-50 rounded-md">
+                        <span className="text-sm text-gray-700">{skill}</span>
+                      </div>
+                    ))}
+                    
+                    {skills.length === 0 && (
                       <button 
-                        onClick={() => handleRemoveSkill(index)}
-                        className="text-gray-400 hover:text-gray-600"
+                        onClick={() => setIsEditingSkills(true)}
+                        className="w-full mt-3 py-2 text-center text-gray-400 hover:text-gray-600 text-sm"
                       >
-                        <span className="text-xs">✏️</span>
+                        + Add more skills
                       </button>
-                    </div>
-                  ))}
-                </div>
-                
-                {!isEditingSkills && skills.length === 0 && (
-                  <button 
-                    onClick={() => setIsEditingSkills(true)}
-                    className="w-full mt-3 py-2 text-center text-gray-400 hover:text-gray-600 text-sm"
-                  >
-                    + Add more skills
-                  </button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

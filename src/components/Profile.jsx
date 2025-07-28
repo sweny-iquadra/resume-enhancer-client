@@ -286,12 +286,12 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
     
     if (Object.keys(errors).length > 0) {
       setCertificateErrors(errors);
-      setErrorMessage('Please fix the validation errors and try again.');
-      setShowErrorToast(true);
       return;
     }
     
     try {
+      // Simulate API call - in real implementation, this would be an actual API call
+      // that could potentially fail and throw an error
       if (editingCertificateId) {
         setCertificates(prev => prev.map(cert => 
           cert.id === editingCertificateId 
@@ -310,6 +310,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
       
       handleCloseCertificateModal();
     } catch (error) {
+      // Only show error toast for actual API/backend failures
       setErrorMessage('Failed to save certificate details. Please try again.');
       setShowErrorToast(true);
     }
@@ -376,12 +377,12 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
     
     if (Object.keys(errors).length > 0) {
       setEducationErrors(errors);
-      setErrorMessage('Please fix the validation errors and try again.');
-      setShowErrorToast(true);
       return;
     }
     
     try {
+      // Simulate API call - in real implementation, this would be an actual API call
+      // that could potentially fail and throw an error
       if (editingEducationId) {
         // Update existing education entry
         setEducation(prev => prev.map(edu => 
@@ -403,6 +404,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
       // Close modal and reset form
       handleCloseEducationModal();
     } catch (error) {
+      // Only show error toast for actual API/backend failures
       setErrorMessage('Failed to save education details. Please try again.');
       setShowErrorToast(true);
     }

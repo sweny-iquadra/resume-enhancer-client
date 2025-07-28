@@ -154,6 +154,7 @@ function App() {
           setShowSuccessToast={setShowSuccessToast}
           setShowPreview={setShowPreview}
           setCurrentPage={setCurrentPage}
+          setShowResumeChat={setShowResumeChat}
         />
 
         {/* Interview Requirement Modal */}

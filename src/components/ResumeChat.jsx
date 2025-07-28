@@ -48,8 +48,8 @@ const ResumeChat = ({
   if (!showResumeChat) return null;
 
   const handleEditProfile = () => {
-    setCurrentPage('profile');
     setShowResumeChat(false);
+    setCurrentPage('profile');
   };
 
   const handleCreateResumeWithFeedback = async () => {

@@ -16,6 +16,7 @@ const ProfileCompletionModal = ({
   setShowSuccessToast,
   setShowPreview,
   setCurrentPage,
+  setShowResumeChat,
 }) => {
   const [currentSelectedRole, setCurrentSelectedRole] = useState(selectedRole);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -304,6 +305,7 @@ const ProfileCompletionModal = ({
                   <button
                     onClick={() => {
                       setShowProfileModal(false);
+                      setShowResumeChat(false);
                       // Redirect to profile page
                       setCurrentPage('profile');
                     }}

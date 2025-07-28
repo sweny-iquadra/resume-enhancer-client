@@ -325,7 +325,11 @@ const ProfileCompletionModal = ({
                     {uniqueRoles.map((role, index) => (
                       <button
                         key={index}
-                        onClick={() => handleRoleSelection(role)}
+                        onClick={() => {
+                          setCurrentSelectedRole(role);
+                          setShowRoleSelection(false);
+                          proceedWithGeneration(role);
+                        }}
                         className="w-full text-left p-4 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all duration-200 border-b border-gray-100 last:border-b-0 group"
                       >
                         <div className="flex items-center justify-between">

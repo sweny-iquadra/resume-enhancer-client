@@ -183,8 +183,21 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const downloadResume = (format) => {
     if (!finalResume) return;
 
-    // Create resume content
-    const resumeContent = `
+    // Use edited content from the Final Resume Preview if available, otherwise generate from finalResume
+    let resumeContent = '';
+    
+    // Check if there's edited content in the Final Resume Preview
+    const finalResumeElement = document.querySelector('.final-resume-content');
+    if (finalResumeElement) {
+      const preElement = finalResumeElement.querySelector('pre');
+      if (preElement) {
+        resumeContent = preElement.textContent || preElement.innerText;
+      }
+    }
+    
+    // Fallback to generating content from finalResume object
+    if (!resumeContent.trim()) {
+      resumeContent = `
 ${finalResume.basicDetails.name || ''}
 ${finalResume.basicDetails.email || ''} | ${finalResume.basicDetails.phone || ''}
 ${finalResume.basicDetails.location || ''}
@@ -209,7 +222,8 @@ Technologies: ${project.technologies?.join(', ') || ''}
 `).join('\n')}
 
 Powered by iQua.ai
-    `;
+      `;
+    }
 
     // Create and download file
     const blob = new Blob([resumeContent], { type: 'text/plain' });
@@ -486,6 +500,76 @@ Powered by iQua.ai
 
   // Final Resume Preview Component
   const FinalResumePreview = ({ resumeData }) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const [editableContent, setEditableContent] = useState('');
+
+    // Generate editable text content from resume data
+    useEffect(() => {
+      if (!resumeData) return;
+
+      const generateEditableContent = () => {
+        let content = '';
+
+        // Header
+        if (resumeData.basicDetails.name || resumeData.basicDetails.email || resumeData.basicDetails.phone || resumeData.basicDetails.location) {
+          if (resumeData.basicDetails.name) content += `${resumeData.basicDetails.name}\n`;
+          
+          const contactInfo = [
+            resumeData.basicDetails.email,
+            resumeData.basicDetails.phone,
+            resumeData.basicDetails.location
+          ].filter(Boolean).join(' | ');
+          
+          if (contactInfo) content += `${contactInfo}\n\n`;
+        }
+
+        // Professional Summary
+        if (resumeData.professionalSummary) {
+          content += `PROFESSIONAL SUMMARY\n`;
+          content += `${resumeData.professionalSummary}\n\n`;
+        }
+
+        // Technical Skills
+        if (resumeData.skills.length > 0) {
+          content += `TECHNICAL SKILLS\n`;
+          content += `${resumeData.skills.join(' • ')}\n\n`;
+        }
+
+        // Work Experience
+        if (resumeData.workExperience.length > 0) {
+          content += `WORK EXPERIENCE\n`;
+          resumeData.workExperience.forEach(job => {
+            content += `${job.position || ''}\n`;
+            content += `${job.company || ''} | ${job.duration || ''}\n`;
+            if (job.responsibilities) {
+              job.responsibilities.forEach(resp => {
+                content += `• ${resp}\n`;
+              });
+            }
+            content += '\n';
+          });
+        }
+
+        // Projects
+        if (resumeData.projects.length > 0) {
+          content += `PROJECTS\n`;
+          resumeData.projects.forEach(project => {
+            content += `${project.name || ''}\n`;
+            content += `${project.description || ''}\n`;
+            if (project.technologies) {
+              content += `Technologies: ${project.technologies.join(', ')}\n`;
+            }
+            content += '\n';
+          });
+        }
+
+        content += `Powered by iQua.ai`;
+        return content;
+      };
+
+      setEditableContent(generateEditableContent());
+    }, [resumeData]);
+
     if (!resumeData) return null;
 
     return (
@@ -499,185 +583,117 @@ Powered by iQua.ai
           </div>
           <span className="text-sm text-gray-600 font-medium">Final_Resume.docx</span>
           <div className="ml-auto flex items-center space-x-2">
+            <button
+              onClick={() => setIsEditing(!isEditing)}
+              className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                isEditing 
+                  ? 'bg-green-500 text-white hover:bg-green-600' 
+                  : 'bg-blue-500 text-white hover:bg-blue-600'
+              }`}
+            >
+              {isEditing ? '💾 Save' : '✏️ Edit'}
+            </button>
             <span className="text-xs text-gray-500">📄</span>
             <span className="text-xs text-gray-500">100%</span>
           </div>
         </div>
 
         {/* Document Content */}
-        <div className="p-8 min-h-[600px]" style={{
-          fontFamily: 'Times New Roman, serif',
-          fontSize: '12pt',
-          lineHeight: '1.15',
-          background: 'white'
-        }}>
-          {/* Header Section */}
-          {(resumeData.basicDetails.name || resumeData.basicDetails.email || resumeData.basicDetails.phone || resumeData.basicDetails.location) && (
-            <div className="text-center mb-6 pb-3 border-b-2 border-gray-300">
-              {resumeData.basicDetails.name && (
-                <h1 className="text-2xl font-bold text-gray-900 mb-2" style={{
+        <div className="min-h-[600px]" style={{ background: 'white' }}>
+          {isEditing ? (
+            /* Edit Mode - Textarea */
+            <div className="p-4">
+              <div className="mb-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">✏️ Edit Your Resume Content</span>
+                  <span className="text-xs text-gray-500">Plain text editing mode</span>
+                </div>
+                <p className="text-xs text-gray-600 mb-3">
+                  Make any changes to your resume content below. Click Save to apply changes and return to preview mode.
+                </p>
+              </div>
+              <textarea
+                value={editableContent}
+                onChange={(e) => setEditableContent(e.target.value)}
+                className="w-full h-[550px] p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                style={{
                   fontFamily: 'Times New Roman, serif',
-                  fontSize: '18pt',
-                  fontWeight: 'bold'
-                }}>
-                  {resumeData.basicDetails.name}
-                </h1>
-              )}
-              <div className="text-sm text-gray-700 space-x-2" style={{ fontSize: '11pt' }}>
-                {resumeData.basicDetails.email && <span>{resumeData.basicDetails.email}</span>}
-                {resumeData.basicDetails.phone && <><span className="mx-2">|</span><span>{resumeData.basicDetails.phone}</span></>}
-                {resumeData.basicDetails.location && <><span className="mx-2">|</span><span>{resumeData.basicDetails.location}</span></>}
+                  fontSize: '12px',
+                  lineHeight: '1.4'
+                }}
+                placeholder="Start typing your resume content..."
+              />
+              <div className="mt-3 flex justify-between items-center">
+                <span className="text-xs text-gray-500">
+                  💡 Tip: Use clear headings and bullet points for better formatting
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      // Reset to original generated content
+                      const generateOriginalContent = () => {
+                        let content = '';
+                        if (resumeData.basicDetails.name) content += `${resumeData.basicDetails.name}\n`;
+                        const contactInfo = [
+                          resumeData.basicDetails.email,
+                          resumeData.basicDetails.phone,
+                          resumeData.basicDetails.location
+                        ].filter(Boolean).join(' | ');
+                        if (contactInfo) content += `${contactInfo}\n\n`;
+                        if (resumeData.professionalSummary) {
+                          content += `PROFESSIONAL SUMMARY\n${resumeData.professionalSummary}\n\n`;
+                        }
+                        if (resumeData.skills.length > 0) {
+                          content += `TECHNICAL SKILLS\n${resumeData.skills.join(' • ')}\n\n`;
+                        }
+                        if (resumeData.workExperience.length > 0) {
+                          content += `WORK EXPERIENCE\n`;
+                          resumeData.workExperience.forEach(job => {
+                            content += `${job.position || ''}\n${job.company || ''} | ${job.duration || ''}\n`;
+                            if (job.responsibilities) {
+                              job.responsibilities.forEach(resp => content += `• ${resp}\n`);
+                            }
+                            content += '\n';
+                          });
+                        }
+                        if (resumeData.projects.length > 0) {
+                          content += `PROJECTS\n`;
+                          resumeData.projects.forEach(project => {
+                            content += `${project.name || ''}\n${project.description || ''}\n`;
+                            if (project.technologies) {
+                              content += `Technologies: ${project.technologies.join(', ')}\n`;
+                            }
+                            content += '\n';
+                          });
+                        }
+                        content += `Powered by iQua.ai`;
+                        return content;
+                      };
+                      setEditableContent(generateOriginalContent());
+                    }}
+                    className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 transition-colors"
+                  >
+                    🔄 Reset
+                  </button>
+                </div>
               </div>
             </div>
-          )}
-
-          {/* Professional Summary */}
-          {resumeData.professionalSummary && (
-            <div className="mb-6">
-              <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
-                fontFamily: 'Times New Roman, serif',
-                fontSize: '14pt',
-                fontWeight: 'bold',
-                borderBottom: '1px solid #333',
-                paddingBottom: '2px'
-              }}>
-                PROFESSIONAL SUMMARY
-              </h2>
-              <p className="text-gray-800 text-justify" style={{
+          ) : (
+            /* Preview Mode - Formatted Display */
+            <div className="p-8 final-resume-content" style={{
+              fontFamily: 'Times New Roman, serif',
+              fontSize: '12pt',
+              lineHeight: '1.15'
+            }}>
+              <pre className="whitespace-pre-wrap text-gray-800" style={{
                 fontFamily: 'Times New Roman, serif',
                 fontSize: '12pt',
-                lineHeight: '1.15',
-                textAlign: 'justify'
+                lineHeight: '1.4'
               }}>
-                {resumeData.professionalSummary}
-              </p>
+                {editableContent}
+              </pre>
             </div>
           )}
-
-          {/* Technical Skills */}
-          {resumeData.skills.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
-                fontFamily: 'Times New Roman, serif',
-                fontSize: '14pt',
-                fontWeight: 'bold',
-                borderBottom: '1px solid #333',
-                paddingBottom: '2px'
-              }}>
-                TECHNICAL SKILLS
-              </h2>
-              <p className="text-gray-800" style={{
-                fontFamily: 'Times New Roman, serif',
-                fontSize: '12pt'
-              }}>
-                {resumeData.skills.join(' • ')}
-              </p>
-            </div>
-          )}
-
-          {/* Work Experience */}
-          {resumeData.workExperience.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
-                fontFamily: 'Times New Roman, serif',
-                fontSize: '14pt',
-                fontWeight: 'bold',
-                borderBottom: '1px solid #333',
-                paddingBottom: '2px'
-              }}>
-                WORK EXPERIENCE
-              </h2>
-              {resumeData.workExperience.map((job, index) => (
-                <div key={`work-${index}-${job.company}`} className="mb-4">
-                  <div className="flex justify-between items-start mb-1">
-                    <div>
-                      <h4 className="font-semibold text-gray-900" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '12pt',
-                        fontWeight: 'bold'
-                      }}>
-                        {job.position}
-                      </h4>
-                      <p className="text-gray-700" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '11pt',
-                        fontStyle: 'italic'
-                      }}>
-                        {job.company}
-                      </p>
-                    </div>
-                    <span className="text-sm text-gray-600" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '11pt'
-                    }}>
-                      {job.duration}
-                    </span>
-                  </div>
-                  {job.responsibilities && (
-                    <ul className="list-disc list-inside text-sm text-gray-700 space-y-1" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '11pt'
-                    }}>
-                      {job.responsibilities.map((resp, respIndex) => (
-                        <li key={`resp-${index}-${respIndex}`}>{resp}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Projects */}
-          {resumeData.projects.length > 0 && (
-            <div className="mb-6">
-              <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
-                fontFamily: 'Times New Roman, serif',
-                fontSize: '14pt',
-                fontWeight: 'bold',
-                borderBottom: '1px solid #333',
-                paddingBottom: '2px'
-              }}>
-                PROJECTS
-              </h2>
-              {resumeData.projects.map((project, index) => (
-                <div key={`project-${index}-${project.name}`} className="mb-4">
-                  <h4 className="font-semibold text-gray-900 mb-1" style={{
-                    fontFamily: 'Times New Roman, serif',
-                    fontSize: '12pt',
-                    fontWeight: 'bold'
-                  }}>
-                    {project.name}
-                  </h4>
-                  <p className="text-sm text-gray-700 mb-2" style={{
-                    fontFamily: 'Times New Roman, serif',
-                    fontSize: '11pt'
-                  }}>
-                    {project.description}
-                  </p>
-                  {project.technologies && (
-                    <p className="text-sm text-gray-600" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '10pt',
-                      fontStyle: 'italic'
-                    }}>
-                      <strong>Technologies:</strong> {project.technologies.join(', ')}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Footer */}
-          <div className="mt-8 pt-4 border-t border-gray-200 text-right">
-            <p className="text-xs text-gray-400" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '9pt'
-            }}>
-              Powered by iQua.ai
-            </p>
-          </div>
         </div>
       </div>
     );
@@ -738,7 +754,7 @@ Powered by iQua.ai
             <div className="overflow-y-auto p-4 bg-gray-50">
               <div className="text-center mb-4">
                 <h4 className="text-lg font-semibold text-gray-800 mb-2">Final Resume Preview</h4>
-                <p className="text-sm text-gray-600">Real-time preview of your selections</p>
+                <p className="text-sm text-gray-600">Real-time preview with editing capability</p>
               </div>
               {finalResume && <FinalResumePreview resumeData={finalResume} />}
               {!finalResume && (

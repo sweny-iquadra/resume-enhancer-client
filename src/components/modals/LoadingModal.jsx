@@ -25,54 +25,67 @@ const LoadingModal = ({ isVisible, message }) => {
         {/* Modal Body */}
         <div className="p-6 text-center">
           <div className="mb-6">
-            {/* Progress Animation */}
-            <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+            {/* Enhanced Progress Animation */}
+            <div className="w-full bg-gray-200 rounded-full h-3 mb-6 shadow-inner">
               <div 
-                className="h-2 rounded-full animate-pulse"
+                className="h-3 rounded-full relative overflow-hidden"
                 style={{
                   background: 'linear-gradient(90deg, #3935cd, #5b4de8, #7c69ef)',
                   width: '70%',
-                  animation: 'progress 2s ease-in-out infinite'
+                  animation: 'progressPulse 2.5s ease-in-out infinite'
                 }}
-              ></div>
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
+              </div>
             </div>
 
             {/* AI Processing Animation */}
-            <div className="flex justify-center items-center space-x-2 mb-4">
-              <div className="flex space-x-1">
+            <div className="flex justify-center items-center space-x-3 mb-6">
+              <div className="flex space-x-2">
                 <div 
-                  className="w-2 h-2 rounded-full animate-bounce"
+                  className="w-3 h-3 rounded-full animate-bounce shadow-lg"
                   style={{ 
                     backgroundColor: '#3935cd',
-                    animationDelay: '0ms'
+                    animationDelay: '0ms',
+                    boxShadow: '0 0 10px rgba(57, 53, 205, 0.5)'
                   }}
                 ></div>
                 <div 
-                  className="w-2 h-2 rounded-full animate-bounce"
+                  className="w-3 h-3 rounded-full animate-bounce shadow-lg"
                   style={{ 
                     backgroundColor: '#5b4de8',
-                    animationDelay: '150ms'
+                    animationDelay: '200ms',
+                    boxShadow: '0 0 10px rgba(91, 77, 232, 0.5)'
                   }}
                 ></div>
                 <div 
-                  className="w-2 h-2 rounded-full animate-bounce"
+                  className="w-3 h-3 rounded-full animate-bounce shadow-lg"
                   style={{ 
                     backgroundColor: '#7c69ef',
-                    animationDelay: '300ms'
+                    animationDelay: '400ms',
+                    boxShadow: '0 0 10px rgba(124, 105, 239, 0.5)'
                   }}
                 ></div>
               </div>
             </div>
           </div>
 
-          <p className="text-gray-700 text-lg leading-relaxed mb-4 font-medium">
-            {message || "iQua AI is generating your resume. This may take a few moments while we tailor your resume to your most relevant job role and skills."}
-          </p>
+          <div className="space-y-4">
+            <p className="text-gray-700 text-lg leading-relaxed font-medium">
+              {message || "🤖 iQua AI is crafting your perfect resume"}
+            </p>
+            <p className="text-gray-600 text-sm">
+              Analyzing your profile and tailoring content to your selected role
+            </p>
+          </div>
 
-          <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 border border-purple-100">
-            <div className="flex items-center justify-center space-x-2 text-sm text-gray-600">
-              <span className="inline-block w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-              <span>AI is analyzing your profile and experience</span>
+          <div className="mt-6 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-4 border border-purple-100">
+            <div className="flex items-center justify-center space-x-2 text-sm text-purple-700">
+              <div className="relative">
+                <span className="inline-block w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                <span className="absolute inset-0 w-2 h-2 bg-green-400 rounded-full animate-ping opacity-75"></span>
+              </div>
+              <span className="font-medium">AI is analyzing your unique profile</span>
             </div>
           </div>
         </div>

@@ -1,13 +1,12 @@
-
 import React, { useState } from 'react';
-import { enhanceResumeAPI, getUniqueJobRoles } from '../../utils/userProfile';
+import { enhanceResumeAPI } from '../../utils/userProfile';
 
 const ProfileCompletionModal = ({ 
   showProfileModal, 
   setShowProfileModal, 
-  userProfile, 
-  selectedRole, 
-  setIsLoading, 
+  userProfile,
+  selectedRole,
+  setIsLoading,
   setEnhancedResumeData,
   showRoleSelection,
   setShowRoleSelection,
@@ -15,7 +14,8 @@ const ProfileCompletionModal = ({
   handleRoleSelection
 }) => {
   const [currentSelectedRole, setCurrentSelectedRole] = useState(selectedRole);
-  
+  const [isGenerating, setIsGenerating] = useState(false);
+
   if (!showProfileModal) return null;
 
   const handleOutsideClick = (e) => {
@@ -24,31 +24,35 @@ const ProfileCompletionModal = ({
     }
   };
 
-  const handleGenerateAnyway = () => {
-    // Check if user has 3 or more different roles
-    if (uniqueRoles.length >= 3) {
-      setShowRoleSelection(true);
-    } else {
-      // Proceed with normal generation using the first available role or current selected role
-      const roleToUse = currentSelectedRole || uniqueRoles[0] || userProfile.role;
-      proceedWithGeneration(roleToUse);
+  const handleGenerateAnyway = async () => {
+    setIsGenerating(true);
+    try {
+      if (uniqueRoles.length >= 3) {
+        setShowRoleSelection(true);
+      } else {
+        // Proceed with normal generation using the first available role or current selected role
+        const roleToUse = currentSelectedRole || uniqueRoles[0] || userProfile.role;
+        await proceedWithGeneration(roleToUse);
+      }
+    } finally {
+      setIsGenerating(false);
     }
   };
 
-  
+
 
   const proceedWithGeneration = async (roleToUse) => {
     setShowProfileModal(false);
     setIsLoading(true);
-    
+
     try {
       // Call the enhance resume API
       const response = await enhanceResumeAPI(roleToUse, userProfile);
-      
+
       if (response.success) {
         // Store in localStorage
         localStorage.setItem('enhancedResumeData', JSON.stringify(response.data));
-        
+
         // Update state
         setEnhancedResumeData(response.data.enhancedResume);
       } else {
@@ -78,7 +82,7 @@ const ProfileCompletionModal = ({
           >
             <span className="text-lg">✕</span>
           </button>
-          
+
           <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-3xl">📝</span>
           </div>
@@ -145,22 +149,24 @@ const ProfileCompletionModal = ({
                   <div className="w-px h-12 bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
                 </div>
 
-                {/* Generate Anyway Button - Secondary Action */}
+                {/* Generate Resume Anyway Button - Secondary Action */}
                 <button 
                   onClick={handleGenerateAnyway}
-                  className="text-gray-700 border-2 border-gray-300 px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold hover:bg-gray-50 hover:border-gray-400 transform hover:scale-105 flex-1 max-w-[180px] relative overflow-hidden"
-                  onMouseEnter={(e) => {
-                    e.target.style.borderColor = '#9ca3af';
-                    e.target.style.backgroundColor = '#f9fafb';
-                    e.target.style.transform = 'scale(1.05) translateY(-2px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.borderColor = '#d1d5db';
-                    e.target.style.backgroundColor = 'transparent';
-                    e.target.style.transform = 'scale(1)';
-                  }}
+                  disabled={isGenerating}
+                  className={`border-2 px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold flex-1 max-w-[180px] flex items-center justify-center space-x-2 ${
+                    isGenerating 
+                      ? 'text-gray-500 border-gray-200 bg-gray-50 cursor-not-allowed' 
+                      : 'text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]'
+                  }`}
                 >
-                  <span className="relative z-10">GENERATE ANYWAY</span>
+                  {isGenerating ? (
+                    <>
+                      <div className="animate-spin w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full"></div>
+                      <span>GENERATING...</span>
+                    </>
+                  ) : (
+                    <span>GENERATE ANYWAY</span>
+                  )}
                 </button>
               </div>
             </>
@@ -175,7 +181,7 @@ const ProfileCompletionModal = ({
                 <p className="text-gray-700 text-sm mb-4 leading-relaxed">
                   We noticed you've explored multiple job roles with iQua.ai. Please select the role you'd like us to tailor this resume for:
                 </p>
-                
+
                 {/* Dropdown Style Selection */}
                 <div className="bg-white rounded-lg border border-blue-200 overflow-hidden shadow-sm">
                   <div className="p-3 bg-blue-50 border-b border-blue-200">

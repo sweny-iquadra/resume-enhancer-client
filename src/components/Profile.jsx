@@ -504,23 +504,129 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
 
       {/* Education Modal */}
       {showEducationModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96 max-w-md">
-            <h3 className="text-lg font-medium mb-4">Add Education</h3>
-            <p className="text-gray-600 mb-4">Education form will be implemented here</p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={handleCloseEducationModal}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCloseEducationModal}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-              >
-                Save
-              </button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            {/* Header */}
+            <div 
+              className="text-white p-6 rounded-t-xl text-center"
+              style={{
+                background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)'
+              }}
+            >
+              <h3 className="text-xl font-semibold">Educational Details</h3>
+            </div>
+
+            {/* Form Content */}
+            <div className="p-6 space-y-4">
+              {/* Qualification Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Qualification*
+                </label>
+                <input
+                  type="text"
+                  placeholder="Bachelor"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50"
+                />
+              </div>
+
+              {/* Academy Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Academy*
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50"
+                />
+                <p className="text-red-500 text-sm mt-1">Please fill this field</p>
+              </div>
+
+              {/* Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Field*
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50"
+                />
+              </div>
+
+              {/* Score Field with Radio Options */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Score*
+                </label>
+                <div className="flex items-center space-x-6 mb-3">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="scoreType"
+                      value="cgpa"
+                      defaultChecked
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">CGPA</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="scoreType"
+                      value="percentage"
+                      className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Percentage</span>
+                  </label>
+                </div>
+                <input
+                  type="text"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50"
+                />
+              </div>
+
+              {/* Date Fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    placeholder="yyyy-mm-dd"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    placeholder="yyyy-mm-dd"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50"
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-3 pt-4">
+                <button
+                  onClick={handleCloseEducationModal}
+                  className="flex-1 bg-white text-black border border-gray-300 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCloseEducationModal}
+                  className="flex-1 text-white py-3 rounded-lg font-medium transition-colors"
+                  style={{
+                    background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)'
+                  }}
+                >
+                  Submit
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -782,4 +782,4 @@ Powered by iQua.ai
   );
 };
 
-export default ResumePreview;
+export default ResumePreview; default ResumePreview;

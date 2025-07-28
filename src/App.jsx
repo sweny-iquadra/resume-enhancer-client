@@ -28,6 +28,7 @@ function App() {
     selectedRole,
     setSelectedRole,
     showRoleSelection,
+    setShowRoleSelection,
     handleRoleSelection,
     uniqueRoles,
     isLoading,

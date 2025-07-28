@@ -342,11 +342,13 @@ Powered by iQua.ai
             </h2>
             <div className="space-y-1">
               {resumeData.skills.map((skill, index) => (
-                getClickableLine(
-                  `${prefix}.skills.${index}`,
-                  skill,
-                  <span className="inline-block bg-gray-100 px-2 py-1 rounded text-sm mr-2 mb-1">{skill}</span>
-                )
+                <div key={index}>
+                  {getClickableLine(
+                    `${prefix}.skills.${index}`,
+                    skill,
+                    <span className="inline-block bg-gray-100 px-2 py-1 rounded text-sm mr-2 mb-1">{skill}</span>
+                  )}
+                </div>
               ))}
             </div>
           </div>
@@ -398,18 +400,20 @@ Powered by iQua.ai
                 )}
                 <div className="ml-4 space-y-1">
                   {exp.responsibilities.map((resp, respIndex) => (
-                    getClickableLine(
-                      `${prefix}.workExperience.${index}.responsibilities.${respIndex}`,
-                      resp,
-                      <li className="text-gray-800" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '12pt',
-                        lineHeight: '1.15',
-                        listStyleType: 'disc'
-                      }}>
-                        {resp}
-                      </li>
-                    )
+                    <div key={respIndex}>
+                      {getClickableLine(
+                        `${prefix}.workExperience.${index}.responsibilities.${respIndex}`,
+                        resp,
+                        <li className="text-gray-800" style={{
+                          fontFamily: 'Times New Roman, serif',
+                          fontSize: '12pt',
+                          lineHeight: '1.15',
+                          listStyleType: 'disc'
+                        }}>
+                          {resp}
+                        </li>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -454,11 +458,13 @@ Powered by iQua.ai
                 <div className="space-y-1">
                   <span className="font-medium text-gray-700">Technologies: </span>
                   {project.technologies.map((tech, techIndex) => (
-                    getClickableLine(
-                      `${prefix}.projects.${index}.technologies.${techIndex}`,
-                      tech,
-                      <span className="inline-block bg-blue-100 px-2 py-1 rounded text-sm mr-2 mb-1">{tech}</span>
-                    )
+                    <div key={techIndex} className="inline-block">
+                      {getClickableLine(
+                        `${prefix}.projects.${index}.technologies.${techIndex}`,
+                        tech,
+                        <span className="inline-block bg-blue-100 px-2 py-1 rounded text-sm mr-2 mb-1">{tech}</span>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>

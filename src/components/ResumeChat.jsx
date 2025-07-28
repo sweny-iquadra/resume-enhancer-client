@@ -6,6 +6,7 @@ const ResumeChat = ({
   hasAttendedInterview, 
   handleCreateResumeClick,
   showRoleSelection,
+  setShowRoleSelection,
   uniqueRoles,
   handleRoleSelection,
   isLoading,

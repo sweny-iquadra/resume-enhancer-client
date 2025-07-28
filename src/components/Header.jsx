@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage }) => {
@@ -64,58 +63,6 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
             </div>
           </div>
         </div>
-      </div>
-    </header>
-  );
-};
-
-export default Header;
-import React from 'react';
-
-const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage }) => {
-  return (
-    <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        {/* Logo and Brand */}
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">iQ</span>
-          </div>
-          <h1 className="text-xl font-semibold text-gray-800">iQua.AI</h1>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex items-center space-x-6">
-          <button
-            onClick={() => setCurrentPage('dashboard')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              currentPage === 'dashboard' 
-                ? 'bg-purple-100 text-purple-700' 
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            Dashboard
-          </button>
-          <button
-            onClick={() => setCurrentPage('interview')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              currentPage === 'interview' 
-                ? 'bg-purple-100 text-purple-700' 
-                : 'text-gray-600 hover:text-gray-800'
-            }`}
-          >
-            Interview
-          </button>
-        </nav>
-
-        {/* Resume Chat Button */}
-        <button
-          onClick={() => setShowResumeChat(!showResumeChat)}
-          className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all shadow-md flex items-center space-x-2"
-        >
-          <span>📄</span>
-          <span>Resume Builder</span>
-        </button>
       </div>
     </header>
   );

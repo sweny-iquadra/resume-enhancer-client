@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const LoadingModal = ({ isVisible, message }) => {
@@ -37,7 +36,7 @@ const LoadingModal = ({ isVisible, message }) => {
                 }}
               ></div>
             </div>
-            
+
             {/* AI Processing Animation */}
             <div className="flex justify-center items-center space-x-2 mb-4">
               <div className="flex space-x-1">
@@ -76,48 +75,6 @@ const LoadingModal = ({ isVisible, message }) => {
               <span>AI is analyzing your profile and experience</span>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default LoadingModal;
-import React from 'react';
-
-const LoadingModal = ({ isVisible, message }) => {
-  if (!isVisible) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-fade-in">
-        <div className="p-8 text-center">
-          {/* Loading Animation */}
-          <div className="flex justify-center mb-6">
-            <div className="relative">
-              <div className="w-16 h-16 border-4 border-purple-200 rounded-full animate-spin border-t-purple-600"></div>
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                <span className="text-2xl">📄</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Loading Text */}
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">
-            Enhancing Your Resume
-          </h3>
-          <p className="text-gray-600 text-sm leading-relaxed mb-4">
-            {message || "Our AI is working to create the perfect resume for you..."}
-          </p>
-          
-          {/* Progress Indicator */}
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-gradient-to-r from-purple-600 to-purple-700 h-2 rounded-full animate-pulse" style={{width: '70%'}}></div>
-          </div>
-          
-          <p className="text-xs text-gray-500 mt-3">
-            This may take a few moments...
-          </p>
         </div>
       </div>
     </div>

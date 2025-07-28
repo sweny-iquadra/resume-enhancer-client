@@ -66,9 +66,8 @@ const ProfileCompletionModal = ({
         setShowSuccessContent(false);
         setIsGenerating(false);
         
-        // Use setTimeout to ensure modal closes before showing success toast
+        // Set loading to false after modal closes
         setTimeout(() => {
-          setShowSuccessToast(true);
           setIsLoading(false);
         }, 0);
 

@@ -258,11 +258,19 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     return keys;
   };
 
-  // Function to select all from one resume and deselect all from the other
-  const handleSelectAll = (resumeType) => {
+  // Function to check if all items from a resume type are selected
+  const areAllSelectedForResumeType = (resumeType) => {
+    const resumeData = resumeType === 'original' ? originalResume : enhancedResumeData;
+    const keys = getAllKeysForResume(resumeData, resumeType);
+    return keys.length > 0 && keys.every(key => selections[key] === true);
+  };
+
+  // Function to toggle select all from one resume
+  const handleSelectAllToggle = (resumeType) => {
     setSelections(prev => {
       const newSelections = { ...prev };
       const otherResumeType = resumeType === 'original' ? 'enhanced' : 'original';
+      const allCurrentlySelected = areAllSelectedForResumeType(resumeType);
 
       // Get all keys for both resumes
       const selectedResumeData = resumeType === 'original' ? originalResume : enhancedResumeData;
@@ -271,15 +279,23 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       const selectedKeys = getAllKeysForResume(selectedResumeData, resumeType);
       const otherKeys = getAllKeysForResume(otherResumeData, otherResumeType);
 
-      // Select all from chosen resume
-      selectedKeys.forEach(key => {
-        newSelections[key] = true;
-      });
-
-      // Deselect all from other resume
-      otherKeys.forEach(key => {
-        newSelections[key] = false;
-      });
+      if (allCurrentlySelected) {
+        // If all are selected, clear all selections from both resumes
+        selectedKeys.forEach(key => {
+          newSelections[key] = false;
+        });
+        otherKeys.forEach(key => {
+          newSelections[key] = false;
+        });
+      } else {
+        // If not all are selected, select all from chosen resume and deselect all from other
+        selectedKeys.forEach(key => {
+          newSelections[key] = true;
+        });
+        otherKeys.forEach(key => {
+          newSelections[key] = false;
+        });
+      }
 
       return newSelections;
     });
@@ -1104,11 +1120,11 @@ Powered by iQua.ai
                 <h4 className="text-lg font-semibold text-gray-800 mb-2">Your Original</h4>
                 <p className="text-sm text-gray-600 mb-3">Select content to keep</p>
                 <button
-                  onClick={() => handleSelectAll('original')}
+                  onClick={() => handleSelectAllToggle('original')}
                   className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg flex items-center space-x-2 mx-auto"
                 >
-                  <span>✓</span>
-                  <span>Use All Original</span>
+                  <span>{areAllSelectedForResumeType('original') ? '✕' : '✓'}</span>
+                  <span>{areAllSelectedForResumeType('original') ? 'Clear Selection' : 'Use All Original'}</span>
                 </button>
               </div>
               <InteractiveWordDocument 
@@ -1125,11 +1141,11 @@ Powered by iQua.ai
                 <h4 className="text-lg font-semibold text-gray-800 mb-2">AI Enhanced</h4>
                 <p className="text-sm text-gray-600 mb-3">Select improved content</p>
                 <button
-                  onClick={() => handleSelectAll('enhanced')}
+                  onClick={() => handleSelectAllToggle('enhanced')}
                   className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg flex items-center space-x-2 mx-auto"
                 >
-                  <span>✓</span>
-                  <span>Use All Enhanced</span>
+                  <span>{areAllSelectedForResumeType('enhanced') ? '✕' : '✓'}</span>
+                  <span>{areAllSelectedForResumeType('enhanced') ? 'Clear Selection' : 'Use All Enhanced'}</span>
                 </button>
               </div>
               <InteractiveWordDocument 

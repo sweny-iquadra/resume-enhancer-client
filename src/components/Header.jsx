@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage }) => {
@@ -48,14 +47,18 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
         <div className="flex items-center space-x-4">
           <div 
             onClick={() => setShowResumeChat(!showResumeChat)}
-            className="w-10 h-10 rounded-lg flex items-center justify-center hover:shadow-lg transition-all cursor-pointer shadow-md animate-pulse" 
+            className="w-10 h-10 rounded-lg flex items-center justify-center hover:shadow-xl transition-all duration-300 cursor-pointer shadow-lg transform hover:scale-110 hover:-translate-y-1 active:scale-95" 
             style={{
-              background: '#3935cd',
-              animation: 'blink-glow-custom 1.5s ease-in-out infinite'
+              background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 100%)',
+              animation: showResumeChat ? 'none' : 'gentlePulse 2s ease-in-out infinite',
+              boxShadow: '0 4px 20px rgba(57, 53, 205, 0.3)'
             }}
-            title="Resume Enhancer"
+            title="Resume Enhancer - Click to open"
           >
-            <span className="text-white text-base font-medium">📄</span>
+            <span className="text-white text-base font-medium transform transition-transform duration-200">📄</span>
+            {!showResumeChat && (
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white"></div>
+            )}
           </div>
           <div className="flex items-center space-x-3">
             <span className="text-gray-700 font-medium text-sm">John Smith</span>

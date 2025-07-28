@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
+import MDEditor from '@uiw/react-md-editor';
 
 const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const [selections, setSelections] = useState({});
@@ -49,49 +49,135 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         projects: []
       };
 
-      // Basic Details
+      // Basic Details - line by line with mutual exclusion
       Object.keys(originalResume.basicDetails).forEach(key => {
-        const selectionKey = `basicDetails.${key}`;
-        final.basicDetails[key] = selections[selectionKey] === 'enhanced' 
-          ? enhancedResumeData.basicDetails[key] 
-          : originalResume.basicDetails[key];
+        const originalKey = `original.basicDetails.${key}`;
+        const enhancedKey = `enhanced.basicDetails.${key}`;
+
+        // Due to mutual exclusion, only one can be true at a time
+        if (selections[enhancedKey]) {
+          final.basicDetails[key] = enhancedResumeData.basicDetails[key];
+        } else if (selections[originalKey]) {
+          final.basicDetails[key] = originalResume.basicDetails[key];
+        }
       });
 
-      // Professional Summary
-      final.professionalSummary = selections['professionalSummary'] === 'enhanced'
-        ? enhancedResumeData.professionalSummary
-        : originalResume.professionalSummary;
+      // Professional Summary with mutual exclusion
+      if (selections['enhanced.professionalSummary']) {
+        final.professionalSummary = enhancedResumeData.professionalSummary;
+      } else if (selections['original.professionalSummary']) {
+        final.professionalSummary = originalResume.professionalSummary;
+      }
 
-      // Skills
-      final.skills = selections['skills'] === 'enhanced'
-        ? enhancedResumeData.skills
-        : originalResume.skills;
+      // Skills - individual skill selection
+      originalResume.skills.forEach((skill, index) => {
+        if (selections[`original.skills.${index}`]) {
+          final.skills.push(skill);
+        }
+      });
+      enhancedResumeData.skills.forEach((skill, index) => {
+        if (selections[`enhanced.skills.${index}`] && !final.skills.includes(skill)) {
+          final.skills.push(skill);
+        }
+      });
 
-      // Work Experience
+      // Work Experience - line by line
       const maxWorkExp = Math.max(originalResume.workExperience.length, enhancedResumeData.workExperience.length);
       for (let i = 0; i < maxWorkExp; i++) {
-        const selectionKey = `workExperience.${i}`;
         const originalExp = originalResume.workExperience[i];
         const enhancedExp = enhancedResumeData.workExperience[i];
 
-        if (selections[selectionKey] === 'enhanced' && enhancedExp) {
-          final.workExperience.push(enhancedExp);
-        } else if (originalExp) {
-          final.workExperience.push(originalExp);
+        const expToAdd = {};
+        let hasContent = false;
+
+        // Check position, company, duration with mutual exclusion
+        ['position', 'company', 'duration'].forEach(field => {
+          const enhancedKey = `enhanced.workExperience.${i}.${field}`;
+          const originalKey = `original.workExperience.${i}.${field}`;
+
+          if (selections[enhancedKey] && enhancedExp?.[field]) {
+            expToAdd[field] = enhancedExp[field];
+            hasContent = true;
+          } else if (selections[originalKey] && originalExp?.[field]) {
+            expToAdd[field] = originalExp[field];
+            hasContent = true;
+          }
+        });
+
+        // Handle responsibilities with mutual exclusion
+        expToAdd.responsibilities = [];
+
+        // Get all responsibility indices from both resumes
+        const maxResponsibilities = Math.max(
+          originalExp?.responsibilities?.length || 0,
+          enhancedExp?.responsibilities?.length || 0
+        );
+
+        for (let respIndex = 0; respIndex < maxResponsibilities; respIndex++) {
+          const enhancedKey = `enhanced.workExperience.${i}.responsibilities.${respIndex}`;
+          const originalKey = `original.workExperience.${i}.responsibilities.${respIndex}`;
+
+          if (selections[enhancedKey] && enhancedExp?.responsibilities?.[respIndex]) {
+            expToAdd.responsibilities.push(enhancedExp.responsibilities[respIndex]);
+            hasContent = true;
+          } else if (selections[originalKey] && originalExp?.responsibilities?.[respIndex]) {
+            expToAdd.responsibilities.push(originalExp.responsibilities[respIndex]);
+            hasContent = true;
+          }
+        }
+
+        if (hasContent) {
+          final.workExperience.push(expToAdd);
         }
       }
 
-      // Projects
+      // Projects - line by line
       const maxProjects = Math.max(originalResume.projects.length, enhancedResumeData.projects?.length || 0);
       for (let i = 0; i < maxProjects; i++) {
-        const selectionKey = `projects.${i}`;
         const originalProject = originalResume.projects[i];
         const enhancedProject = enhancedResumeData.projects?.[i];
 
-        if (selections[selectionKey] === 'enhanced' && enhancedProject) {
-          final.projects.push(enhancedProject);
-        } else if (originalProject) {
-          final.projects.push(originalProject);
+        const projectToAdd = {};
+        let hasContent = false;
+
+        // Check name, description with mutual exclusion
+        ['name', 'description'].forEach(field => {
+          const enhancedKey = `enhanced.projects.${i}.${field}`;
+          const originalKey = `original.projects.${i}.${field}`;
+
+          if (selections[enhancedKey] && enhancedProject?.[field]) {
+            projectToAdd[field] = enhancedProject[field];
+            hasContent = true;
+          } else if (selections[originalKey] && originalProject?.[field]) {
+            projectToAdd[field] = originalProject[field];
+            hasContent = true;
+          }
+        });
+
+        // Handle technologies with mutual exclusion
+        projectToAdd.technologies = [];
+
+        // Get all technology indices from both resumes
+        const maxTechnologies = Math.max(
+          originalProject?.technologies?.length || 0,
+          enhancedProject?.technologies?.length || 0
+        );
+
+        for (let techIndex = 0; techIndex < maxTechnologies; techIndex++) {
+          const enhancedKey = `enhanced.projects.${i}.technologies.${techIndex}`;
+          const originalKey = `original.projects.${i}.technologies.${techIndex}`;
+
+          if (selections[enhancedKey] && enhancedProject?.technologies?.[techIndex]) {
+            projectToAdd.technologies.push(enhancedProject.technologies[techIndex]);
+            hasContent = true;
+          } else if (selections[originalKey] && originalProject?.technologies?.[techIndex]) {
+            projectToAdd.technologies.push(originalProject.technologies[techIndex]);
+            hasContent = true;
+          }
+        }
+
+        if (hasContent) {
+          final.projects.push(projectToAdd);
         }
       }
 
@@ -109,50 +195,151 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     }
   };
 
-  const handleSelection = (key, version) => {
-    setSelections(prev => ({
-      ...prev,
-      [key]: version
-    }));
+  const handleSelection = (key, isSelected) => {
+    setSelections(prev => {
+      const newSelections = { ...prev };
+
+      if (isSelected) {
+        // When selecting a line, we need to deselect the corresponding line from the other resume
+        const keyParts = key.split('.');
+        const resumeType = keyParts[0]; // 'original' or 'enhanced'
+        const otherResumeType = resumeType === 'original' ? 'enhanced' : 'original';
+
+        // Create the corresponding key for the other resume
+        const correspondingKey = key.replace(`${resumeType}.`, `${otherResumeType}.`);
+
+        // Set the selected line and deselect the corresponding line from the other resume
+        newSelections[key] = true;
+        newSelections[correspondingKey] = false;
+      } else {
+        // Simply deselect the line
+        newSelections[key] = false;
+      }
+
+      return newSelections;
+    });
+  };
+
+  // Function to get all possible keys for a resume
+  const getAllKeysForResume = (resumeData, prefix) => {
+    const keys = [];
+
+    // Basic details
+    Object.keys(resumeData.basicDetails).forEach(key => {
+      keys.push(`${prefix}.basicDetails.${key}`);
+    });
+
+    // Professional summary
+    keys.push(`${prefix}.professionalSummary`);
+
+    // Skills
+    resumeData.skills.forEach((_, index) => {
+      keys.push(`${prefix}.skills.${index}`);
+    });
+
+    // Work experience
+    resumeData.workExperience.forEach((exp, index) => {
+      keys.push(`${prefix}.workExperience.${index}.position`);
+      keys.push(`${prefix}.workExperience.${index}.company`);
+      keys.push(`${prefix}.workExperience.${index}.duration`);
+      exp.responsibilities.forEach((_, respIndex) => {
+        keys.push(`${prefix}.workExperience.${index}.responsibilities.${respIndex}`);
+      });
+    });
+
+    // Projects
+    resumeData.projects.forEach((project, index) => {
+      keys.push(`${prefix}.projects.${index}.name`);
+      keys.push(`${prefix}.projects.${index}.description`);
+      project.technologies.forEach((_, techIndex) => {
+        keys.push(`${prefix}.projects.${index}.technologies.${techIndex}`);
+      });
+    });
+
+    return keys;
+  };
+
+  // Function to check if all items from a resume type are selected
+  const areAllSelectedForResumeType = (resumeType) => {
+    const resumeData = resumeType === 'original' ? originalResume : enhancedResumeData;
+    const keys = getAllKeysForResume(resumeData, resumeType);
+    return keys.length > 0 && keys.every(key => selections[key] === true);
+  };
+
+  // Function to toggle select all from one resume
+  const handleSelectAllToggle = (resumeType) => {
+    setSelections(prev => {
+      const newSelections = { ...prev };
+      const otherResumeType = resumeType === 'original' ? 'enhanced' : 'original';
+      const allCurrentlySelected = areAllSelectedForResumeType(resumeType);
+
+      // Get all keys for both resumes
+      const selectedResumeData = resumeType === 'original' ? originalResume : enhancedResumeData;
+      const otherResumeData = resumeType === 'original' ? enhancedResumeData : originalResume;
+
+      const selectedKeys = getAllKeysForResume(selectedResumeData, resumeType);
+      const otherKeys = getAllKeysForResume(otherResumeData, otherResumeType);
+
+      if (allCurrentlySelected) {
+        // If all are selected, clear all selections from both resumes
+        selectedKeys.forEach(key => {
+          newSelections[key] = false;
+        });
+        otherKeys.forEach(key => {
+          newSelections[key] = false;
+        });
+      } else {
+        // If not all are selected, select all from chosen resume and deselect all from other
+        selectedKeys.forEach(key => {
+          newSelections[key] = true;
+        });
+        otherKeys.forEach(key => {
+          newSelections[key] = false;
+        });
+      }
+
+      return newSelections;
+    });
   };
 
   const downloadResume = (format) => {
     if (!finalResume) return;
 
-    // Create resume content
+    // Generate content from finalResume object with proper formatting
     const resumeContent = `
-${finalResume.basicDetails.name}
-${finalResume.basicDetails.email} | ${finalResume.basicDetails.phone}
-${finalResume.basicDetails.location}
+${finalResume.basicDetails.name || ''}
+${finalResume.basicDetails.email || ''} | ${finalResume.basicDetails.phone || ''}
+${finalResume.basicDetails.location || ''}
 
 PROFESSIONAL SUMMARY
-${finalResume.professionalSummary}
+${finalResume.professionalSummary || ''}
 
 TECHNICAL SKILLS
 ${finalResume.skills.join(' • ')}
 
 WORK EXPERIENCE
 ${finalResume.workExperience.map(exp => `
-${exp.position} | ${exp.company} | ${exp.duration}
-${exp.responsibilities.map(resp => `• ${resp}`).join('\n')}
+${exp.position || ''}
+${exp.company || ''} | ${exp.duration || ''}
+${exp.responsibilities?.map(resp => `• ${resp}`).join('\n') || ''}
 `).join('\n')}
 
 PROJECTS
-${finalResume.projects.map(project => `
-${project.name}
-${project.description}
-Technologies: ${project.technologies.join(', ')}
-`).join('\n')}
+${finalResume.projects?.map(project => `
+${project.name || ''}
+${project.description || ''}
+Technologies: ${project.technologies?.join(', ') || ''}
+`).join('\n') || ''}
 
 Powered by iQua.ai
-    `;
+    `.trim();
 
     // Create and download file
     const blob = new Blob([resumeContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `resume_${finalResume.basicDetails.name.replace(/\s+/g, '_')}.${format.toLowerCase()}`;
+    a.download = `resume_${finalResume.basicDetails.name?.replace(/\s+/g, '_') || 'resume'}.${format.toLowerCase()}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -161,38 +348,34 @@ Powered by iQua.ai
     console.log(`Downloading resume as ${format}`);
   };
 
-  // Interactive Word Document Component with clickable sections
-  const InteractiveWordDocument = ({ resumeData, enhancedData, title, isOriginal = false }) => {
-    const getClickableSection = (sectionKey, content, isHeader = false) => {
-      const isSelected = selections[sectionKey];
-      const isFromOriginal = isSelected === 'original';
-      const isFromEnhanced = isSelected === 'enhanced';
-      
-      let bgColor = 'hover:bg-blue-50';
-      let borderColor = 'hover:border-blue-300';
-      
-      if (isFromOriginal && isOriginal) {
-        bgColor = 'bg-green-100 border-green-300';
-      } else if (isFromEnhanced && !isOriginal) {
-        bgColor = 'bg-green-100 border-green-300';
-      } else if ((isFromOriginal && !isOriginal) || (isFromEnhanced && isOriginal)) {
-        bgColor = 'bg-gray-100 opacity-50';
-      }
+  // Interactive Word Document Component with line-by-line selection
+  const InteractiveWordDocument = ({ resumeData, title, isOriginal = false, prefix }) => {
+    const getClickableLine = (key, content, displayContent = null) => {
+      const isSelected = selections[key];
 
       return (
-        <div
-          className={`cursor-pointer transition-all duration-200 border-2 border-transparent rounded p-1 ${bgColor} ${borderColor}`}
-          onClick={() => handleSelection(sectionKey, isOriginal ? 'original' : 'enhanced')}
-          title={`Click to select this ${isOriginal ? 'original' : 'enhanced'} content`}
-        >
-          {content}
+        <div className="flex items-start gap-2 group">
+          <input
+            type="checkbox"
+            checked={isSelected || false}
+            onChange={(e) => handleSelection(key, e.target.checked)}
+            className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+          />
+          <div
+            className={`flex-1 cursor-pointer transition-all duration-200 rounded p-1 ${
+              isSelected ? 'bg-green-100 border-green-300 border' : 'hover:bg-blue-50 border border-transparent'
+            }`}
+            onClick={() => handleSelection(key, !isSelected)}
+          >
+            {displayContent || content}
+          </div>
         </div>
       );
     };
 
     return (
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-        {/* Document Header - Word-style */}
+        {/* Document Header */}
         <div className="bg-gray-100 px-4 py-2 border-b border-gray-300 flex items-center space-x-2">
           <div className="flex space-x-1">
             <div className="w-3 h-3 bg-red-500 rounded-full"></div>
@@ -206,17 +389,19 @@ Powered by iQua.ai
           </div>
         </div>
 
-        {/* Document Content - Styled like Microsoft Word */}
-        <div className="p-8 min-h-[600px]" style={{
+        {/* Document Content */}
+        <div className="p-8 min-h-[600px] space-y-4" style={{
           fontFamily: 'Times New Roman, serif',
           fontSize: '12pt',
           lineHeight: '1.15',
           background: 'white'
         }}>
           {/* Header Section */}
-          <div className="text-center mb-6 pb-3 border-b-2 border-gray-300">
-            {getClickableSection('name', 
-              <h1 className="text-2xl font-bold text-gray-900 mb-2" style={{
+          <div className="text-center mb-6 pb-3 border-b-2 border-gray-300 space-y-2">
+            {getClickableLine(
+              `${prefix}.basicDetails.name`,
+              resumeData.basicDetails.name,
+              <h1 className="text-2xl font-bold text-gray-900" style={{
                 fontFamily: 'Times New Roman, serif',
                 fontSize: '18pt',
                 fontWeight: 'bold'
@@ -224,19 +409,25 @@ Powered by iQua.ai
                 {resumeData.basicDetails.name}
               </h1>
             )}
-            {getClickableSection('contact',
-              <div className="text-sm text-gray-700" style={{ fontSize: '11pt' }}>
-                <span>{resumeData.basicDetails.email}</span>
-                <span className="mx-2">|</span>
-                <span>{resumeData.basicDetails.phone}</span>
-                <span className="mx-2">|</span>
-                <span>{resumeData.basicDetails.location}</span>
-              </div>
+            {getClickableLine(
+              `${prefix}.basicDetails.email`,
+              resumeData.basicDetails.email,
+              <span className="text-sm text-gray-700">{resumeData.basicDetails.email}</span>
+            )}
+            {getClickableLine(
+              `${prefix}.basicDetails.phone`,
+              resumeData.basicDetails.phone,
+              <span className="text-sm text-gray-700">{resumeData.basicDetails.phone}</span>
+            )}
+            {getClickableLine(
+              `${prefix}.basicDetails.location`,
+              resumeData.basicDetails.location,
+              <span className="text-sm text-gray-700">{resumeData.basicDetails.location}</span>
             )}
           </div>
 
           {/* Professional Summary */}
-          <div className="mb-6">
+          <div className="mb-6 space-y-2">
             <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
               fontFamily: 'Times New Roman, serif',
               fontSize: '14pt',
@@ -246,7 +437,9 @@ Powered by iQua.ai
             }}>
               PROFESSIONAL SUMMARY
             </h2>
-            {getClickableSection('professionalSummary',
+            {getClickableLine(
+              `${prefix}.professionalSummary`,
+              resumeData.professionalSummary,
               <p className="text-gray-800 text-justify" style={{
                 fontFamily: 'Times New Roman, serif',
                 fontSize: '12pt',
@@ -259,7 +452,7 @@ Powered by iQua.ai
           </div>
 
           {/* Technical Skills */}
-          <div className="mb-6">
+          <div className="mb-6 space-y-2">
             <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
               fontFamily: 'Times New Roman, serif',
               fontSize: '14pt',
@@ -269,18 +462,21 @@ Powered by iQua.ai
             }}>
               TECHNICAL SKILLS
             </h2>
-            {getClickableSection('skills',
-              <p className="text-gray-800" style={{
-                fontFamily: 'Times New Roman, serif',
-                fontSize: '12pt'
-              }}>
-                {resumeData.skills.join(' • ')}
-              </p>
-            )}
+            <div className="space-y-1">
+              {resumeData.skills.map((skill, index) => (
+                <div key={index}>
+                  {getClickableLine(
+                    `${prefix}.skills.${index}`,
+                    skill,
+                    <span className="inline-block bg-gray-100 px-2 py-1 rounded text-sm mr-2 mb-1">{skill}</span>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Work Experience */}
-          <div className="mb-6">
+          <div className="mb-6 space-y-4">
             <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
               fontFamily: 'Times New Roman, serif',
               fontSize: '14pt',
@@ -291,50 +487,63 @@ Powered by iQua.ai
               WORK EXPERIENCE
             </h2>
             {resumeData.workExperience.map((exp, index) => (
-              <div key={index} className="mb-4">
-                {getClickableSection(`workExperience.${index}`,
-                  <div>
-                    <div className="flex justify-between items-start mb-1">
-                      <h3 className="font-bold text-gray-900" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '12pt',
-                        fontWeight: 'bold'
-                      }}>
-                        {exp.position}
-                      </h3>
-                      <span className="text-gray-700 text-right" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '12pt'
-                      }}>
-                        {exp.duration}
-                      </span>
-                    </div>
-                    <div className="text-gray-800 mb-2 italic" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '12pt',
-                      fontStyle: 'italic'
-                    }}>
-                      {exp.company}
-                    </div>
-                    <ul className="ml-4" style={{ listStyleType: 'disc' }}>
-                      {exp.responsibilities.map((resp, respIndex) => (
-                        <li key={respIndex} className="text-gray-800 mb-1" style={{
+              <div key={index} className="space-y-2">
+                {getClickableLine(
+                  `${prefix}.workExperience.${index}.position`,
+                  exp.position,
+                  <h3 className="font-bold text-gray-900" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '12pt',
+                    fontWeight: 'bold'
+                  }}>
+                    {exp.position}
+                  </h3>
+                )}
+                {getClickableLine(
+                  `${prefix}.workExperience.${index}.company`,
+                  exp.company,
+                  <div className="text-gray-800 italic" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '12pt',
+                    fontStyle: 'italic'
+                  }}>
+                    {exp.company}
+                  </div>
+                )}
+                {getClickableLine(
+                  `${prefix}.workExperience.${index}.duration`,
+                  exp.duration,
+                  <span className="text-gray-700" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '12pt'
+                  }}>
+                    {exp.duration}
+                  </span>
+                )}
+                <div className="ml-4 space-y-1">
+                  {exp.responsibilities.map((resp, respIndex) => (
+                    <div key={respIndex}>
+                      {getClickableLine(
+                        `${prefix}.workExperience.${index}.responsibilities.${respIndex}`,
+                        resp,
+                        <li className="text-gray-800" style={{
                           fontFamily: 'Times New Roman, serif',
                           fontSize: '12pt',
-                          lineHeight: '1.15'
+                          lineHeight: '1.15',
+                          listStyleType: 'disc'
                         }}>
                           {resp}
                         </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
 
           {/* Projects */}
-          <div className="mb-6">
+          <div className="mb-6 space-y-4">
             <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
               fontFamily: 'Times New Roman, serif',
               fontSize: '14pt',
@@ -345,32 +554,41 @@ Powered by iQua.ai
               PROJECTS
             </h2>
             {resumeData.projects.map((project, index) => (
-              <div key={index} className="mb-3">
-                {getClickableSection(`projects.${index}`,
-                  <div>
-                    <h3 className="font-bold text-gray-900" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '12pt',
-                      fontWeight: 'bold'
-                    }}>
-                      {project.name}
-                    </h3>
-                    <p className="text-gray-800 mb-1" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '12pt',
-                      lineHeight: '1.15'
-                    }}>
-                      {project.description}
-                    </p>
-                    <p className="text-gray-700 text-sm" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '11pt',
-                      fontStyle: 'italic'
-                    }}>
-                      <span className="font-medium">Technologies:</span> {project.technologies.join(', ')}
-                    </p>
-                  </div>
+              <div key={index} className="space-y-2">
+                {getClickableLine(
+                  `${prefix}.projects.${index}.name`,
+                  project.name,
+                  <h3 className="font-bold text-gray-900" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '12pt',
+                    fontWeight: 'bold'
+                  }}>
+                    {project.name}
+                  </h3>
                 )}
+                {getClickableLine(
+                  `${prefix}.projects.${index}.description`,
+                  project.description,
+                  <p className="text-gray-800" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '12pt',
+                    lineHeight: '1.15'
+                  }}>
+                    {project.description}
+                  </p>
+                )}
+                <div className="space-y-1">
+                  <span className="font-medium text-gray-700">Technologies: </span>
+                  {project.technologies.map((tech, techIndex) => (
+                    <div key={techIndex} className="inline-block">
+                      {getClickableLine(
+                        `${prefix}.projects.${index}.technologies.${techIndex}`,
+                        tech,
+                        <span className="inline-block bg-blue-100 px-2 py-1 rounded text-sm mr-2 mb-1">{tech}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -389,13 +607,118 @@ Powered by iQua.ai
     );
   };
 
-  // Final Resume Preview Component (using original styling)
+  // Final Resume Preview Component with Rich Text Editor
   const FinalResumePreview = ({ resumeData }) => {
+    const [isRichTextMode, setIsRichTextMode] = useState(false);
+    const [richTextContent, setRichTextContent] = useState('');
+    const [editedResumeData, setEditedResumeData] = useState(null);
+
+    // Initialize edited resume data and rich text content
+    useEffect(() => {
+      if (resumeData) {
+        setEditedResumeData({ ...resumeData });
+        // Convert resume data to HTML for rich text editor
+        const htmlContent = generateResumeHTML(resumeData);
+        setRichTextContent(htmlContent);
+      }
+    }, [resumeData]);
+
     if (!resumeData) return null;
-    
+
+    const displayData = editedResumeData || resumeData;
+
+    // Generate markdown content from resume data
+    const generateResumeHTML = (data) => {
+      // Safely access basic details with fallbacks
+      const name = data?.basicDetails?.name || 'Your Name';
+      const email = data?.basicDetails?.email || 'your.email@example.com';
+      const phone = data?.basicDetails?.phone || '+1 (555) 123-4567';
+      const location = data?.basicDetails?.location || 'Your Location';
+      const summary = data?.professionalSummary || 'Professional summary will appear here';
+      const skills = data?.skills || [];
+      const workExperience = data?.workExperience || [];
+      const projects = data?.projects || [];
+
+      return `# ${name}
+
+**${email}** | **${phone}** | **${location}**
+
+---
+
+## PROFESSIONAL SUMMARY
+
+${summary}
+
+---
+
+## TECHNICAL SKILLS
+
+${skills.map(skill => `- ${skill}`).join('\n')}
+
+---
+
+## WORK EXPERIENCE
+
+${workExperience.map(exp => `
+### ${exp?.position || 'Position Title'}
+**${exp?.company || 'Company Name'}** | *${exp?.duration || 'Duration'}*
+
+${exp?.responsibilities?.map(resp => `- ${resp}`).join('\n') || ''}
+`).join('\n')}
+
+---
+
+## PROJECTS
+
+${projects.map(project => `
+### ${project?.name || 'Project Name'}
+${project?.description || 'Project description'}
+
+**Technologies:** ${project?.technologies?.join(', ') || 'Technologies used'}
+`).join('\n')}
+
+---
+
+*Powered by iQua.ai*
+      `;
+    };
+
+    // Rich text editor configuration
+    const editorConfig = {
+      preview: 'edit',
+      hideToolbar: false,
+      visibleDragBar: false,
+    };
+
+    // Parse HTML back to resume data (simplified)
+    const parseHTMLToResumeData = (html) => {
+      // This would be a more complex function in production
+      // For now, we'll keep the structured data and just store the HTML
+      return {
+        ...displayData,
+        htmlContent: html
+      };
+    };
+
+    const handleRichTextChange = (content) => {
+      setRichTextContent(content);
+      // Update the structured data as well
+      const updatedData = parseHTMLToResumeData(content);
+      setEditedResumeData(updatedData);
+    };
+
+    const toggleEditMode = () => {
+      if (isRichTextMode) {
+        // Save the rich text content
+        const updatedData = parseHTMLToResumeData(richTextContent);
+        setEditedResumeData(updatedData);
+      }
+      setIsRichTextMode(!isRichTextMode);
+    };
+
     return (
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-        {/* Document Header - Word-style */}
+        {/* Document Header */}
         <div className="bg-gray-100 px-4 py-2 border-b border-gray-300 flex items-center space-x-2">
           <div className="flex space-x-1">
             <div className="w-3 h-3 bg-red-500 rounded-full"></div>
@@ -404,174 +727,72 @@ Powered by iQua.ai
           </div>
           <span className="text-sm text-gray-600 font-medium">Final_Resume.docx</span>
           <div className="ml-auto flex items-center space-x-2">
+            <button
+              onClick={toggleEditMode}
+              className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                isRichTextMode 
+                  ? 'bg-green-500 text-white hover:bg-green-600' 
+                  : 'bg-blue-500 text-white hover:bg-blue-600'
+              }`}
+            >
+              {isRichTextMode ? '💾 Save & Exit' : '✏️ Rich Edit'}
+            </button>
             <span className="text-xs text-gray-500">📄</span>
             <span className="text-xs text-gray-500">100%</span>
           </div>
         </div>
 
-        {/* Document Content - Styled like Microsoft Word */}
-        <div className="p-8 min-h-[600px]" style={{
-          fontFamily: 'Times New Roman, serif',
-          fontSize: '12pt',
-          lineHeight: '1.15',
-          background: 'white'
-        }}>
-          {/* Header Section */}
-          <div className="text-center mb-6 pb-3 border-b-2 border-gray-300">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '18pt',
-              fontWeight: 'bold'
-            }}>
-              {resumeData.basicDetails.name}
-            </h1>
-            <div className="text-sm text-gray-700" style={{ fontSize: '11pt' }}>
-              <span>{resumeData.basicDetails.email}</span>
-              <span className="mx-2">|</span>
-              <span>{resumeData.basicDetails.phone}</span>
-              <span className="mx-2">|</span>
-              <span>{resumeData.basicDetails.location}</span>
+        {/* Document Content */}
+        <div className="min-h-[600px]">
+          {isRichTextMode ? (
+            // Rich Text Editor Mode
+            <div className="h-full">
+              <div style={{ minHeight: '600px' }}>
+                <MDEditor
+                  value={richTextContent}
+                  onChange={handleRichTextChange}
+                  preview="edit"
+                  hideToolbar={false}
+                  visibledragbar={false}
+                  data-color-mode="light"
+                  style={{
+                    minHeight: '600px',
+                    fontFamily: "'Times New Roman', serif"
+                  }}
+                />
+              </div>
+            </div>
+          ) : (
+            // Preview Mode with structured layout
+            <div className="p-8 space-y-4" style={{ minHeight: '600px' }}>
+              <MDEditor.Markdown 
+                source={richTextContent} 
+                style={{
+                  fontFamily: 'Times New Roman, serif',
+                  fontSize: '12pt',
+                  lineHeight: '1.15',
+                  background: 'white'
+                }}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Formatting Tips */}
+        {isRichTextMode && (
+          <div className="border-t border-gray-200 p-4 bg-blue-50">
+            <div className="text-sm text-blue-700">
+              <strong>💡 Formatting Tips:</strong>
+              <ul className="mt-2 ml-4 space-y-1">
+                <li>• Use # for your name, ## for sections (EXPERIENCE, SKILLS, etc.)</li>
+                <li>• Use **text** for bold, *text* for italic</li>
+                <li>• Use - or * for bullet points</li>
+                <li>• Use --- for horizontal lines/dividers</li>
+                <li>• Keep formatting simple and professional</li>
+              </ul>
             </div>
           </div>
-
-          {/* Professional Summary */}
-          <div className="mb-6">
-            <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '14pt',
-              fontWeight: 'bold',
-              borderBottom: '1px solid #333',
-              paddingBottom: '2px'
-            }}>
-              PROFESSIONAL SUMMARY
-            </h2>
-            <p className="text-gray-800 text-justify" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '12pt',
-              lineHeight: '1.15',
-              textAlign: 'justify'
-            }}>
-              {resumeData.professionalSummary}
-            </p>
-          </div>
-
-          {/* Technical Skills */}
-          <div className="mb-6">
-            <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '14pt',
-              fontWeight: 'bold',
-              borderBottom: '1px solid #333',
-              paddingBottom: '2px'
-            }}>
-              TECHNICAL SKILLS
-            </h2>
-            <p className="text-gray-800" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '12pt'
-            }}>
-              {resumeData.skills.join(' • ')}
-            </p>
-          </div>
-
-          {/* Work Experience */}
-          <div className="mb-6">
-            <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '14pt',
-              fontWeight: 'bold',
-              borderBottom: '1px solid #333',
-              paddingBottom: '2px'
-            }}>
-              WORK EXPERIENCE
-            </h2>
-            {resumeData.workExperience.map((exp, index) => (
-              <div key={index} className="mb-4">
-                <div className="flex justify-between items-start mb-1">
-                  <h3 className="font-bold text-gray-900" style={{
-                    fontFamily: 'Times New Roman, serif',
-                    fontSize: '12pt',
-                    fontWeight: 'bold'
-                  }}>
-                    {exp.position}
-                  </h3>
-                  <span className="text-gray-700 text-right" style={{
-                    fontFamily: 'Times New Roman, serif',
-                    fontSize: '12pt'
-                  }}>
-                    {exp.duration}
-                  </span>
-                </div>
-                <div className="text-gray-800 mb-2 italic" style={{
-                  fontFamily: 'Times New Roman, serif',
-                  fontSize: '12pt',
-                  fontStyle: 'italic'
-                }}>
-                  {exp.company}
-                </div>
-                <ul className="ml-4" style={{ listStyleType: 'disc' }}>
-                  {exp.responsibilities.map((resp, respIndex) => (
-                    <li key={respIndex} className="text-gray-800 mb-1" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '12pt',
-                      lineHeight: '1.15'
-                    }}>
-                      {resp}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          {/* Projects */}
-          <div className="mb-6">
-            <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '14pt',
-              fontWeight: 'bold',
-              borderBottom: '1px solid #333',
-              paddingBottom: '2px'
-            }}>
-              PROJECTS
-            </h2>
-            {resumeData.projects.map((project, index) => (
-              <div key={index} className="mb-3">
-                <h3 className="font-bold text-gray-900" style={{
-                  fontFamily: 'Times New Roman, serif',
-                  fontSize: '12pt',
-                  fontWeight: 'bold'
-                }}>
-                  {project.name}
-                </h3>
-                <p className="text-gray-800 mb-1" style={{
-                  fontFamily: 'Times New Roman, serif',
-                  fontSize: '12pt',
-                  lineHeight: '1.15'
-                }}>
-                  {project.description}
-                </p>
-                <p className="text-gray-700 text-sm" style={{
-                  fontFamily: 'Times New Roman, serif',
-                  fontSize: '11pt',
-                  fontStyle: 'italic'
-                }}>
-                  <span className="font-medium">Technologies:</span> {project.technologies.join(', ')}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {/* Footer */}
-          <div className="mt-8 pt-4 border-t border-gray-200 text-right">
-            <p className="text-xs text-gray-400" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '9pt'
-            }}>
-              Powered by iQua.ai
-            </p>
-          </div>
-        </div>
+        )}
       </div>
     );
   };
@@ -585,8 +806,8 @@ Powered by iQua.ai
         {/* Modal Header */}
         <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6 rounded-t-2xl flex justify-between items-center">
           <div>
-            <h3 className="text-xl font-semibold">Smart Resume Builder</h3>
-            <p className="text-sm opacity-90 mt-1">Your resume, reimagined intelligently</p>
+            <h3 className="text-xl font-semibold">Resume Builder</h3>
+            <p className="text-sm opacity-90 mt-1">Choose content from both versions</p>
           </div>
           <button
             onClick={() => setShowPreview(false)}
@@ -602,42 +823,56 @@ Powered by iQua.ai
             {/* Left Panel - Original Resume */}
             <div className="overflow-y-auto p-4 border-r border-gray-200">
               <div className="text-center mb-4">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">Original Resume</h4>
-                <p className="text-sm text-gray-600">Click on any section to select it for your final resume</p>
+                <h4 className="text-lg font-semibold text-gray-800 mb-2">Your Original</h4>
+                <p className="text-sm text-gray-600 mb-3">Select content to keep</p>
+                <button
+                  onClick={() => handleSelectAllToggle('original')}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg flex items-center space-x-2 mx-auto"
+                >
+                  <span>{areAllSelectedForResumeType('original') ? '✕' : '✓'}</span>
+                  <span>{areAllSelectedForResumeType('original') ? 'Clear Selection' : 'Use All Original'}</span>
+                </button>
               </div>
               <InteractiveWordDocument 
                 resumeData={originalResume} 
-                enhancedData={enhancedResumeData}
                 title="Original_Resume.docx"
                 isOriginal={true}
+                prefix="original"
               />
             </div>
 
             {/* Middle Panel - Enhanced Resume */}
             <div className="overflow-y-auto p-4 border-r border-gray-200">
               <div className="text-center mb-4">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">AI Enhanced Resume</h4>
-                <p className="text-sm text-gray-600">Click on any section to select it for your final resume</p>
+                <h4 className="text-lg font-semibold text-gray-800 mb-2">AI Enhanced</h4>
+                <p className="text-sm text-gray-600 mb-3">Select improved content</p>
+                <button
+                  onClick={() => handleSelectAllToggle('enhanced')}
+                  className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg flex items-center space-x-2 mx-auto"
+                >
+                  <span>{areAllSelectedForResumeType('enhanced') ? '✕' : '✓'}</span>
+                  <span>{areAllSelectedForResumeType('enhanced') ? 'Clear Selection' : 'Use All Enhanced'}</span>
+                </button>
               </div>
               <InteractiveWordDocument 
                 resumeData={enhancedResumeData} 
-                enhancedData={enhancedResumeData}
                 title="Enhanced_Resume.docx"
                 isOriginal={false}
+                prefix="enhanced"
               />
             </div>
 
             {/* Right Panel - Final Resume Preview */}
             <div className="overflow-y-auto p-4 bg-gray-50">
               <div className="text-center mb-4">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">Final Resume Preview</h4>
-                <p className="text-sm text-gray-600">Real-time preview of your selections</p>
+                <h4 className="text-lg font-semibold text-gray-800 mb-2">Final Resume</h4>
+                <p className="text-sm text-gray-600">Live preview & edit</p>
               </div>
               {finalResume && <FinalResumePreview resumeData={finalResume} />}
               {!finalResume && (
                 <div className="bg-white rounded-lg p-8 text-center text-gray-500">
                   <div className="mb-4">📄</div>
-                  <p>Start selecting content from the original or enhanced resume to build your final version</p>
+                  <p>Select content from either version to build your resume</p>
                 </div>
               )}
             </div>
@@ -648,7 +883,7 @@ Powered by iQua.ai
         <div className="border-t border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              Click directly on sections in the original or enhanced resume to build your final version
+              Pick individual lines or use "Use All" buttons for quick selection
             </div>
             <div className="flex space-x-3">
               <button
@@ -657,7 +892,7 @@ Powered by iQua.ai
                 className="bg-red-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-600 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>📄</span>
-                <span>Download as PDF</span>
+                <span>Download PDF</span>
               </button>
               <button
                 onClick={() => downloadResume('DOC')}
@@ -665,7 +900,7 @@ Powered by iQua.ai
                 className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>📃</span>
-                <span>Download as DOC</span>
+                <span>Download DOC</span>
               </button>
             </div>
           </div>

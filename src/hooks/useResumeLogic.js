@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { createUserProfile, checkProfileCompletion, getCompletedInterviewsCount, getUniqueJobRoles } from '../utils/userProfile';
+import { createUserProfile, checkProfileCompletion, getCompletedInterviewsCount, getUniqueJobRoles, enhanceResumeAPI } from '../utils/userProfile';
 
 export const useResumeLogic = () => {
   const [showResumeChat, setShowResumeChat] = useState(false);
@@ -13,6 +13,7 @@ export const useResumeLogic = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [enhancedResumeData, setEnhancedResumeData] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   // Calculate interview status based on interview history
   const completedInterviewsCount = getCompletedInterviewsCount(userProfile);
@@ -22,34 +23,80 @@ export const useResumeLogic = () => {
   const handleCreateResumeClick = () => {
     if (!hasAttendedInterview) {
       setShowInterviewModal(true);
-    } else if (uniqueRoles.length >= 3) {
-      // Show role selection in chat
-      setShowRoleSelection(true);
     } else {
-      // Proceed with single role or check profile completion
+      // Proceed with single role or default role
       const defaultRole = uniqueRoles[0] || userProfile.role;
       setSelectedRole(defaultRole);
-      
+
+      // Check if profile is complete first
       if (!checkProfileCompletion(userProfile)) {
         setShowProfileModal(true);
       } else {
-        // Handle resume creation logic here
-        console.log('Creating resume...');
-        alert('Resume creation started!');
+        // Profile is complete - check for multiple roles
+        if (uniqueRoles.length >= 3) {
+          // Show role selection for users with 3+ different roles
+          setShowRoleSelection(true);
+        } else {
+          // Proceed with resume enhancement for single role or less than 3 roles
+          handleResumeEnhancement(defaultRole);
+        }
       }
     }
   };
 
   const handleRoleSelection = (role) => {
-    setSelectedRole(role);
+    // Format role to industry-standard format (lowercase, hyphenated)
+    const formattedRole = role.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    setSelectedRole(formattedRole);
     setShowRoleSelection(false);
-    
-    if (!checkProfileCompletion(userProfile)) {
-      setShowProfileModal(true);
-    } else {
-      // Handle resume creation logic here
-      console.log('Creating resume with role:', role);
-      alert('Resume creation started!');
+
+    // Profile is already confirmed complete at this point - proceed with resume enhancement
+    handleResumeEnhancement(role); // Use original role for display purposes
+  };
+
+  const handleResumeEnhancement = async (role) => {
+    try {
+      // Show loading modal
+      setIsLoading(true);
+
+      // Call the enhance resume API with user profile data
+      const response = await enhanceResumeAPI(role, userProfile);
+
+      if (response.success) {
+        // Store in localStorage
+        localStorage.setItem('enhancedResumeData', JSON.stringify(response.data));
+
+        // Update state with enhanced resume data
+        setEnhancedResumeData(response.data.enhancedResume);
+
+        // Show success toast
+        setShowSuccessToast(true);
+
+        // Show success feedback
+        console.log('✅ Resume enhanced successfully!');
+      } else {
+        console.error('API call failed:', response);
+        
+        // Show user-friendly error message
+        alert('❌ Failed to enhance resume. Our AI encountered an issue. Please try again or check your profile completeness.');
+        
+        // If profile is incomplete, show profile modal for completion
+        if (!checkProfileCompletion(userProfile)) {
+          setShowProfileModal(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error calling enhance resume API:', error);
+      
+      // Show user-friendly error message
+      alert('⚠️ Network error occurred while enhancing your resume. Please check your internet connection and try again.');
+      
+      // If profile is incomplete, show profile modal for completion
+      if (!checkProfileCompletion(userProfile)) {
+        setShowProfileModal(true);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -78,12 +125,13 @@ export const useResumeLogic = () => {
     setShowRoleSelection,
     handleRoleSelection,
     uniqueRoles,
-    completedInterviewsCount,
     isLoading,
     setIsLoading,
     enhancedResumeData,
     setEnhancedResumeData,
     showPreview,
-    setShowPreview
+    setShowPreview,
+    showSuccessToast,
+    setShowSuccessToast
   };
 };

@@ -1,6 +1,6 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
+import './index.css';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import InterviewPage from './components/InterviewPage';
@@ -8,6 +8,8 @@ import ResumeChat from './components/ResumeChat';
 import ResumePreview from './components/ResumePreview';
 import ProfileCompletionModal from './components/modals/ProfileCompletionModal';
 import InterviewRequirementModal from './components/modals/InterviewRequirementModal';
+import LoadingModal from './components/modals/LoadingModal';
+import SuccessToast from './components/modals/SuccessToast';
 import { useResumeLogic } from './hooks/useResumeLogic';
 
 function App() {
@@ -25,7 +27,9 @@ function App() {
     handleCreateResumeClick,
     navigateToInterview,
     selectedRole,
+    setSelectedRole,
     showRoleSelection,
+    setShowRoleSelection,
     handleRoleSelection,
     uniqueRoles,
     isLoading,
@@ -33,7 +37,9 @@ function App() {
     enhancedResumeData,
     setEnhancedResumeData,
     showPreview,
-    setShowPreview
+    setShowPreview,
+    showSuccessToast,
+    setShowSuccessToast
   } = useResumeLogic();
 
   return (
@@ -76,12 +82,15 @@ function App() {
           hasAttendedInterview={hasAttendedInterview}
           handleCreateResumeClick={handleCreateResumeClick}
           showRoleSelection={showRoleSelection}
+          setShowRoleSelection={setShowRoleSelection}
           uniqueRoles={uniqueRoles}
           handleRoleSelection={handleRoleSelection}
           isLoading={isLoading}
           enhancedResumeData={enhancedResumeData}
           setShowPreview={setShowPreview}
           setCurrentPage={setCurrentPage}
+          setEnhancedResumeData={setEnhancedResumeData}
+          setSelectedRole={setSelectedRole}
         />
 
         {/* Resume Preview Modal */}
@@ -99,6 +108,13 @@ function App() {
           selectedRole={selectedRole}
           setIsLoading={setIsLoading}
           setEnhancedResumeData={setEnhancedResumeData}
+          showRoleSelection={showRoleSelection}
+          setShowRoleSelection={setShowRoleSelection}
+          uniqueRoles={uniqueRoles}
+          handleRoleSelection={handleRoleSelection}
+          setShowSuccessToast={setShowSuccessToast}
+          setShowPreview={setShowPreview}
+          setCurrentPage={setCurrentPage}
         />
 
         {/* Interview Requirement Modal */}
@@ -106,6 +122,18 @@ function App() {
           showInterviewModal={showInterviewModal}
           setShowInterviewModal={setShowInterviewModal}
           navigateToInterview={navigateToInterview}
+        />
+
+        {/* Loading Modal */}
+        <LoadingModal 
+          isVisible={isLoading}
+          message="iQua AI is generating your resume. This may take a few moments while we tailor your resume to your most relevant job role and skills."
+        />
+
+        {/* Success Toast */}
+        <SuccessToast 
+          showSuccessToast={showSuccessToast}
+          setShowSuccessToast={setShowSuccessToast}
         />
       </div>
     </div>

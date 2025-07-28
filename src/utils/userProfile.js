@@ -12,7 +12,7 @@ export const createUserProfile = () => ({
   role: "Software Developer",
   sector: "Technology",
   skills: ["JavaScript", "React", "Node.js", "Python", "SQL"],
-  professionalSummary: "Experienced software developer with 2+ years in web development. Skilled in JavaScript and React with a passion for creating user-friendly applications.", // This will be auto-generated
+  professionalSummary: null, // Made null to test missing field
   workExperience: [
     {
       company: "Tech Solutions Inc",
@@ -21,13 +21,7 @@ export const createUserProfile = () => ({
       responsibilities: ["Developed web applications", "Collaborated with team"]
     }
   ],
-  projects: [
-    {
-      name: "E-commerce Website",
-      description: "Created a responsive e-commerce website with shopping cart functionality",
-      technologies: ["HTML", "CSS", "JavaScript", "React"]
-    }
-  ], // Missing project information
+  projects: null, // Made null to test missing field
   interviewHistory: [
     {
       id: 1,

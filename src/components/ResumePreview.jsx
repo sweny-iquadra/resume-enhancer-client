@@ -793,7 +793,7 @@ Powered by iQua.ai
                     : 'bg-blue-500 text-white hover:bg-blue-600'
                 }`}
               >
-                {isEditing ? '💾 Save' : '✏️ Edit'}
+                {isEditing ? '💾 Done' : '✏️ Edit'}
               </button>
             <span className="text-xs text-gray-500">📄</span>
             <span className="text-xs text-gray-500">100%</span>
@@ -1084,8 +1084,8 @@ Powered by iQua.ai
         {/* Modal Header */}
         <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6 rounded-t-2xl flex justify-between items-center">
           <div>
-            <h3 className="text-xl font-semibold">Smart Resume Builder</h3>
-            <p className="text-sm opacity-90 mt-1">Select individual lines to build your perfect resume</p>
+            <h3 className="text-xl font-semibold">Resume Builder</h3>
+            <p className="text-sm opacity-90 mt-1">Choose content from both versions</p>
           </div>
           <button
             onClick={() => setShowPreview(false)}
@@ -1101,14 +1101,14 @@ Powered by iQua.ai
             {/* Left Panel - Original Resume */}
             <div className="overflow-y-auto p-4 border-r border-gray-200">
               <div className="text-center mb-4">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">Original Resume</h4>
-                <p className="text-sm text-gray-600 mb-3">Check lines to include in your final resume</p>
+                <h4 className="text-lg font-semibold text-gray-800 mb-2">Your Original</h4>
+                <p className="text-sm text-gray-600 mb-3">Select content to keep</p>
                 <button
                   onClick={() => handleSelectAll('original')}
                   className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg flex items-center space-x-2 mx-auto"
                 >
                   <span>✓</span>
-                  <span>Select All Original</span>
+                  <span>Use All Original</span>
                 </button>
               </div>
               <InteractiveWordDocument 
@@ -1122,14 +1122,14 @@ Powered by iQua.ai
             {/* Middle Panel - Enhanced Resume */}
             <div className="overflow-y-auto p-4 border-r border-gray-200">
               <div className="text-center mb-4">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">AI Enhanced Resume</h4>
-                <p className="text-sm text-gray-600 mb-3">Check lines to include in your final resume</p>
+                <h4 className="text-lg font-semibold text-gray-800 mb-2">AI Enhanced</h4>
+                <p className="text-sm text-gray-600 mb-3">Select improved content</p>
                 <button
                   onClick={() => handleSelectAll('enhanced')}
                   className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg flex items-center space-x-2 mx-auto"
                 >
                   <span>✓</span>
-                  <span>Select All Enhanced</span>
+                  <span>Use All Enhanced</span>
                 </button>
               </div>
               <InteractiveWordDocument 
@@ -1143,14 +1143,14 @@ Powered by iQua.ai
             {/* Right Panel - Final Resume Preview */}
             <div className="overflow-y-auto p-4 bg-gray-50">
               <div className="text-center mb-4">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">Final Resume Preview</h4>
-                <p className="text-sm text-gray-600">Real-time preview with editing capability</p>
+                <h4 className="text-lg font-semibold text-gray-800 mb-2">Final Resume</h4>
+                <p className="text-sm text-gray-600">Live preview & edit</p>
               </div>
               {finalResume && <FinalResumePreview resumeData={finalResume} />}
               {!finalResume && (
                 <div className="bg-white rounded-lg p-8 text-center text-gray-500">
                   <div className="mb-4">📄</div>
-                  <p>Start checking lines from the original or enhanced resume to build your final version</p>
+                  <p>Select content from either version to build your resume</p>
                 </div>
               )}
             </div>
@@ -1161,7 +1161,7 @@ Powered by iQua.ai
         <div className="border-t border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              Check individual lines or use "Select All" buttons to customize your resume with granular control
+              Pick individual lines or use "Use All" buttons for quick selection
             </div>
             <div className="flex space-x-3">
               <button
@@ -1170,7 +1170,7 @@ Powered by iQua.ai
                 className="bg-red-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-600 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>📄</span>
-                <span>Download as PDF</span>
+                <span>Download PDF</span>
               </button>
               <button
                 onClick={() => downloadResume('DOC')}
@@ -1178,7 +1178,7 @@ Powered by iQua.ai
                 className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>📃</span>
-                <span>Download as DOC</span>
+                <span>Download DOC</span>
               </button>
             </div>
           </div>

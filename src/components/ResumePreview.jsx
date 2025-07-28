@@ -48,11 +48,12 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         projects: []
       };
 
-      // Basic Details - line by line
+      // Basic Details - line by line with mutual exclusion
       Object.keys(originalResume.basicDetails).forEach(key => {
         const originalKey = `original.basicDetails.${key}`;
         const enhancedKey = `enhanced.basicDetails.${key}`;
 
+        // Due to mutual exclusion, only one can be true at a time
         if (selections[enhancedKey]) {
           final.basicDetails[key] = enhancedResumeData.basicDetails[key];
         } else if (selections[originalKey]) {
@@ -60,7 +61,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         }
       });
 
-      // Professional Summary
+      // Professional Summary with mutual exclusion
       if (selections['enhanced.professionalSummary']) {
         final.professionalSummary = enhancedResumeData.professionalSummary;
       } else if (selections['original.professionalSummary']) {
@@ -88,31 +89,41 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         const expToAdd = {};
         let hasContent = false;
 
-        // Check position, company, duration
+        // Check position, company, duration with mutual exclusion
         ['position', 'company', 'duration'].forEach(field => {
-          if (selections[`enhanced.workExperience.${i}.${field}`] && enhancedExp?.[field]) {
+          const enhancedKey = `enhanced.workExperience.${i}.${field}`;
+          const originalKey = `original.workExperience.${i}.${field}`;
+          
+          if (selections[enhancedKey] && enhancedExp?.[field]) {
             expToAdd[field] = enhancedExp[field];
             hasContent = true;
-          } else if (selections[`original.workExperience.${i}.${field}`] && originalExp?.[field]) {
+          } else if (selections[originalKey] && originalExp?.[field]) {
             expToAdd[field] = originalExp[field];
             hasContent = true;
           }
         });
 
-        // Handle responsibilities
+        // Handle responsibilities with mutual exclusion
         expToAdd.responsibilities = [];
-        originalExp?.responsibilities?.forEach((resp, respIndex) => {
-          if (selections[`original.workExperience.${i}.responsibilities.${respIndex}`]) {
-            expToAdd.responsibilities.push(resp);
+        
+        // Get all responsibility indices from both resumes
+        const maxResponsibilities = Math.max(
+          originalExp?.responsibilities?.length || 0,
+          enhancedExp?.responsibilities?.length || 0
+        );
+        
+        for (let respIndex = 0; respIndex < maxResponsibilities; respIndex++) {
+          const enhancedKey = `enhanced.workExperience.${i}.responsibilities.${respIndex}`;
+          const originalKey = `original.workExperience.${i}.responsibilities.${respIndex}`;
+          
+          if (selections[enhancedKey] && enhancedExp?.responsibilities?.[respIndex]) {
+            expToAdd.responsibilities.push(enhancedExp.responsibilities[respIndex]);
+            hasContent = true;
+          } else if (selections[originalKey] && originalExp?.responsibilities?.[respIndex]) {
+            expToAdd.responsibilities.push(originalExp.responsibilities[respIndex]);
             hasContent = true;
           }
-        });
-        enhancedExp?.responsibilities?.forEach((resp, respIndex) => {
-          if (selections[`enhanced.workExperience.${i}.responsibilities.${respIndex}`]) {
-            expToAdd.responsibilities.push(resp);
-            hasContent = true;
-          }
-        });
+        }
 
         if (hasContent) {
           final.workExperience.push(expToAdd);
@@ -128,31 +139,41 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         const projectToAdd = {};
         let hasContent = false;
 
-        // Check name, description
+        // Check name, description with mutual exclusion
         ['name', 'description'].forEach(field => {
-          if (selections[`enhanced.projects.${i}.${field}`] && enhancedProject?.[field]) {
+          const enhancedKey = `enhanced.projects.${i}.${field}`;
+          const originalKey = `original.projects.${i}.${field}`;
+          
+          if (selections[enhancedKey] && enhancedProject?.[field]) {
             projectToAdd[field] = enhancedProject[field];
             hasContent = true;
-          } else if (selections[`original.projects.${i}.${field}`] && originalProject?.[field]) {
+          } else if (selections[originalKey] && originalProject?.[field]) {
             projectToAdd[field] = originalProject[field];
             hasContent = true;
           }
         });
 
-        // Handle technologies
+        // Handle technologies with mutual exclusion
         projectToAdd.technologies = [];
-        originalProject?.technologies?.forEach((tech, techIndex) => {
-          if (selections[`original.projects.${i}.technologies.${techIndex}`]) {
-            projectToAdd.technologies.push(tech);
+        
+        // Get all technology indices from both resumes
+        const maxTechnologies = Math.max(
+          originalProject?.technologies?.length || 0,
+          enhancedProject?.technologies?.length || 0
+        );
+        
+        for (let techIndex = 0; techIndex < maxTechnologies; techIndex++) {
+          const enhancedKey = `enhanced.projects.${i}.technologies.${techIndex}`;
+          const originalKey = `original.projects.${i}.technologies.${techIndex}`;
+          
+          if (selections[enhancedKey] && enhancedProject?.technologies?.[techIndex]) {
+            projectToAdd.technologies.push(enhancedProject.technologies[techIndex]);
+            hasContent = true;
+          } else if (selections[originalKey] && originalProject?.technologies?.[techIndex]) {
+            projectToAdd.technologies.push(originalProject.technologies[techIndex]);
             hasContent = true;
           }
-        });
-        enhancedProject?.technologies?.forEach((tech, techIndex) => {
-          if (selections[`enhanced.projects.${i}.technologies.${techIndex}`] && !projectToAdd.technologies.includes(tech)) {
-            projectToAdd.technologies.push(tech);
-            hasContent = true;
-          }
-        });
+        }
 
         if (hasContent) {
           final.projects.push(projectToAdd);
@@ -174,10 +195,28 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   };
 
   const handleSelection = (key, isSelected) => {
-    setSelections(prev => ({
-      ...prev,
-      [key]: isSelected
-    }));
+    setSelections(prev => {
+      const newSelections = { ...prev };
+      
+      if (isSelected) {
+        // When selecting a line, we need to deselect the corresponding line from the other resume
+        const keyParts = key.split('.');
+        const resumeType = keyParts[0]; // 'original' or 'enhanced'
+        const otherResumeType = resumeType === 'original' ? 'enhanced' : 'original';
+        
+        // Create the corresponding key for the other resume
+        const correspondingKey = key.replace(`${resumeType}.`, `${otherResumeType}.`);
+        
+        // Set the selected line and deselect the corresponding line from the other resume
+        newSelections[key] = true;
+        newSelections[correspondingKey] = false;
+      } else {
+        // Simply deselect the line
+        newSelections[key] = false;
+      }
+      
+      return newSelections;
+    });
   };
 
   const downloadResume = (format) => {
@@ -241,7 +280,7 @@ Powered by iQua.ai
           />
           <div
             className={`flex-1 cursor-pointer transition-all duration-200 rounded p-1 ${
-              isSelected ? 'bg-green-100 border-green-300' : 'hover:bg-blue-50'
+              isSelected ? 'bg-green-100 border-green-300 border' : 'hover:bg-blue-50 border border-transparent'
             }`}
             onClick={() => handleSelection(key, !isSelected)}
           >

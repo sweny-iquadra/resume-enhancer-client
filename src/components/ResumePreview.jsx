@@ -753,7 +753,7 @@ ${project?.description || 'Project description'}
                   onChange={handleRichTextChange}
                   preview="edit"
                   hideToolbar={false}
-                  visibleDragBar={false}
+                  visibledragbar={false}
                   data-color-mode="light"
                   style={{
                     minHeight: '600px',

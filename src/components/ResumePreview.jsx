@@ -49,49 +49,114 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         projects: []
       };
 
-      // Basic Details
+      // Basic Details - line by line
       Object.keys(originalResume.basicDetails).forEach(key => {
-        const selectionKey = `basicDetails.${key}`;
-        final.basicDetails[key] = selections[selectionKey] === 'enhanced' 
-          ? enhancedResumeData.basicDetails[key] 
-          : originalResume.basicDetails[key];
+        const originalKey = `original.basicDetails.${key}`;
+        const enhancedKey = `enhanced.basicDetails.${key}`;
+        
+        if (selections[enhancedKey]) {
+          final.basicDetails[key] = enhancedResumeData.basicDetails[key];
+        } else if (selections[originalKey]) {
+          final.basicDetails[key] = originalResume.basicDetails[key];
+        }
       });
 
       // Professional Summary
-      final.professionalSummary = selections['professionalSummary'] === 'enhanced'
-        ? enhancedResumeData.professionalSummary
-        : originalResume.professionalSummary;
+      if (selections['enhanced.professionalSummary']) {
+        final.professionalSummary = enhancedResumeData.professionalSummary;
+      } else if (selections['original.professionalSummary']) {
+        final.professionalSummary = originalResume.professionalSummary;
+      }
 
-      // Skills
-      final.skills = selections['skills'] === 'enhanced'
-        ? enhancedResumeData.skills
-        : originalResume.skills;
+      // Skills - individual skill selection
+      originalResume.skills.forEach((skill, index) => {
+        if (selections[`original.skills.${index}`]) {
+          final.skills.push(skill);
+        }
+      });
+      enhancedResumeData.skills.forEach((skill, index) => {
+        if (selections[`enhanced.skills.${index}`] && !final.skills.includes(skill)) {
+          final.skills.push(skill);
+        }
+      });
 
-      // Work Experience
+      // Work Experience - line by line
       const maxWorkExp = Math.max(originalResume.workExperience.length, enhancedResumeData.workExperience.length);
       for (let i = 0; i < maxWorkExp; i++) {
-        const selectionKey = `workExperience.${i}`;
         const originalExp = originalResume.workExperience[i];
         const enhancedExp = enhancedResumeData.workExperience[i];
+        
+        const expToAdd = {};
+        let hasContent = false;
 
-        if (selections[selectionKey] === 'enhanced' && enhancedExp) {
-          final.workExperience.push(enhancedExp);
-        } else if (originalExp) {
-          final.workExperience.push(originalExp);
+        // Check position, company, duration
+        ['position', 'company', 'duration'].forEach(field => {
+          if (selections[`enhanced.workExperience.${i}.${field}`] && enhancedExp?.[field]) {
+            expToAdd[field] = enhancedExp[field];
+            hasContent = true;
+          } else if (selections[`original.workExperience.${i}.${field}`] && originalExp?.[field]) {
+            expToAdd[field] = originalExp[field];
+            hasContent = true;
+          }
+        });
+
+        // Handle responsibilities
+        expToAdd.responsibilities = [];
+        originalExp?.responsibilities?.forEach((resp, respIndex) => {
+          if (selections[`original.workExperience.${i}.responsibilities.${respIndex}`]) {
+            expToAdd.responsibilities.push(resp);
+            hasContent = true;
+          }
+        });
+        enhancedExp?.responsibilities?.forEach((resp, respIndex) => {
+          if (selections[`enhanced.workExperience.${i}.responsibilities.${respIndex}`]) {
+            expToAdd.responsibilities.push(resp);
+            hasContent = true;
+          }
+        });
+
+        if (hasContent) {
+          final.workExperience.push(expToAdd);
         }
       }
 
-      // Projects
+      // Projects - line by line
       const maxProjects = Math.max(originalResume.projects.length, enhancedResumeData.projects?.length || 0);
       for (let i = 0; i < maxProjects; i++) {
-        const selectionKey = `projects.${i}`;
         const originalProject = originalResume.projects[i];
         const enhancedProject = enhancedResumeData.projects?.[i];
+        
+        const projectToAdd = {};
+        let hasContent = false;
 
-        if (selections[selectionKey] === 'enhanced' && enhancedProject) {
-          final.projects.push(enhancedProject);
-        } else if (originalProject) {
-          final.projects.push(originalProject);
+        // Check name, description
+        ['name', 'description'].forEach(field => {
+          if (selections[`enhanced.projects.${i}.${field}`] && enhancedProject?.[field]) {
+            projectToAdd[field] = enhancedProject[field];
+            hasContent = true;
+          } else if (selections[`original.projects.${i}.${field}`] && originalProject?.[field]) {
+            projectToAdd[field] = originalProject[field];
+            hasContent = true;
+          }
+        });
+
+        // Handle technologies
+        projectToAdd.technologies = [];
+        originalProject?.technologies?.forEach((tech, techIndex) => {
+          if (selections[`original.projects.${i}.technologies.${techIndex}`]) {
+            projectToAdd.technologies.push(tech);
+            hasContent = true;
+          }
+        });
+        enhancedProject?.technologies?.forEach((tech, techIndex) => {
+          if (selections[`enhanced.projects.${i}.technologies.${techIndex}`] && !projectToAdd.technologies.includes(tech)) {
+            projectToAdd.technologies.push(tech);
+            hasContent = true;
+          }
+        });
+
+        if (hasContent) {
+          final.projects.push(projectToAdd);
         }
       }
 
@@ -109,10 +174,10 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     }
   };
 
-  const handleSelection = (key, version) => {
+  const handleSelection = (key, isSelected) => {
     setSelections(prev => ({
       ...prev,
-      [key]: version
+      [key]: isSelected
     }));
   };
 
@@ -121,27 +186,27 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
     // Create resume content
     const resumeContent = `
-${finalResume.basicDetails.name}
-${finalResume.basicDetails.email} | ${finalResume.basicDetails.phone}
-${finalResume.basicDetails.location}
+${finalResume.basicDetails.name || ''}
+${finalResume.basicDetails.email || ''} | ${finalResume.basicDetails.phone || ''}
+${finalResume.basicDetails.location || ''}
 
 PROFESSIONAL SUMMARY
-${finalResume.professionalSummary}
+${finalResume.professionalSummary || ''}
 
 TECHNICAL SKILLS
 ${finalResume.skills.join(' • ')}
 
 WORK EXPERIENCE
 ${finalResume.workExperience.map(exp => `
-${exp.position} | ${exp.company} | ${exp.duration}
-${exp.responsibilities.map(resp => `• ${resp}`).join('\n')}
+${exp.position || ''} | ${exp.company || ''} | ${exp.duration || ''}
+${exp.responsibilities?.map(resp => `• ${resp}`).join('\n') || ''}
 `).join('\n')}
 
 PROJECTS
 ${finalResume.projects.map(project => `
-${project.name}
-${project.description}
-Technologies: ${project.technologies.join(', ')}
+${project.name || ''}
+${project.description || ''}
+Technologies: ${project.technologies?.join(', ') || ''}
 `).join('\n')}
 
 Powered by iQua.ai
@@ -152,7 +217,7 @@ Powered by iQua.ai
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `resume_${finalResume.basicDetails.name.replace(/\s+/g, '_')}.${format.toLowerCase()}`;
+    a.download = `resume_${finalResume.basicDetails.name?.replace(/\s+/g, '_') || 'resume'}.${format.toLowerCase()}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -161,38 +226,34 @@ Powered by iQua.ai
     console.log(`Downloading resume as ${format}`);
   };
 
-  // Interactive Word Document Component with clickable sections
-  const InteractiveWordDocument = ({ resumeData, enhancedData, title, isOriginal = false }) => {
-    const getClickableSection = (sectionKey, content, isHeader = false) => {
-      const isSelected = selections[sectionKey];
-      const isFromOriginal = isSelected === 'original';
-      const isFromEnhanced = isSelected === 'enhanced';
+  // Interactive Word Document Component with line-by-line selection
+  const InteractiveWordDocument = ({ resumeData, title, isOriginal = false, prefix }) => {
+    const getClickableLine = (key, content, displayContent = null) => {
+      const isSelected = selections[key];
       
-      let bgColor = 'hover:bg-blue-50';
-      let borderColor = 'hover:border-blue-300';
-      
-      if (isFromOriginal && isOriginal) {
-        bgColor = 'bg-green-100 border-green-300';
-      } else if (isFromEnhanced && !isOriginal) {
-        bgColor = 'bg-green-100 border-green-300';
-      } else if ((isFromOriginal && !isOriginal) || (isFromEnhanced && isOriginal)) {
-        bgColor = 'bg-gray-100 opacity-50';
-      }
-
       return (
-        <div
-          className={`cursor-pointer transition-all duration-200 border-2 border-transparent rounded p-1 ${bgColor} ${borderColor}`}
-          onClick={() => handleSelection(sectionKey, isOriginal ? 'original' : 'enhanced')}
-          title={`Click to select this ${isOriginal ? 'original' : 'enhanced'} content`}
-        >
-          {content}
+        <div className="flex items-start gap-2 group">
+          <input
+            type="checkbox"
+            checked={isSelected || false}
+            onChange={(e) => handleSelection(key, e.target.checked)}
+            className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+          />
+          <div
+            className={`flex-1 cursor-pointer transition-all duration-200 rounded p-1 ${
+              isSelected ? 'bg-green-100 border-green-300' : 'hover:bg-blue-50'
+            }`}
+            onClick={() => handleSelection(key, !isSelected)}
+          >
+            {displayContent || content}
+          </div>
         </div>
       );
     };
 
     return (
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-        {/* Document Header - Word-style */}
+        {/* Document Header */}
         <div className="bg-gray-100 px-4 py-2 border-b border-gray-300 flex items-center space-x-2">
           <div className="flex space-x-1">
             <div className="w-3 h-3 bg-red-500 rounded-full"></div>
@@ -206,17 +267,19 @@ Powered by iQua.ai
           </div>
         </div>
 
-        {/* Document Content - Styled like Microsoft Word */}
-        <div className="p-8 min-h-[600px]" style={{
+        {/* Document Content */}
+        <div className="p-8 min-h-[600px] space-y-4" style={{
           fontFamily: 'Times New Roman, serif',
           fontSize: '12pt',
           lineHeight: '1.15',
           background: 'white'
         }}>
           {/* Header Section */}
-          <div className="text-center mb-6 pb-3 border-b-2 border-gray-300">
-            {getClickableSection('name', 
-              <h1 className="text-2xl font-bold text-gray-900 mb-2" style={{
+          <div className="text-center mb-6 pb-3 border-b-2 border-gray-300 space-y-2">
+            {getClickableLine(
+              `${prefix}.basicDetails.name`,
+              resumeData.basicDetails.name,
+              <h1 className="text-2xl font-bold text-gray-900" style={{
                 fontFamily: 'Times New Roman, serif',
                 fontSize: '18pt',
                 fontWeight: 'bold'
@@ -224,19 +287,25 @@ Powered by iQua.ai
                 {resumeData.basicDetails.name}
               </h1>
             )}
-            {getClickableSection('contact',
-              <div className="text-sm text-gray-700" style={{ fontSize: '11pt' }}>
-                <span>{resumeData.basicDetails.email}</span>
-                <span className="mx-2">|</span>
-                <span>{resumeData.basicDetails.phone}</span>
-                <span className="mx-2">|</span>
-                <span>{resumeData.basicDetails.location}</span>
-              </div>
+            {getClickableLine(
+              `${prefix}.basicDetails.email`,
+              resumeData.basicDetails.email,
+              <span className="text-sm text-gray-700">{resumeData.basicDetails.email}</span>
+            )}
+            {getClickableLine(
+              `${prefix}.basicDetails.phone`,
+              resumeData.basicDetails.phone,
+              <span className="text-sm text-gray-700">{resumeData.basicDetails.phone}</span>
+            )}
+            {getClickableLine(
+              `${prefix}.basicDetails.location`,
+              resumeData.basicDetails.location,
+              <span className="text-sm text-gray-700">{resumeData.basicDetails.location}</span>
             )}
           </div>
 
           {/* Professional Summary */}
-          <div className="mb-6">
+          <div className="mb-6 space-y-2">
             <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
               fontFamily: 'Times New Roman, serif',
               fontSize: '14pt',
@@ -246,7 +315,9 @@ Powered by iQua.ai
             }}>
               PROFESSIONAL SUMMARY
             </h2>
-            {getClickableSection('professionalSummary',
+            {getClickableLine(
+              `${prefix}.professionalSummary`,
+              resumeData.professionalSummary,
               <p className="text-gray-800 text-justify" style={{
                 fontFamily: 'Times New Roman, serif',
                 fontSize: '12pt',
@@ -259,7 +330,7 @@ Powered by iQua.ai
           </div>
 
           {/* Technical Skills */}
-          <div className="mb-6">
+          <div className="mb-6 space-y-2">
             <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
               fontFamily: 'Times New Roman, serif',
               fontSize: '14pt',
@@ -269,18 +340,19 @@ Powered by iQua.ai
             }}>
               TECHNICAL SKILLS
             </h2>
-            {getClickableSection('skills',
-              <p className="text-gray-800" style={{
-                fontFamily: 'Times New Roman, serif',
-                fontSize: '12pt'
-              }}>
-                {resumeData.skills.join(' • ')}
-              </p>
-            )}
+            <div className="space-y-1">
+              {resumeData.skills.map((skill, index) => (
+                getClickableLine(
+                  `${prefix}.skills.${index}`,
+                  skill,
+                  <span className="inline-block bg-gray-100 px-2 py-1 rounded text-sm mr-2 mb-1">{skill}</span>
+                )
+              ))}
+            </div>
           </div>
 
           {/* Work Experience */}
-          <div className="mb-6">
+          <div className="mb-6 space-y-4">
             <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
               fontFamily: 'Times New Roman, serif',
               fontSize: '14pt',
@@ -291,50 +363,61 @@ Powered by iQua.ai
               WORK EXPERIENCE
             </h2>
             {resumeData.workExperience.map((exp, index) => (
-              <div key={index} className="mb-4">
-                {getClickableSection(`workExperience.${index}`,
-                  <div>
-                    <div className="flex justify-between items-start mb-1">
-                      <h3 className="font-bold text-gray-900" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '12pt',
-                        fontWeight: 'bold'
-                      }}>
-                        {exp.position}
-                      </h3>
-                      <span className="text-gray-700 text-right" style={{
-                        fontFamily: 'Times New Roman, serif',
-                        fontSize: '12pt'
-                      }}>
-                        {exp.duration}
-                      </span>
-                    </div>
-                    <div className="text-gray-800 mb-2 italic" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '12pt',
-                      fontStyle: 'italic'
-                    }}>
-                      {exp.company}
-                    </div>
-                    <ul className="ml-4" style={{ listStyleType: 'disc' }}>
-                      {exp.responsibilities.map((resp, respIndex) => (
-                        <li key={respIndex} className="text-gray-800 mb-1" style={{
-                          fontFamily: 'Times New Roman, serif',
-                          fontSize: '12pt',
-                          lineHeight: '1.15'
-                        }}>
-                          {resp}
-                        </li>
-                      ))}
-                    </ul>
+              <div key={index} className="space-y-2">
+                {getClickableLine(
+                  `${prefix}.workExperience.${index}.position`,
+                  exp.position,
+                  <h3 className="font-bold text-gray-900" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '12pt',
+                    fontWeight: 'bold'
+                  }}>
+                    {exp.position}
+                  </h3>
+                )}
+                {getClickableLine(
+                  `${prefix}.workExperience.${index}.company`,
+                  exp.company,
+                  <div className="text-gray-800 italic" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '12pt',
+                    fontStyle: 'italic'
+                  }}>
+                    {exp.company}
                   </div>
                 )}
+                {getClickableLine(
+                  `${prefix}.workExperience.${index}.duration`,
+                  exp.duration,
+                  <span className="text-gray-700" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '12pt'
+                  }}>
+                    {exp.duration}
+                  </span>
+                )}
+                <div className="ml-4 space-y-1">
+                  {exp.responsibilities.map((resp, respIndex) => (
+                    getClickableLine(
+                      `${prefix}.workExperience.${index}.responsibilities.${respIndex}`,
+                      resp,
+                      <li className="text-gray-800" style={{
+                        fontFamily: 'Times New Roman, serif',
+                        fontSize: '12pt',
+                        lineHeight: '1.15',
+                        listStyleType: 'disc'
+                      }}>
+                        {resp}
+                      </li>
+                    )
+                  ))}
+                </div>
               </div>
             ))}
           </div>
 
           {/* Projects */}
-          <div className="mb-6">
+          <div className="mb-6 space-y-4">
             <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
               fontFamily: 'Times New Roman, serif',
               fontSize: '14pt',
@@ -345,32 +428,39 @@ Powered by iQua.ai
               PROJECTS
             </h2>
             {resumeData.projects.map((project, index) => (
-              <div key={index} className="mb-3">
-                {getClickableSection(`projects.${index}`,
-                  <div>
-                    <h3 className="font-bold text-gray-900" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '12pt',
-                      fontWeight: 'bold'
-                    }}>
-                      {project.name}
-                    </h3>
-                    <p className="text-gray-800 mb-1" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '12pt',
-                      lineHeight: '1.15'
-                    }}>
-                      {project.description}
-                    </p>
-                    <p className="text-gray-700 text-sm" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '11pt',
-                      fontStyle: 'italic'
-                    }}>
-                      <span className="font-medium">Technologies:</span> {project.technologies.join(', ')}
-                    </p>
-                  </div>
+              <div key={index} className="space-y-2">
+                {getClickableLine(
+                  `${prefix}.projects.${index}.name`,
+                  project.name,
+                  <h3 className="font-bold text-gray-900" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '12pt',
+                    fontWeight: 'bold'
+                  }}>
+                    {project.name}
+                  </h3>
                 )}
+                {getClickableLine(
+                  `${prefix}.projects.${index}.description`,
+                  project.description,
+                  <p className="text-gray-800" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '12pt',
+                    lineHeight: '1.15'
+                  }}>
+                    {project.description}
+                  </p>
+                )}
+                <div className="space-y-1">
+                  <span className="font-medium text-gray-700">Technologies: </span>
+                  {project.technologies.map((tech, techIndex) => (
+                    getClickableLine(
+                      `${prefix}.projects.${index}.technologies.${techIndex}`,
+                      tech,
+                      <span className="inline-block bg-blue-100 px-2 py-1 rounded text-sm mr-2 mb-1">{tech}</span>
+                    )
+                  ))}
+                </div>
               </div>
             ))}
           </div>
@@ -389,13 +479,13 @@ Powered by iQua.ai
     );
   };
 
-  // Final Resume Preview Component (using original styling)
+  // Final Resume Preview Component
   const FinalResumePreview = ({ resumeData }) => {
     if (!resumeData) return null;
     
     return (
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-        {/* Document Header - Word-style */}
+        {/* Document Header */}
         <div className="bg-gray-100 px-4 py-2 border-b border-gray-300 flex items-center space-x-2">
           <div className="flex space-x-1">
             <div className="w-3 h-3 bg-red-500 rounded-full"></div>
@@ -409,7 +499,7 @@ Powered by iQua.ai
           </div>
         </div>
 
-        {/* Document Content - Styled like Microsoft Word */}
+        {/* Document Content */}
         <div className="p-8 min-h-[600px]" style={{
           fontFamily: 'Times New Roman, serif',
           fontSize: '12pt',
@@ -417,150 +507,174 @@ Powered by iQua.ai
           background: 'white'
         }}>
           {/* Header Section */}
-          <div className="text-center mb-6 pb-3 border-b-2 border-gray-300">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '18pt',
-              fontWeight: 'bold'
-            }}>
-              {resumeData.basicDetails.name}
-            </h1>
-            <div className="text-sm text-gray-700" style={{ fontSize: '11pt' }}>
-              <span>{resumeData.basicDetails.email}</span>
-              <span className="mx-2">|</span>
-              <span>{resumeData.basicDetails.phone}</span>
-              <span className="mx-2">|</span>
-              <span>{resumeData.basicDetails.location}</span>
+          {(resumeData.basicDetails.name || resumeData.basicDetails.email || resumeData.basicDetails.phone || resumeData.basicDetails.location) && (
+            <div className="text-center mb-6 pb-3 border-b-2 border-gray-300">
+              {resumeData.basicDetails.name && (
+                <h1 className="text-2xl font-bold text-gray-900 mb-2" style={{
+                  fontFamily: 'Times New Roman, serif',
+                  fontSize: '18pt',
+                  fontWeight: 'bold'
+                }}>
+                  {resumeData.basicDetails.name}
+                </h1>
+              )}
+              <div className="text-sm text-gray-700 space-x-2" style={{ fontSize: '11pt' }}>
+                {resumeData.basicDetails.email && <span>{resumeData.basicDetails.email}</span>}
+                {resumeData.basicDetails.phone && <><span className="mx-2">|</span><span>{resumeData.basicDetails.phone}</span></>}
+                {resumeData.basicDetails.location && <><span className="mx-2">|</span><span>{resumeData.basicDetails.location}</span></>}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Professional Summary */}
-          <div className="mb-6">
-            <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '14pt',
-              fontWeight: 'bold',
-              borderBottom: '1px solid #333',
-              paddingBottom: '2px'
-            }}>
-              PROFESSIONAL SUMMARY
-            </h2>
-            <p className="text-gray-800 text-justify" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '12pt',
-              lineHeight: '1.15',
-              textAlign: 'justify'
-            }}>
-              {resumeData.professionalSummary}
-            </p>
-          </div>
+          {resumeData.professionalSummary && (
+            <div className="mb-6">
+              <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
+                fontFamily: 'Times New Roman, serif',
+                fontSize: '14pt',
+                fontWeight: 'bold',
+                borderBottom: '1px solid #333',
+                paddingBottom: '2px'
+              }}>
+                PROFESSIONAL SUMMARY
+              </h2>
+              <p className="text-gray-800 text-justify" style={{
+                fontFamily: 'Times New Roman, serif',
+                fontSize: '12pt',
+                lineHeight: '1.15',
+                textAlign: 'justify'
+              }}>
+                {resumeData.professionalSummary}
+              </p>
+            </div>
+          )}
 
           {/* Technical Skills */}
-          <div className="mb-6">
-            <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '14pt',
-              fontWeight: 'bold',
-              borderBottom: '1px solid #333',
-              paddingBottom: '2px'
-            }}>
-              TECHNICAL SKILLS
-            </h2>
-            <p className="text-gray-800" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '12pt'
-            }}>
-              {resumeData.skills.join(' • ')}
-            </p>
-          </div>
+          {resumeData.skills.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
+                fontFamily: 'Times New Roman, serif',
+                fontSize: '14pt',
+                fontWeight: 'bold',
+                borderBottom: '1px solid #333',
+                paddingBottom: '2px'
+              }}>
+                TECHNICAL SKILLS
+              </h2>
+              <p className="text-gray-800" style={{
+                fontFamily: 'Times New Roman, serif',
+                fontSize: '12pt'
+              }}>
+                {resumeData.skills.join(' • ')}
+              </p>
+            </div>
+          )}
 
           {/* Work Experience */}
-          <div className="mb-6">
-            <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '14pt',
-              fontWeight: 'bold',
-              borderBottom: '1px solid #333',
-              paddingBottom: '2px'
-            }}>
-              WORK EXPERIENCE
-            </h2>
-            {resumeData.workExperience.map((exp, index) => (
-              <div key={index} className="mb-4">
-                <div className="flex justify-between items-start mb-1">
-                  <h3 className="font-bold text-gray-900" style={{
-                    fontFamily: 'Times New Roman, serif',
-                    fontSize: '12pt',
-                    fontWeight: 'bold'
-                  }}>
-                    {exp.position}
-                  </h3>
-                  <span className="text-gray-700 text-right" style={{
-                    fontFamily: 'Times New Roman, serif',
-                    fontSize: '12pt'
-                  }}>
-                    {exp.duration}
-                  </span>
+          {resumeData.workExperience.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
+                fontFamily: 'Times New Roman, serif',
+                fontSize: '14pt',
+                fontWeight: 'bold',
+                borderBottom: '1px solid #333',
+                paddingBottom: '2px'
+              }}>
+                WORK EXPERIENCE
+              </h2>
+              {resumeData.workExperience.map((exp, index) => (
+                <div key={index} className="mb-4">
+                  <div className="flex justify-between items-start mb-1">
+                    {exp.position && (
+                      <h3 className="font-bold text-gray-900" style={{
+                        fontFamily: 'Times New Roman, serif',
+                        fontSize: '12pt',
+                        fontWeight: 'bold'
+                      }}>
+                        {exp.position}
+                      </h3>
+                    )}
+                    {exp.duration && (
+                      <span className="text-gray-700 text-right" style={{
+                        fontFamily: 'Times New Roman, serif',
+                        fontSize: '12pt'
+                      }}>
+                        {exp.duration}
+                      </span>
+                    )}
+                  </div>
+                  {exp.company && (
+                    <div className="text-gray-800 mb-2 italic" style={{
+                      fontFamily: 'Times New Roman, serif',
+                      fontSize: '12pt',
+                      fontStyle: 'italic'
+                    }}>
+                      {exp.company}
+                    </div>
+                  )}
+                  {exp.responsibilities && exp.responsibilities.length > 0 && (
+                    <ul className="ml-4" style={{ listStyleType: 'disc' }}>
+                      {exp.responsibilities.map((resp, respIndex) => (
+                        <li key={respIndex} className="text-gray-800 mb-1" style={{
+                          fontFamily: 'Times New Roman, serif',
+                          fontSize: '12pt',
+                          lineHeight: '1.15'
+                        }}>
+                          {resp}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-                <div className="text-gray-800 mb-2 italic" style={{
-                  fontFamily: 'Times New Roman, serif',
-                  fontSize: '12pt',
-                  fontStyle: 'italic'
-                }}>
-                  {exp.company}
-                </div>
-                <ul className="ml-4" style={{ listStyleType: 'disc' }}>
-                  {exp.responsibilities.map((resp, respIndex) => (
-                    <li key={respIndex} className="text-gray-800 mb-1" style={{
+              ))}
+            </div>
+          )}
+
+          {/* Projects */}
+          {resumeData.projects.length > 0 && (
+            <div className="mb-6">
+              <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
+                fontFamily: 'Times New Roman, serif',
+                fontSize: '14pt',
+                fontWeight: 'bold',
+                borderBottom: '1px solid #333',
+                paddingBottom: '2px'
+              }}>
+                PROJECTS
+              </h2>
+              {resumeData.projects.map((project, index) => (
+                <div key={index} className="mb-3">
+                  {project.name && (
+                    <h3 className="font-bold text-gray-900" style={{
+                      fontFamily: 'Times New Roman, serif',
+                      fontSize: '12pt',
+                      fontWeight: 'bold'
+                    }}>
+                      {project.name}
+                    </h3>
+                  )}
+                  {project.description && (
+                    <p className="text-gray-800 mb-1" style={{
                       fontFamily: 'Times New Roman, serif',
                       fontSize: '12pt',
                       lineHeight: '1.15'
                     }}>
-                      {resp}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          {/* Projects */}
-          <div className="mb-6">
-            <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '14pt',
-              fontWeight: 'bold',
-              borderBottom: '1px solid #333',
-              paddingBottom: '2px'
-            }}>
-              PROJECTS
-            </h2>
-            {resumeData.projects.map((project, index) => (
-              <div key={index} className="mb-3">
-                <h3 className="font-bold text-gray-900" style={{
-                  fontFamily: 'Times New Roman, serif',
-                  fontSize: '12pt',
-                  fontWeight: 'bold'
-                }}>
-                  {project.name}
-                </h3>
-                <p className="text-gray-800 mb-1" style={{
-                  fontFamily: 'Times New Roman, serif',
-                  fontSize: '12pt',
-                  lineHeight: '1.15'
-                }}>
-                  {project.description}
-                </p>
-                <p className="text-gray-700 text-sm" style={{
-                  fontFamily: 'Times New Roman, serif',
-                  fontSize: '11pt',
-                  fontStyle: 'italic'
-                }}>
-                  <span className="font-medium">Technologies:</span> {project.technologies.join(', ')}
-                </p>
-              </div>
-            ))}
-          </div>
+                      {project.description}
+                    </p>
+                  )}
+                  {project.technologies && project.technologies.length > 0 && (
+                    <p className="text-gray-700 text-sm" style={{
+                      fontFamily: 'Times New Roman, serif',
+                      fontSize: '11pt',
+                      fontStyle: 'italic'
+                    }}>
+                      <span className="font-medium">Technologies:</span> {project.technologies.join(', ')}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Footer */}
           <div className="mt-8 pt-4 border-t border-gray-200 text-right">
@@ -586,7 +700,7 @@ Powered by iQua.ai
         <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6 rounded-t-2xl flex justify-between items-center">
           <div>
             <h3 className="text-xl font-semibold">Smart Resume Builder</h3>
-            <p className="text-sm opacity-90 mt-1">Your resume, reimagined intelligently</p>
+            <p className="text-sm opacity-90 mt-1">Select individual lines to build your perfect resume</p>
           </div>
           <button
             onClick={() => setShowPreview(false)}
@@ -603,13 +717,13 @@ Powered by iQua.ai
             <div className="overflow-y-auto p-4 border-r border-gray-200">
               <div className="text-center mb-4">
                 <h4 className="text-lg font-semibold text-gray-800 mb-2">Original Resume</h4>
-                <p className="text-sm text-gray-600">Click on any section to select it for your final resume</p>
+                <p className="text-sm text-gray-600">Check lines to include in your final resume</p>
               </div>
               <InteractiveWordDocument 
                 resumeData={originalResume} 
-                enhancedData={enhancedResumeData}
                 title="Original_Resume.docx"
                 isOriginal={true}
+                prefix="original"
               />
             </div>
 
@@ -617,13 +731,13 @@ Powered by iQua.ai
             <div className="overflow-y-auto p-4 border-r border-gray-200">
               <div className="text-center mb-4">
                 <h4 className="text-lg font-semibold text-gray-800 mb-2">AI Enhanced Resume</h4>
-                <p className="text-sm text-gray-600">Click on any section to select it for your final resume</p>
+                <p className="text-sm text-gray-600">Check lines to include in your final resume</p>
               </div>
               <InteractiveWordDocument 
                 resumeData={enhancedResumeData} 
-                enhancedData={enhancedResumeData}
                 title="Enhanced_Resume.docx"
                 isOriginal={false}
+                prefix="enhanced"
               />
             </div>
 
@@ -637,7 +751,7 @@ Powered by iQua.ai
               {!finalResume && (
                 <div className="bg-white rounded-lg p-8 text-center text-gray-500">
                   <div className="mb-4">📄</div>
-                  <p>Start selecting content from the original or enhanced resume to build your final version</p>
+                  <p>Start checking lines from the original or enhanced resume to build your final version</p>
                 </div>
               )}
             </div>
@@ -648,7 +762,7 @@ Powered by iQua.ai
         <div className="border-t border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              Click directly on sections in the original or enhanced resume to build your final version
+              Check individual lines to customize your resume with granular control
             </div>
             <div className="flex space-x-3">
               <button

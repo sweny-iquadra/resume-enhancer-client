@@ -78,6 +78,7 @@ function App() {
           hasAttendedInterview={hasAttendedInterview}
           handleCreateResumeClick={handleCreateResumeClick}
           showRoleSelection={showRoleSelection}
+          setShowRoleSelection={setShowRoleSelection}
           uniqueRoles={uniqueRoles}
           handleRoleSelection={handleRoleSelection}
           isLoading={isLoading}

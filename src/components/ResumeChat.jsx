@@ -66,7 +66,7 @@ const ResumeChat = ({
                   <p className="text-gray-700 text-sm mb-4 leading-relaxed">
                     We noticed you've explored multiple job roles with iQua.ai. Please select the role you'd like us to tailor this resume for:
                   </p>
-                  
+
                   {/* Dropdown Style Selection */}
                   <div className="bg-white rounded-lg border border-blue-200 overflow-hidden shadow-sm">
                     <div className="p-3 bg-blue-50 border-b border-blue-200">

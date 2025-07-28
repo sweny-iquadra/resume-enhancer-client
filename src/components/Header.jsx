@@ -10,7 +10,7 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
             className="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => setCurrentPage('dashboard')}
           >
-            <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{backgroundColor: '#7f90fa'}}>
               <span className="text-white text-sm font-bold">iQ</span>
             </div>
             <div className="flex flex-col">
@@ -40,9 +40,9 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
           className="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={() => setCurrentPage('dashboard')}
         >
-          <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-sm font-bold">iQ</span>
-          </div>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{backgroundColor: '#7f90fa'}}>
+              <span className="text-white text-sm font-bold">iQ</span>
+            </div>
           <div className="flex flex-col">
             <span className="text-lg font-semibold text-gray-800">iQua.ai</span>
             <span className="text-xs text-gray-500 -mt-1">AI that gets you</span>

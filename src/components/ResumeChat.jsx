@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
-const ResumeChat = ({ 
-  showResumeChat, 
-  setShowResumeChat, 
-  hasAttendedInterview, 
+const ResumeChat = ({
+  showResumeChat,
+  setShowResumeChat,
+  hasAttendedInterview,
   handleCreateResumeClick,
   showRoleSelection,
   setShowRoleSelection,
@@ -18,6 +18,15 @@ const ResumeChat = ({
 }) => {
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [selectedRoleForFeedback, setSelectedRoleForFeedback] = useState(null);
+  // Add ref for chat content
+  const chatContentRef = useRef(null);
+
+  // Auto-scroll to bottom when enhancedResumeData changes
+  useEffect(() => {
+    if (enhancedResumeData && chatContentRef.current) {
+      chatContentRef.current.scrollTop = chatContentRef.current.scrollHeight;
+    }
+  }, [enhancedResumeData]);
 
   if (!showResumeChat) return null;
 
@@ -48,13 +57,13 @@ const ResumeChat = ({
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl w-96 h-[500px] flex flex-col transition-all duration-300 ease-out transform hover:scale-[1.01]" 
-           style={{
-             animation: 'slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05)'
-           }}>
+      <div className="bg-white rounded-2xl shadow-2xl w-96 h-[500px] flex flex-col transition-all duration-300 ease-out transform hover:scale-[1.01]"
+        style={{
+          animation: 'slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05)'
+        }}>
         {/* Chat Header */}
-        <div className="text-white p-4 rounded-t-2xl flex justify-between items-center" style={{background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)'}}>
+        <div className="text-white p-4 rounded-t-2xl flex justify-between items-center" style={{ background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)' }}>
           <div className="flex items-center space-x-2">
             <span className="text-xl">📄</span>
             <span className="font-semibold">Resume Enhancer</span>
@@ -68,7 +77,7 @@ const ResumeChat = ({
         </div>
 
         {/* Chat Content with Full Scrolling */}
-        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-gray-100 p-6">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-purple-300 scrollbar-track-gray-100 p-6" ref={chatContentRef}>
           <div className="space-y-6">
             {/* Welcome Message */}
             {!isLoading && !enhancedResumeData && (
@@ -106,25 +115,22 @@ const ResumeChat = ({
                           key={index}
                           onClick={() => handleRoleSelectionWithFeedback(role)}
                           disabled={selectedRoleForFeedback === role}
-                          className={`w-full text-left p-4 transition-all duration-200 border-b border-gray-100 last:border-b-0 group relative ${
-                            selectedRoleForFeedback === role 
-                              ? 'bg-gradient-to-r from-green-50 to-emerald-50 scale-[0.98]' 
+                          className={`w-full text-left p-4 transition-all duration-200 border-b border-gray-100 last:border-b-0 group relative ${selectedRoleForFeedback === role
+                              ? 'bg-gradient-to-r from-green-50 to-emerald-50 scale-[0.98]'
                               : 'hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:scale-[1.01] hover:shadow-sm'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className={`font-medium transition-colors ${
-                              selectedRoleForFeedback === role 
-                                ? 'text-green-700' 
+                            <span className={`font-medium transition-colors ${selectedRoleForFeedback === role
+                                ? 'text-green-700'
                                 : 'text-gray-800 group-hover:text-blue-700'
-                            }`}>
+                              }`}>
                               {role}
                             </span>
-                            <span className={`transition-all duration-200 ${
-                              selectedRoleForFeedback === role 
-                                ? 'text-green-500 opacity-100 transform scale-110' 
+                            <span className={`transition-all duration-200 ${selectedRoleForFeedback === role
+                                ? 'text-green-500 opacity-100 transform scale-110'
                                 : 'text-blue-500 opacity-0 group-hover:opacity-100'
-                            }`}>
+                              }`}>
                               {selectedRoleForFeedback === role ? '✓' : '→'}
                             </span>
                           </div>
@@ -150,9 +156,9 @@ const ResumeChat = ({
                   <p className="text-purple-700 font-semibold">🤖 AI is crafting your resume...</p>
                   <p className="text-purple-600 text-sm">Analyzing your profile and tailoring content</p>
                   <div className="flex justify-center space-x-1 mt-3">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></div>
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></div>
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                   </div>
                 </div>
               </div>
@@ -274,14 +280,13 @@ const ResumeChat = ({
             {!isLoading && !enhancedResumeData && (
               <div className="flex gap-4 items-center justify-center">
                 {/* Create Resume Button */}
-                <button 
+                <button
                   onClick={handleCreateResumeWithFeedback}
                   disabled={!hasAttendedInterview || isButtonLoading}
-                  className={`group relative overflow-hidden px-6 py-3.5 rounded-xl transition-all duration-500 font-bold text-sm shadow-xl hover:shadow-2xl transform hover:scale-105 border-2 min-w-[140px] ${
-                    hasAttendedInterview && !isButtonLoading
-                      ? 'text-white cursor-pointer border-indigo-300 hover:border-indigo-200 hover:-translate-y-1' 
+                  className={`group relative overflow-hidden px-6 py-3.5 rounded-xl transition-all duration-500 font-bold text-sm shadow-xl hover:shadow-2xl transform hover:scale-105 border-2 min-w-[140px] ${hasAttendedInterview && !isButtonLoading
+                      ? 'text-white cursor-pointer border-indigo-300 hover:border-indigo-200 hover:-translate-y-1'
                       : 'bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 text-gray-600 cursor-not-allowed border-gray-300 opacity-60'
-                  }`}
+                    }`}
                   style={hasAttendedInterview && !isButtonLoading ? {
                     background: 'linear-gradient(135deg, #4f46e5 0%, #5b4de8 30%, #7c3aed 70%, #8b5cf6 100%)',
                     boxShadow: '0 8px 25px rgba(79, 70, 229, 0.3), 0 0 20px rgba(79, 70, 229, 0.1)',
@@ -314,16 +319,15 @@ const ResumeChat = ({
                 </div>
 
                 {/* Attend Interview Button */}
-                <button 
+                <button
                   onClick={() => {
                     setCurrentPage('dashboard');
                     setShowResumeChat(false);
                   }}
-                  className={`group relative overflow-hidden px-6 py-3.5 rounded-xl font-bold text-sm shadow-lg transition-all duration-300 border-2 min-w-[140px] ${
-                    !hasAttendedInterview
+                  className={`group relative overflow-hidden px-6 py-3.5 rounded-xl font-bold text-sm shadow-lg transition-all duration-300 border-2 min-w-[140px] ${!hasAttendedInterview
                       ? 'text-white cursor-pointer border-blue-300 hover:border-blue-200 hover:-translate-y-1'
                       : 'bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 text-gray-600 cursor-not-allowed border-gray-300 opacity-50'
-                  }`}
+                    }`}
                   style={!hasAttendedInterview ? {
                     background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #1e40af 100%)',
                     boxShadow: '0 8px 25px rgba(59, 130, 246, 0.3)'
@@ -333,7 +337,7 @@ const ResumeChat = ({
                   <span className="relative z-20 flex flex-col items-center justify-center space-y-1 text-white">
                     <span className="text-xl">{!hasAttendedInterview ? '🎤' : '🔒'}</span>
                     <span className="font-bold tracking-wider text-xs uppercase leading-tight">
-                      ATTEND<br/>INTERVIEW
+                      ATTEND<br />INTERVIEW
                     </span>
                   </span>
                 </button>

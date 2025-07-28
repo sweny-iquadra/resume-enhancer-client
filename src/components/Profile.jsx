@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
 import Header from './Header';
+import SuccessToast from './modals/SuccessToast';
+import ErrorToast from './modals/ErrorToast';
 
 const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }) => {
   const [activeTab, setActiveTab] = useState('Active Interview');
@@ -26,6 +28,11 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
   });
   const [educationErrors, setEducationErrors] = useState({});
   const [editingEducationId, setEditingEducationId] = useState(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [successTitle, setSuccessTitle] = useState('');
 
   // Available skills for dropdown
   const availableSkills = [
@@ -205,23 +212,36 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
     
     if (Object.keys(errors).length > 0) {
       setEducationErrors(errors);
+      setErrorMessage('Please fix the validation errors and try again.');
+      setShowErrorToast(true);
       return;
     }
     
-    if (editingEducationId) {
-      // Update existing education entry
-      setEducation(prev => prev.map(edu => 
-        edu.id === editingEducationId 
-          ? { ...educationForm, id: editingEducationId }
-          : edu
-      ));
-    } else {
-      // Add new education entry
-      setEducation(prev => [...prev, { ...educationForm, id: Date.now() }]);
+    try {
+      if (editingEducationId) {
+        // Update existing education entry
+        setEducation(prev => prev.map(edu => 
+          edu.id === editingEducationId 
+            ? { ...educationForm, id: editingEducationId }
+            : edu
+        ));
+        setSuccessTitle('Education Updated!');
+        setSuccessMessage('Your education details have been updated successfully.');
+        setShowSuccessToast(true);
+      } else {
+        // Add new education entry
+        setEducation(prev => [...prev, { ...educationForm, id: Date.now() }]);
+        setSuccessTitle('Education Added!');
+        setSuccessMessage('Your education details have been saved successfully.');
+        setShowSuccessToast(true);
+      }
+      
+      // Close modal and reset form
+      handleCloseEducationModal();
+    } catch (error) {
+      setErrorMessage('Failed to save education details. Please try again.');
+      setShowErrorToast(true);
     }
-    
-    // Close modal and reset form
-    handleCloseEducationModal();
   };
 
   return (
@@ -855,6 +875,21 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
           </div>
         </div>
       )}
+
+      {/* Success Toast */}
+      <SuccessToast 
+        showSuccessToast={showSuccessToast} 
+        setShowSuccessToast={setShowSuccessToast}
+        title={successTitle}
+        message={successMessage}
+      />
+
+      {/* Error Toast */}
+      <ErrorToast 
+        showErrorToast={showErrorToast} 
+        setShowErrorToast={setShowErrorToast} 
+        errorMessage={errorMessage}
+      />
     </div>
   );
 };

@@ -1,16 +1,3 @@
-/*
-  TESTING INCOMPLETE PROFILE SCENARIOS:
-
-  To test different incomplete profile scenarios, change the CURRENT_TEST_SCENARIO value:
-
-  1. TEST_SCENARIOS.COMPLETE - Full profile (no modal should appear)
-  2. TEST_SCENARIOS.MISSING_SUMMARY - Missing professional summary only
-  3. TEST_SCENARIOS.MISSING_PROJECTS - Missing projects only  
-  4. TEST_SCENARIOS.MISSING_BOTH - Missing both summary and projects
-  5. TEST_SCENARIOS.MISSING_WORK_EXP - Missing work experience, summary and projects
-
-  The ProfileCompletionModal will show different missing fields based on the scenario.
-*/
 
 // Dummy user object with interview history
 export const createUserProfile = () => ({
@@ -103,7 +90,7 @@ export const getUniqueJobRoles = (userProfile) => {
 export const enhanceResumeAPI = async (selectedRole, userProfile, originalResume = null) => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 2000));
-
+  
   // Mock API response
   return {
     success: true,

@@ -84,40 +84,16 @@ const ProfileCompletionModal = ({
           <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left">
             <h4 className="font-semibold text-gray-800 mb-3">Missing Information:</h4>
             <ul className="space-y-2 text-sm text-gray-600">
-              {(!userProfile.professionalSummary || userProfile.professionalSummary === '') && (
+              {!userProfile.professionalSummary && (
                 <li className="flex items-center space-x-2">
                   <span className="w-2 h-2 bg-red-400 rounded-full"></span>
                   <span>Professional Summary</span>
                 </li>
               )}
-              {(!userProfile.projects || userProfile.projects === null || userProfile.projects.length === 0) && (
+              {!userProfile.projects && (
                 <li className="flex items-center space-x-2">
                   <span className="w-2 h-2 bg-red-400 rounded-full"></span>
                   <span>Projects Information</span>
-                </li>
-              )}
-              {(!userProfile.workExperience || userProfile.workExperience.length === 0) && (
-                <li className="flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-red-400 rounded-full"></span>
-                  <span>Work Experience</span>
-                </li>
-              )}
-              {(!userProfile.name || userProfile.name === '') && (
-                <li className="flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-red-400 rounded-full"></span>
-                  <span>Full Name</span>
-                </li>
-              )}
-              {(!userProfile.email || userProfile.email === '') && (
-                <li className="flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-red-400 rounded-full"></span>
-                  <span>Email Address</span>
-                </li>
-              )}
-              {(!userProfile.skills || userProfile.skills.length === 0) && (
-                <li className="flex items-center space-x-2">
-                  <span className="w-2 h-2 bg-red-400 rounded-full"></span>
-                  <span>Skills</span>
                 </li>
               )}
             </ul>

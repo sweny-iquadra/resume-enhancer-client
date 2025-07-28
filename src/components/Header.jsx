@@ -6,7 +6,10 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
+          <div 
+            className="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => setCurrentPage('dashboard')}
+          >
             <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
               <span className="text-white text-sm font-bold">iQ</span>
             </div>
@@ -33,7 +36,10 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
     <header className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex justify-between items-center">
         {/* Logo */}
-        <div className="flex items-center space-x-2">
+        <div 
+          className="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => setCurrentPage('dashboard')}
+        >
           <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
             <span className="text-white text-sm font-bold">iQ</span>
           </div>

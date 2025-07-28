@@ -31,20 +31,13 @@ const ProfileCompletionModal = ({
 
   const handleGenerateAnyway = async () => {
     setIsGenerating(true);
-    try {
-      if (uniqueRoles.length >= 3) {
-        setShowRoleSelection(true);
-      } else {
-        // Proceed with normal generation using the first available role or current selected role
-        const roleToUse = currentSelectedRole || uniqueRoles[0] || userProfile.role;
-        await proceedWithGeneration(roleToUse);
-        // Do not set any modal state here - let proceedWithGeneration handle it
-      }
-    } catch (error) {
-      console.error('Error in handleGenerateAnyway:', error);
-      // Only show modal again if there was an unexpected error
-      setShowProfileModal(true);
-    } finally {
+    if (uniqueRoles.length >= 3) {
+      setShowRoleSelection(true);
+      setIsGenerating(false);
+    } else {
+      // Proceed with normal generation using the first available role or current selected role
+      const roleToUse = currentSelectedRole || uniqueRoles[0] || userProfile.role;
+      await proceedWithGeneration(roleToUse);
       setIsGenerating(false);
     }
   };

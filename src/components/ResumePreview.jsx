@@ -782,7 +782,7 @@ ${project.description}
               </ul>
             </div>
           </div>
-        )}</li></ul></div></div>}
+        )}
       </div>
     );
   };

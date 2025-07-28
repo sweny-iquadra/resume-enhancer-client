@@ -102,7 +102,7 @@ const ProfileCompletionModal = ({
           <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-3xl">📝</span>
           </div>
-          <h3 className="text-xl font-semibold">Complete Your Profile</h3>
+          <h3 className="text-xl font-semibold">Complete Your Profiles</h3>
         </div>
 
         {/* Modal Body */}

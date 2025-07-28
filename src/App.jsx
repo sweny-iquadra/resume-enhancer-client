@@ -107,6 +107,9 @@ function App() {
           {currentPage === 'profile' && (
             <Profile 
               setCurrentPage={setCurrentPage}
+              showResumeChat={showResumeChat}
+              setShowResumeChat={setShowResumeChat}
+              onLogout={handleLogout}
             />
           )}
         </div>

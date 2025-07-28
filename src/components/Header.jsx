@@ -7,12 +7,14 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
         <div className="flex justify-between items-center">
           {/* Logo */}
           <div 
-            className="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => setCurrentPage('dashboard')}
           >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{backgroundColor: '#7f90fa'}}>
-              <span className="text-white text-sm font-bold">iQ</span>
-            </div>
+            <img 
+              src="/iqua-logo.png" 
+              alt="iQua.ai" 
+              className="h-10 w-auto"
+            />
             <div className="flex flex-col">
               <span className="text-lg font-semibold text-gray-800">iQua.ai Interview</span>
               <span className="text-xs text-gray-500 -mt-1">AI that gets you</span>
@@ -37,12 +39,14 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
       <div className="flex justify-between items-center">
         {/* Logo */}
         <div 
-          className="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+          className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={() => setCurrentPage('dashboard')}
         >
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{backgroundColor: '#7f90fa'}}>
-              <span className="text-white text-sm font-bold">iQ</span>
-            </div>
+          <img 
+            src="/iqua-logo.png" 
+            alt="iQua.ai" 
+            className="h-10 w-auto"
+          />
           <div className="flex flex-col">
             <span className="text-lg font-semibold text-gray-800">iQua.ai</span>
             <span className="text-xs text-gray-500 -mt-1">AI that gets you</span>

@@ -11,7 +11,8 @@ const ProfileCompletionModal = ({
   showRoleSelection,
   setShowRoleSelection,
   uniqueRoles,
-  handleRoleSelection
+  handleRoleSelection,
+  setShowSuccessToast
 }) => {
   const [currentSelectedRole, setCurrentSelectedRole] = useState(selectedRole);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -55,6 +56,11 @@ const ProfileCompletionModal = ({
 
         // Update state
         setEnhancedResumeData(response.data.enhancedResume);
+        
+        // Show success toast
+        if (setShowSuccessToast) {
+          setShowSuccessToast(true);
+        }
         
         // Modal will stay closed as resume was successful
       } else {

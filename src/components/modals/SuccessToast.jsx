@@ -1,47 +1,51 @@
+import React, { useEffect } from 'react';
 
-import React, { useEffect, useState } from 'react';
-
-const SuccessToast = ({ show, message, onClose, duration = 3000 }) => {
-  const [isVisible, setIsVisible] = useState(false);
-
+const SuccessToast = ({ showSuccessToast, setShowSuccessToast }) => {
   useEffect(() => {
-    if (show) {
-      setIsVisible(true);
+    if (showSuccessToast) {
+      // Auto hide after 4 seconds
       const timer = setTimeout(() => {
-        setIsVisible(false);
-        setTimeout(onClose, 300); // Wait for fade out animation
-      }, duration);
+        setShowSuccessToast(false);
+      }, 4000);
 
       return () => clearTimeout(timer);
     }
-  }, [show, duration, onClose]);
+  }, [showSuccessToast, setShowSuccessToast]);
 
-  if (!show && !isVisible) return null;
+  if (!showSuccessToast) return null;
 
   return (
-    <div className={`fixed top-4 right-4 z-[60] transition-all duration-300 transform ${
-      isVisible ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'
-    }`}>
-      <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl border border-green-400 max-w-sm">
-        <div className="flex items-center space-x-3">
-          <div className="flex-shrink-0">
-            <div className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-              <span className="text-lg">✓</span>
-            </div>
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-sm">{message}</p>
-          </div>
-          <button
-            onClick={() => {
-              setIsVisible(false);
-              setTimeout(onClose, 300);
-            }}
-            className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1 transition-colors ml-2"
-          >
-            <span className="text-sm">✕</span>
-          </button>
+    <div className="fixed top-4 right-4 z-[60]" style={{
+      animation: 'slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+    }}>
+      <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white p-4 rounded-xl shadow-2xl flex items-center space-x-3 max-w-md border border-green-400" style={{
+        boxShadow: '0 20px 50px rgba(34, 197, 94, 0.3), 0 0 20px rgba(34, 197, 94, 0.1)'
+      }}>
+        <div className="flex-shrink-0 w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center animate-pulse">
+          <span className="text-white text-xl">🎉</span>
         </div>
+        <div className="flex-1">
+          <h3 className="font-bold text-base">Resume Enhanced Successfully!</h3>
+          <p className="text-green-100 text-sm mt-1 leading-relaxed">Your AI-powered resume is ready for preview and download</p>
+
+          {/* Progress bar */}
+          <div className="w-full bg-green-400 bg-opacity-30 rounded-full h-1 mt-3 overflow-hidden">
+            <div 
+              className="bg-white h-full rounded-full transition-all duration-[4000ms] ease-linear"
+              style={{
+                width: showSuccessToast ? '0%' : '100%',
+                animation: showSuccessToast ? 'shrink 4s linear forwards' : 'none'
+              }}
+            ></div>
+          </div>
+        </div>
+        <button
+          onClick={() => setShowSuccessToast(false)}
+          className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-all duration-200 hover:scale-110 active:scale-95"
+          title="Close"
+        >
+          <span className="text-lg">✕</span>
+        </button>
       </div>
     </div>
   );

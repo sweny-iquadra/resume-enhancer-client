@@ -37,7 +37,9 @@ function App() {
     enhancedResumeData,
     setEnhancedResumeData,
     showPreview,
-    setShowPreview
+    setShowPreview,
+    showSuccessToast,
+    setShowSuccessToast
   } = useResumeLogic();
 
   return (
@@ -110,6 +112,7 @@ function App() {
           setShowRoleSelection={setShowRoleSelection}
           uniqueRoles={uniqueRoles}
           handleRoleSelection={handleRoleSelection}
+          setShowSuccessToast={setShowSuccessToast}
         />
 
         {/* Interview Requirement Modal */}
@@ -123,6 +126,12 @@ function App() {
         <LoadingModal 
           isVisible={isLoading}
           message="iQua AI is generating your resume. This may take a few moments while we tailor your resume to your most relevant job role and skills."
+        />
+
+        {/* Success Toast */}
+        <SuccessToast 
+          showSuccessToast={showSuccessToast}
+          setShowSuccessToast={setShowSuccessToast}
         />
       </div>
     </div>

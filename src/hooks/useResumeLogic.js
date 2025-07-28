@@ -13,6 +13,7 @@ export const useResumeLogic = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [enhancedResumeData, setEnhancedResumeData] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   // Calculate interview status based on interview history
   const completedInterviewsCount = getCompletedInterviewsCount(userProfile);
@@ -67,6 +68,9 @@ export const useResumeLogic = () => {
 
         // Update state with enhanced resume data
         setEnhancedResumeData(response.data.enhancedResume);
+
+        // Show success toast
+        setShowSuccessToast(true);
 
         // Show success feedback
         console.log('✅ Resume enhanced successfully!');
@@ -126,6 +130,8 @@ export const useResumeLogic = () => {
     enhancedResumeData,
     setEnhancedResumeData,
     showPreview,
-    setShowPreview
+    setShowPreview,
+    showSuccessToast,
+    setShowSuccessToast
   };
 };

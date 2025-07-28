@@ -15,6 +15,16 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
   const [tempSkills, setTempSkills] = useState([]);
   const [education, setEducation] = useState([]);
   const [showEducationModal, setShowEducationModal] = useState(false);
+  const [educationForm, setEducationForm] = useState({
+    qualification: '',
+    academy: '',
+    field: '',
+    score: '',
+    scoreType: 'cgpa',
+    startDate: '',
+    endDate: ''
+  });
+  const [educationErrors, setEducationErrors] = useState({});
 
   // Available skills for dropdown
   const availableSkills = [
@@ -83,10 +93,91 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
 
   const handleAddEducation = () => {
     setShowEducationModal(true);
+    // Reset form and errors when opening modal
+    setEducationForm({
+      qualification: '',
+      academy: '',
+      field: '',
+      score: '',
+      scoreType: 'cgpa',
+      startDate: '',
+      endDate: ''
+    });
+    setEducationErrors({});
   };
 
   const handleCloseEducationModal = () => {
     setShowEducationModal(false);
+    setEducationForm({
+      qualification: '',
+      academy: '',
+      field: '',
+      score: '',
+      scoreType: 'cgpa',
+      startDate: '',
+      endDate: ''
+    });
+    setEducationErrors({});
+  };
+
+  const handleEducationInputChange = (field, value) => {
+    setEducationForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    
+    // Clear error for this field when user starts typing
+    if (educationErrors[field]) {
+      setEducationErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
+    }
+  };
+
+  const validateEducationForm = () => {
+    const errors = {};
+    
+    if (!educationForm.qualification.trim()) {
+      errors.qualification = 'Please fill this field';
+    }
+    
+    if (!educationForm.academy.trim()) {
+      errors.academy = 'Please fill this field';
+    }
+    
+    if (!educationForm.field.trim()) {
+      errors.field = 'Please fill this field';
+    }
+    
+    if (!educationForm.score.trim()) {
+      errors.score = 'Please fill this field';
+    }
+    
+    if (!educationForm.startDate) {
+      errors.startDate = 'Please fill this field';
+    }
+    
+    if (!educationForm.endDate) {
+      errors.endDate = 'Please fill this field';
+    }
+    
+    return errors;
+  };
+
+  const handleEducationSubmit = () => {
+    const errors = validateEducationForm();
+    
+    if (Object.keys(errors).length > 0) {
+      setEducationErrors(errors);
+      return;
+    }
+    
+    // Add to education list
+    setEducation(prev => [...prev, { ...educationForm, id: Date.now() }]);
+    
+    // Close modal and reset form
+    handleCloseEducationModal();
   };
 
   return (
@@ -526,8 +617,15 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                 <input
                   type="text"
                   placeholder="Bachelor"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50"
+                  value={educationForm.qualification}
+                  onChange={(e) => handleEducationInputChange('qualification', e.target.value)}
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50 ${
+                    educationErrors.qualification ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
+                {educationErrors.qualification && (
+                  <p className="text-red-500 text-sm mt-1">{educationErrors.qualification}</p>
+                )}
               </div>
 
               {/* Academy Field */}
@@ -537,9 +635,15 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50"
+                  value={educationForm.academy}
+                  onChange={(e) => handleEducationInputChange('academy', e.target.value)}
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50 ${
+                    educationErrors.academy ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
-                <p className="text-red-500 text-sm mt-1">Please fill this field</p>
+                {educationErrors.academy && (
+                  <p className="text-red-500 text-sm mt-1">{educationErrors.academy}</p>
+                )}
               </div>
 
               {/* Field */}
@@ -549,8 +653,15 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50"
+                  value={educationForm.field}
+                  onChange={(e) => handleEducationInputChange('field', e.target.value)}
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50 ${
+                    educationErrors.field ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
+                {educationErrors.field && (
+                  <p className="text-red-500 text-sm mt-1">{educationErrors.field}</p>
+                )}
               </div>
 
               {/* Score Field with Radio Options */}
@@ -564,7 +675,8 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                       type="radio"
                       name="scoreType"
                       value="cgpa"
-                      defaultChecked
+                      checked={educationForm.scoreType === 'cgpa'}
+                      onChange={(e) => handleEducationInputChange('scoreType', e.target.value)}
                       className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                     />
                     <span className="ml-2 text-sm text-gray-700">CGPA</span>
@@ -574,6 +686,8 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                       type="radio"
                       name="scoreType"
                       value="percentage"
+                      checked={educationForm.scoreType === 'percentage'}
+                      onChange={(e) => handleEducationInputChange('scoreType', e.target.value)}
                       className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                     />
                     <span className="ml-2 text-sm text-gray-700">Percentage</span>
@@ -581,8 +695,15 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                 </div>
                 <input
                   type="text"
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50"
+                  value={educationForm.score}
+                  onChange={(e) => handleEducationInputChange('score', e.target.value)}
+                  className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50 ${
+                    educationErrors.score ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
+                {educationErrors.score && (
+                  <p className="text-red-500 text-sm mt-1">{educationErrors.score}</p>
+                )}
               </div>
 
               {/* Date Fields */}
@@ -593,9 +714,15 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                   </label>
                   <input
                     type="date"
-                    placeholder="yyyy-mm-dd"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50"
+                    value={educationForm.startDate}
+                    onChange={(e) => handleEducationInputChange('startDate', e.target.value)}
+                    className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50 ${
+                      educationErrors.startDate ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   />
+                  {educationErrors.startDate && (
+                    <p className="text-red-500 text-sm mt-1">{educationErrors.startDate}</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -603,9 +730,15 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                   </label>
                   <input
                     type="date"
-                    placeholder="yyyy-mm-dd"
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50"
+                    value={educationForm.endDate}
+                    onChange={(e) => handleEducationInputChange('endDate', e.target.value)}
+                    className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50 ${
+                      educationErrors.endDate ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   />
+                  {educationErrors.endDate && (
+                    <p className="text-red-500 text-sm mt-1">{educationErrors.endDate}</p>
+                  )}
                 </div>
               </div>
 
@@ -618,7 +751,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                   Cancel
                 </button>
                 <button
-                  onClick={handleCloseEducationModal}
+                  onClick={handleEducationSubmit}
                   className="flex-1 text-white py-3 rounded-lg font-medium transition-colors"
                   style={{
                     background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)'

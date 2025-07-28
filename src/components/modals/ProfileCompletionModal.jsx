@@ -34,7 +34,12 @@ const ProfileCompletionModal = ({
         // Proceed with normal generation using the first available role or current selected role
         const roleToUse = currentSelectedRole || uniqueRoles[0] || userProfile.role;
         await proceedWithGeneration(roleToUse);
+        // Do not set any modal state here - let proceedWithGeneration handle it
       }
+    } catch (error) {
+      console.error('Error in handleGenerateAnyway:', error);
+      // Only show modal again if there was an unexpected error
+      setShowProfileModal(true);
     } finally {
       setIsGenerating(false);
     }
@@ -62,8 +67,8 @@ const ProfileCompletionModal = ({
           setShowSuccessToast(true);
         }
         
-        // Ensure modal stays closed after successful generation
-        // Do not reopen modal on success
+        // Modal will remain closed - do not set setShowProfileModal(true) here
+        return; // Exit early on success to prevent any further modal state changes
       } else {
         // Only reopen modal on actual failure
         setShowProfileModal(true);

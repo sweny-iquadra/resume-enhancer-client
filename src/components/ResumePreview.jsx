@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const [selections, setSelections] = useState({});
@@ -606,15 +608,19 @@ Powered by iQua.ai
     );
   };
 
-  // Final Resume Preview Component
+  // Final Resume Preview Component with Rich Text Editor
   const FinalResumePreview = ({ resumeData }) => {
-    const [isEditing, setIsEditing] = useState(false);
+    const [isRichTextMode, setIsRichTextMode] = useState(false);
+    const [richTextContent, setRichTextContent] = useState('');
     const [editedResumeData, setEditedResumeData] = useState(null);
 
-    // Initialize edited resume data with the final resume data
+    // Initialize edited resume data and rich text content
     useEffect(() => {
       if (resumeData) {
         setEditedResumeData({ ...resumeData });
+        // Convert resume data to HTML for rich text editor
+        const htmlContent = generateResumeHTML(resumeData);
+        setRichTextContent(htmlContent);
       }
     }, [resumeData]);
 
@@ -622,172 +628,126 @@ Powered by iQua.ai
 
     const displayData = editedResumeData || resumeData;
 
-    const handleFieldEdit = (section, field, value, index = null, subIndex = null) => {
-      setEditedResumeData(prev => {
-        const updated = { ...prev };
-
-        if (section === 'basicDetails') {
-          updated.basicDetails = { ...updated.basicDetails, [field]: value };
-        } else if (section === 'professionalSummary') {
-          updated.professionalSummary = value;
-        } else if (section === 'skills') {
-          const newSkills = [...updated.skills];
-          if (index !== null) {
-            newSkills[index] = value;
-          }
-          updated.skills = newSkills;
-        } else if (section === 'workExperience') {
-          const newWorkExp = [...updated.workExperience];
-          if (field === 'responsibilities' && subIndex !== null) {
-            newWorkExp[index].responsibilities[subIndex] = value;
-          } else {
-            newWorkExp[index][field] = value;
-          }
-          updated.workExperience = newWorkExp;
-        } else if (section === 'projects') {
-          const newProjects = [...updated.projects];
-          if (field === 'technologies' && subIndex !== null) {
-            newProjects[index].technologies[subIndex] = value;
-          } else {
-            newProjects[index][field] = value;
-          }
-          updated.projects = newProjects;
-        }
-
-        return updated;
-      });
-    };
-
-    const addNewItem = (section, type) => {
-      setEditedResumeData(prev => {
-        const updated = { ...prev };
-
-        if (section === 'skills') {
-          updated.skills = [...updated.skills, 'New Skill'];
-        } else if (section === 'workExperience') {
-          updated.workExperience = [...updated.workExperience, {
-            position: 'New Position',
-            company: 'New Company',
-            duration: 'Duration',
-            responsibilities: ['New responsibility']
-          }];
-        } else if (section === 'projects') {
-          updated.projects = [...updated.projects, {
-            name: 'New Project',
-            description: 'Project description',
-            technologies: ['Technology']
-          }];
-        } else if (section === 'responsibilities') {
-          const newWorkExp = [...updated.workExperience];
-          newWorkExp[type].responsibilities.push('New responsibility');
-          updated.workExperience = newWorkExp;
-        } else if (section === 'technologies') {
-          const newProjects = [...updated.projects];
-          newProjects[type].technologies.push('New Technology');
-          updated.projects = newProjects;
-        }
-
-        return updated;
-      });
-    };
-
-    const removeItem = (section, index, subIndex = null) => {
-      setEditedResumeData(prev => {
-        const updated = { ...prev };
-
-        if (section === 'skills') {
-          updated.skills = updated.skills.filter((_, i) => i !== index);
-        } else if (section === 'workExperience') {
-          updated.workExperience = updated.workExperience.filter((_, i) => i !== index);
-        } else if (section === 'projects') {
-          updated.projects = updated.projects.filter((_, i) => i !== index);
-        } else if (section === 'responsibilities') {
-          const newWorkExp = [...updated.workExperience];
-          newWorkExp[index].responsibilities = newWorkExp[index].responsibilities.filter((_, i) => i !== subIndex);
-          updated.workExperience = newWorkExp;
-        } else if (section === 'technologies') {
-          const newProjects = [...updated.projects];
-          newProjects[index].technologies = newProjects[index].technologies.filter((_, i) => i !== subIndex);
-          updated.projects = newProjects;
-        }
-
-        return updated;
-      });
-    };
-
-    const EditableField = ({ value, onSave, multiline = false, placeholder = "", className = "" }) => {
-      const [isFieldEditing, setIsFieldEditing] = useState(false);
-      const [fieldValue, setFieldValue] = useState(value);
-
-      const handleSave = () => {
-        onSave(fieldValue);
-        setIsFieldEditing(false);
-      };
-
-      const handleCancel = () => {
-        setFieldValue(value);
-        setIsFieldEditing(false);
-      };
-
-      if (isFieldEditing) {
-        return (
-          <div className="relative group">
-            {multiline ? (
-              <textarea
-                value={fieldValue}
-                onChange={(e) => setFieldValue(e.target.value)}
-                className={`w-full border border-blue-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${className}`}
-                style={{
-                  fontFamily: 'Times New Roman, serif',
-                  fontSize: '12pt',
-                  lineHeight: '1.15'
-                }}
-                placeholder={placeholder}
-                rows={3}
-                autoFocus
-              />
-            ) : (
-              <input
-                type="text"
-                value={fieldValue}
-                onChange={(e) => setFieldValue(e.target.value)}
-                className={`w-full border border-blue-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
-                style={{
-                  fontFamily: 'Times New Roman, serif',
-                  fontSize: '12pt',
-                  lineHeight: '1.15'
-                }}
-                placeholder={placeholder}
-                autoFocus
-              />
-            )}
-            <div className="flex gap-1 mt-1">
-              <button
-                onClick={handleSave}
-                className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
-              >
-                ✓
-              </button>
-              <button
-                onClick={handleCancel}
-                className="px-2 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600"
-              >
-                ✕
-              </button>
+    // Generate HTML content from resume data
+    const generateResumeHTML = (data) => {
+      return `
+        <div style="font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.15; background: white; padding: 32px;">
+          <!-- Header Section -->
+          <div style="text-align: center; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid #333;">
+            <h1 style="font-size: 18pt; font-weight: bold; margin: 0; color: #1f2937;">${data.basicDetails.name}</h1>
+            <div style="font-size: 12pt; color: #374151; margin-top: 8px;">
+              <div>${data.basicDetails.email}</div>
+              <div>${data.basicDetails.phone}</div>
+              <div>${data.basicDetails.location}</div>
             </div>
           </div>
-        );
-      }
 
-      return (
-        <div
-          onClick={() => isEditing && setIsFieldEditing(true)}
-          className={`${isEditing ? 'cursor-pointer hover:bg-blue-50 border border-transparent hover:border-blue-200 rounded px-1' : ''} ${className}`}
-          title={isEditing ? "Click to edit" : ""}
-        >
-          {value || (isEditing ? <span className="text-gray-400 italic">{placeholder}</span> : "")}
+          <!-- Professional Summary -->
+          <div style="margin-bottom: 24px;">
+            <h2 style="font-size: 14pt; font-weight: bold; text-transform: uppercase; color: #1f2937; border-bottom: 1px solid #333; padding-bottom: 2px; margin-bottom: 8px;">PROFESSIONAL SUMMARY</h2>
+            <p style="text-align: justify; color: #374151; margin: 0;">${data.professionalSummary}</p>
+          </div>
+
+          <!-- Technical Skills -->
+          <div style="margin-bottom: 24px;">
+            <h2 style="font-size: 14pt; font-weight: bold; text-transform: uppercase; color: #1f2937; border-bottom: 1px solid #333; padding-bottom: 2px; margin-bottom: 8px;">TECHNICAL SKILLS</h2>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              ${data.skills.map(skill => `<span style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 11pt;">${skill}</span>`).join('')}
+            </div>
+          </div>
+
+          <!-- Work Experience -->
+          <div style="margin-bottom: 24px;">
+            <h2 style="font-size: 14pt; font-weight: bold; text-transform: uppercase; color: #1f2937; border-bottom: 1px solid #333; padding-bottom: 2px; margin-bottom: 12px;">WORK EXPERIENCE</h2>
+            ${data.workExperience.map(exp => `
+              <div style="margin-bottom: 16px; border-left: 2px solid #e5e7eb; padding-left: 16px;">
+                <h3 style="font-weight: bold; color: #1f2937; margin: 0; font-size: 12pt;">${exp.position}</h3>
+                <div style="font-style: italic; color: #374151; margin: 4px 0;">${exp.company}</div>
+                <div style="color: #6b7280; margin: 4px 0;">${exp.duration}</div>
+                <ul style="margin: 8px 0 0 16px; padding: 0;">
+                  ${exp.responsibilities?.map(resp => `<li style="color: #374151; margin: 2px 0;">${resp}</li>`).join('') || ''}
+                </ul>
+              </div>
+            `).join('')}
+          </div>
+
+          <!-- Projects -->
+          <div style="margin-bottom: 24px;">
+            <h2 style="font-size: 14pt; font-weight: bold; text-transform: uppercase; color: #1f2937; border-bottom: 1px solid #333; padding-bottom: 2px; margin-bottom: 12px;">PROJECTS</h2>
+            ${data.projects?.map(project => `
+              <div style="margin-bottom: 16px; border-left: 2px solid #e5e7eb; padding-left: 16px;">
+                <h3 style="font-weight: bold; color: #1f2937; margin: 0; font-size: 12pt;">${project.name}</h3>
+                <p style="color: #374151; margin: 4px 0;">${project.description}</p>
+                <div style="margin: 4px 0;">
+                  <span style="font-weight: 500; color: #6b7280;">Technologies: </span>
+                  ${project.technologies?.map(tech => `<span style="background: #dbeafe; color: #1d4ed8; padding: 2px 6px; border-radius: 4px; margin-right: 4px; font-size: 11pt;">${tech}</span>`).join('') || ''}
+                </div>
+              </div>
+            `).join('') || ''}
+          </div>
+
+          <!-- Footer -->
+          <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: right;">
+            <p style="font-size: 9pt; color: #9ca3af; margin: 0;">Powered by iQua.ai</p>
+          </div>
         </div>
-      );
+      `;
+    };
+
+    // Rich text editor configuration
+    const quillModules = {
+      toolbar: [
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        [{ 'font': [] }],
+        [{ 'size': ['small', false, 'large', 'huge'] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'align': [] }],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        [{ 'indent': '-1'}, { 'indent': '+1' }],
+        ['blockquote', 'code-block'],
+        ['link', 'image'],
+        ['clean']
+      ],
+      clipboard: {
+        matchVisual: false,
+      }
+    };
+
+    const quillFormats = [
+      'header', 'font', 'size',
+      'bold', 'italic', 'underline', 'strike',
+      'color', 'background',
+      'align',
+      'list', 'bullet', 'indent',
+      'blockquote', 'code-block',
+      'link', 'image'
+    ];
+
+    // Parse HTML back to resume data (simplified)
+    const parseHTMLToResumeData = (html) => {
+      // This would be a more complex function in production
+      // For now, we'll keep the structured data and just store the HTML
+      return {
+        ...displayData,
+        htmlContent: html
+      };
+    };
+
+    const handleRichTextChange = (content) => {
+      setRichTextContent(content);
+      // Update the structured data as well
+      const updatedData = parseHTMLToResumeData(content);
+      setEditedResumeData(updatedData);
+    };
+
+    const toggleEditMode = () => {
+      if (isRichTextMode) {
+        // Save the rich text content
+        const updatedData = parseHTMLToResumeData(richTextContent);
+        setEditedResumeData(updatedData);
+      }
+      setIsRichTextMode(!isRichTextMode);
     };
 
     return (
@@ -802,291 +762,104 @@ Powered by iQua.ai
           <span className="text-sm text-gray-600 font-medium">Final_Resume.docx</span>
           <div className="ml-auto flex items-center space-x-2">
             <button
-                onClick={() => setIsEditing(!isEditing)}
-                className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                  isEditing 
-                    ? 'bg-green-500 text-white hover:bg-green-600' 
-                    : 'bg-blue-500 text-white hover:bg-blue-600'
-                }`}
-              >
-                {isEditing ? '💾 Done' : '✏️ Edit'}
-              </button>
+              onClick={toggleEditMode}
+              className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                isRichTextMode 
+                  ? 'bg-green-500 text-white hover:bg-green-600' 
+                  : 'bg-blue-500 text-white hover:bg-blue-600'
+              }`}
+            >
+              {isRichTextMode ? '💾 Save & Exit' : '✏️ Rich Edit'}
+            </button>
             <span className="text-xs text-gray-500">📄</span>
             <span className="text-xs text-gray-500">100%</span>
           </div>
         </div>
 
-        {/* Document Content - Following Original Resume Layout */}
-        <div className="p-8 min-h-[600px] space-y-4 final-resume-content" style={{
-          fontFamily: 'Times New Roman, serif',
-          fontSize: '12pt',
-          lineHeight: '1.15',
-          background: 'white'
-        }}>
-          {/* Header Section - Same as Original */}
-          <div className="text-center mb-6 pb-3 border-b-2 border-gray-300 space-y-2">
-            <EditableField
-              value={displayData.basicDetails.name}
-              onSave={(value) => handleFieldEdit('basicDetails', 'name', value)}
-              placeholder="Your Name"
-              className="text-2xl font-bold text-gray-900 text-center"
+        {/* Document Content */}
+        <div className="min-h-[600px]">
+          {isRichTextMode ? (
+            // Rich Text Editor Mode
+            <div className="h-full">
+              <style>
+                {`
+                  .ql-editor {
+                    font-family: 'Times New Roman', serif !important;
+                    font-size: 12pt !important;
+                    line-height: 1.15 !important;
+                    min-height: 600px !important;
+                    background: white !important;
+                  }
+                  .ql-toolbar {
+                    border-top: none !important;
+                    border-left: none !important;
+                    border-right: none !important;
+                    background: #f8fafc !important;
+                  }
+                  .ql-container {
+                    border-bottom: none !important;
+                    border-left: none !important;
+                    border-right: none !important;
+                    font-family: 'Times New Roman', serif !important;
+                  }
+                  .ql-editor h1 {
+                    font-size: 18pt !important;
+                    font-weight: bold !important;
+                  }
+                  .ql-editor h2 {
+                    font-size: 14pt !important;
+                    font-weight: bold !important;
+                    text-transform: uppercase !important;
+                  }
+                  .ql-editor h3 {
+                    font-size: 12pt !important;
+                    font-weight: bold !important;
+                  }
+                `}
+              </style>
+              <ReactQuill
+                theme="snow"
+                value={richTextContent}
+                onChange={handleRichTextChange}
+                modules={quillModules}
+                formats={quillFormats}
+                style={{
+                  height: '600px',
+                  fontFamily: "'Times New Roman', serif"
+                }}
+              />
+            </div>
+          ) : (
+            // Preview Mode with structured layout
+            <div 
+              className="p-8 space-y-4"
+              style={{
+                fontFamily: 'Times New Roman, serif',
+                fontSize: '12pt',
+                lineHeight: '1.15',
+                background: 'white',
+                minHeight: '600px'
+              }}
+              dangerouslySetInnerHTML={{ __html: richTextContent }}
             />
-            <div className="text-sm text-gray-700 space-y-1">
-              <EditableField
-                value={displayData.basicDetails.email}
-                onSave={(value) => handleFieldEdit('basicDetails', 'email', value)}
-                placeholder="email@example.com"
-                className="block"
-              />
-              <EditableField
-                value={displayData.basicDetails.phone}
-                onSave={(value) => handleFieldEdit('basicDetails', 'phone', value)}
-                placeholder="Phone Number"
-                className="block"
-              />
-              <EditableField
-                value={displayData.basicDetails.location}
-                onSave={(value) => handleFieldEdit('basicDetails', 'location', value)}
-                placeholder="Location"
-                className="block"
-              />
-            </div>
-          </div>
-
-          {/* Professional Summary - Same as Original */}
-          <div className="mb-6 space-y-2">
-            <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '14pt',
-              fontWeight: 'bold',
-              borderBottom: '1px solid #333',
-              paddingBottom: '2px'
-            }}>
-              PROFESSIONAL SUMMARY
-            </h2>
-            <EditableField
-              value={displayData.professionalSummary}
-              onSave={(value) => handleFieldEdit('professionalSummary', '', value)}
-              multiline={true}
-              placeholder="Write your professional summary here..."
-              className="text-gray-800 text-justify"
-            />
-          </div>
-
-          {/* Technical Skills - Same as Original */}
-          <div className="mb-6 space-y-2">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
-                fontFamily: 'Times New Roman, serif',
-                fontSize: '14pt',
-                fontWeight: 'bold',
-                borderBottom: '1px solid #333',
-                paddingBottom: '2px'
-              }}>
-                TECHNICAL SKILLS
-              </h2>
-              {isEditing && (
-                <button
-                  onClick={() => addNewItem('skills')}
-                  className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
-                >
-                  + Add Skill
-                </button>
-              )}
-            </div>
-            <div className="space-y-1">
-              {displayData.skills.map((skill, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <EditableField
-                    value={skill}
-                    onSave={(value) => handleFieldEdit('skills', '', value, index)}
-                    placeholder="Skill name"
-                    className="inline-block bg-gray-100 px-2 py-1 rounded text-sm"
-                  />
-                  {isEditing && (
-                    <button
-                      onClick={() => removeItem('skills', index)}
-                      className="px-1 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Work Experience - Same as Original */}
-          <div className="mb-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
-                fontFamily: 'Times New Roman, serif',
-                fontSize: '14pt',
-                fontWeight: 'bold',
-                borderBottom: '1px solid #333',
-                paddingBottom: '2px'
-              }}>
-                WORK EXPERIENCE
-              </h2>
-              {isEditing && (
-                <button
-                  onClick={() => addNewItem('workExperience')}
-                  className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
-                >
-                  + Add Experience
-                </button>
-              )}
-            </div>
-            {displayData.workExperience.map((exp, index) => (
-              <div key={index} className="space-y-2 border-l-2 border-gray-200 pl-4 relative">
-                {isEditing && (
-                  <button
-                    onClick={() => removeItem('workExperience', index)}
-                    className="absolute -left-8 top-0 px-1 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
-                  >
-                    ✕
-                  </button>
-                )}
-                <EditableField
-                  value={exp.position}
-                  onSave={(value) => handleFieldEdit('workExperience', 'position', value, index)}
-                  placeholder="Job Position"
-                  className="font-bold text-gray-900 text-lg"
-                />
-                <EditableField
-                  value={exp.company}
-                  onSave={(value) => handleFieldEdit('workExperience', 'company', value, index)}
-                  placeholder="Company Name"
-                  className="text-gray-800 italic"
-                />
-                <EditableField
-                  value={exp.duration}
-                  onSave={(value) => handleFieldEdit('workExperience', 'duration', value, index)}
-                  placeholder="Duration"
-                  className="text-gray-700"
-                />
-                <div className="ml-4 space-y-1">
-                  {exp.responsibilities?.map((resp, respIndex) => (
-                    <div key={respIndex} className="flex items-start gap-2">
-                      <span className="text-gray-800">•</span>
-                      <EditableField
-                        value={resp}
-                        onSave={(value) => handleFieldEdit('workExperience', 'responsibilities', value, index, respIndex)}
-                        placeholder="Responsibility description"
-                        className="text-gray-800 flex-1"
-                      />
-                      {isEditing && (
-                        <button
-                          onClick={() => removeItem('responsibilities', index, respIndex)}
-                          className="px-1 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
-                        >
-                          ✕
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                  {isEditing && (
-                    <button
-                      onClick={() => addNewItem('responsibilities', index)}
-                      className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 ml-4"
-                    >
-                      + Add Responsibility
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Projects - Same as Original */}
-          <div className="mb-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
-                fontFamily: 'Times New Roman, serif',
-                fontSize: '14pt',
-                fontWeight: 'bold',
-                borderBottom: '1px solid #333',
-                paddingBottom: '2px'
-              }}>
-                PROJECTS
-              </h2>
-              {isEditing && (
-                <button
-                  onClick={() => addNewItem('projects')}
-                  className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
-                >
-                  + Add Project
-                </button>
-              )}
-            </div>
-            {displayData.projects?.map((project, index) => (
-              <div key={index} className="space-y-2 border-l-2 border-gray-200 pl-4 relative">
-                {isEditing && (
-                  <button
-                    onClick={() => removeItem('projects', index)}
-                    className="absolute -left-8 top-0 px-1 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
-                  >
-                    ✕
-                  </button>
-                )}
-                <EditableField
-                  value={project.name}
-                  onSave={(value) => handleFieldEdit('projects', 'name', value, index)}
-                  placeholder="Project Name"
-                  className="font-bold text-gray-900 text-lg"
-                />
-                <EditableField
-                  value={project.description}
-                  onSave={(value) => handleFieldEdit('projects', 'description', value, index)}
-                  multiline={true}
-                  placeholder="Project description"
-                  className="text-gray-800"
-                />
-                <div className="space-y-1">
-                  <span className="font-medium text-gray-700">Technologies: </span>
-                  <div className="flex flex-wrap gap-2">
-                    {project.technologies?.map((tech, techIndex) => (
-                      <div key={techIndex} className="flex items-center gap-1">
-                        <EditableField
-                          value={tech}
-                          onSave={(value) => handleFieldEdit('projects', 'technologies', value, index, techIndex)}
-                          placeholder="Technology"
-                          className="inline-block bg-blue-100 px-2 py-1 rounded text-sm"
-                        />
-                        {isEditing && (
-                          <button
-                            onClick={() => removeItem('technologies', index, techIndex)}
-                            className="px-1 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
-                          >
-                            ✕
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                    {isEditing && (
-                      <button
-                        onClick={() => addNewItem('technologies', index)}
-                        className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600"
-                      >
-                        + Add Tech
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Footer - Same as Original */}
-          <div className="mt-8 pt-4 border-t border-gray-200 text-right">
-            <p className="text-xs text-gray-400" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '9pt'
-            }}>
-              Powered by iQua.ai
-            </p>
-          </div>
+          )}
         </div>
+
+        {/* Formatting Tips */}
+        {isRichTextMode && (
+          <div className="border-t border-gray-200 p-4 bg-blue-50">
+            <div className="text-sm text-blue-700">
+              <strong>💡 Formatting Tips:</strong>
+              <ul className="mt-2 ml-4 space-y-1">
+                <li>• Use Header 1 for your name, Header 2 for sections (EXPERIENCE, SKILLS, etc.)</li>
+                <li>• Keep fonts professional - Times New Roman, Arial, or Calibri work best</li>
+                <li>• Use bullet points for responsibilities and achievements</li>
+                <li>• Maintain consistent spacing and alignment throughout</li>
+                <li>• Keep colors minimal - black text on white background is standard</li>
+              </ul>
+            </div>
+          </div>
+        )}
       </div>
     );
   };

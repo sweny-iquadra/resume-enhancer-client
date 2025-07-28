@@ -629,43 +629,53 @@ Powered by iQua.ai
 
     // Generate markdown content from resume data
     const generateResumeHTML = (data) => {
-      return `# ${data.basicDetails.name}
+      // Safely access basic details with fallbacks
+      const name = data?.basicDetails?.name || 'Your Name';
+      const email = data?.basicDetails?.email || 'your.email@example.com';
+      const phone = data?.basicDetails?.phone || '+1 (555) 123-4567';
+      const location = data?.basicDetails?.location || 'Your Location';
+      const summary = data?.professionalSummary || 'Professional summary will appear here';
+      const skills = data?.skills || [];
+      const workExperience = data?.workExperience || [];
+      const projects = data?.projects || [];
 
-**${data.basicDetails.email}** | **${data.basicDetails.phone}** | **${data.basicDetails.location}**
+      return `# ${name}
+
+**${email}** | **${phone}** | **${location}**
 
 ---
 
 ## PROFESSIONAL SUMMARY
 
-${data.professionalSummary}
+${summary}
 
 ---
 
 ## TECHNICAL SKILLS
 
-${data.skills.map(skill => `- ${skill}`).join('\n')}
+${skills.map(skill => `- ${skill}`).join('\n')}
 
 ---
 
 ## WORK EXPERIENCE
 
-${data.workExperience.map(exp => `
-### ${exp.position}
-**${exp.company}** | *${exp.duration}*
+${workExperience.map(exp => `
+### ${exp?.position || 'Position Title'}
+**${exp?.company || 'Company Name'}** | *${exp?.duration || 'Duration'}*
 
-${exp.responsibilities?.map(resp => `- ${resp}`).join('\n') || ''}
+${exp?.responsibilities?.map(resp => `- ${resp}`).join('\n') || ''}
 `).join('\n')}
 
 ---
 
 ## PROJECTS
 
-${data.projects?.map(project => `
-### ${project.name}
-${project.description}
+${projects.map(project => `
+### ${project?.name || 'Project Name'}
+${project?.description || 'Project description'}
 
-**Technologies:** ${project.technologies?.join(', ') || ''}
-`).join('\n') || ''}
+**Technologies:** ${project?.technologies?.join(', ') || 'Technologies used'}
+`).join('\n')}
 
 ---
 

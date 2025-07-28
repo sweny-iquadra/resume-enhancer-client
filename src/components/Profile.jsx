@@ -251,6 +251,16 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
     }
   };
 
+  const isValidUrl = (url) => {
+    if (!url) return false;
+    try {
+      const urlObj = new URL(url);
+      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
+
   const validateCertificateForm = () => {
     const errors = {};
     
@@ -268,6 +278,8 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
     
     if (!certificateForm.credentialUrl.trim()) {
       errors.credentialUrl = 'Please enter your credential URL.';
+    } else if (!isValidUrl(certificateForm.credentialUrl)) {
+      errors.credentialUrl = 'Please enter a valid URL.';
     }
     
     if (!certificateForm.startDate) {
@@ -1027,6 +1039,17 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                 />
                 {certificateErrors.credentialUrl && (
                   <p className="text-red-500 text-sm mt-1">{certificateErrors.credentialUrl}</p>
+                )}
+                {certificateForm.credentialUrl && isValidUrl(certificateForm.credentialUrl) && !certificateErrors.credentialUrl && (
+                  <div className="mt-2 text-center">
+                    <button
+                      type="button"
+                      onClick={() => window.open(certificateForm.credentialUrl, '_blank')}
+                      className="text-blue-600 hover:text-blue-800 text-sm underline font-medium"
+                    >
+                      Visit URL
+                    </button>
+                  </div>
                 )}
               </div>
 

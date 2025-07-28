@@ -61,10 +61,12 @@ const ProfileCompletionModal = ({
         // Show success toast
         setShowSuccessToast(true);
 
-        // Close the modal automatically on success
+        // IMMEDIATELY close the modal and reset all states - this must happen synchronously
         setShowProfileModal(false);
         setShowRoleSelection(false);
         setShowSuccessContent(false);
+        setIsGenerating(false);
+        setIsLoading(false);
 
         return; // Exit early on success
       } else {

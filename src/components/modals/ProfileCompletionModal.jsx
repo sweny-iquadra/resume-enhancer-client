@@ -64,14 +64,17 @@ const ProfileCompletionModal = ({
 
         // Update state
         setEnhancedResumeData(response.data.enhancedResume);
-        
+
         // Store generated resume data for modal display
         setGeneratedResumeData(response.data.enhancedResume);
-        
+
         // Show success content in modal instead of closing it
         setShowSuccessContent(true);
         setShowRoleSelection(false);
-        
+
+        // Keep the modal open with success content
+        setShowProfileModal(true);
+
         return; // Exit early on success
       } else {
         // Only reopen modal on actual failure
@@ -80,7 +83,7 @@ const ProfileCompletionModal = ({
       }
     } catch (error) {
       console.error('Error calling enhance resume API:', error);
-      
+
       // Only reopen modal on error
       setShowProfileModal(true);
       alert('⚠️ An error occurred while enhancing your resume. Please check your connection and try again.');

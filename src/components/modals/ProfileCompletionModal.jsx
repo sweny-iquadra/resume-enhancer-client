@@ -12,10 +12,14 @@ const ProfileCompletionModal = ({
   setShowRoleSelection,
   uniqueRoles,
   handleRoleSelection,
-  setShowSuccessToast
+  setShowSuccessToast,
+  setShowPreview,
+  setCurrentPage
 }) => {
   const [currentSelectedRole, setCurrentSelectedRole] = useState(selectedRole);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showSuccessContent, setShowSuccessContent] = useState(false);
+  const [generatedResumeData, setGeneratedResumeData] = useState(null);
 
   if (!showProfileModal) return null;
 
@@ -50,7 +54,6 @@ const ProfileCompletionModal = ({
   const proceedWithGeneration = async (roleToUse) => {
     try {
       setIsLoading(true);
-      setShowProfileModal(false); // Close modal immediately when starting
 
       // Call the enhance resume API
       const response = await enhanceResumeAPI(roleToUse, userProfile);
@@ -62,13 +65,14 @@ const ProfileCompletionModal = ({
         // Update state
         setEnhancedResumeData(response.data.enhancedResume);
         
-        // Show success toast
-        if (setShowSuccessToast) {
-          setShowSuccessToast(true);
-        }
+        // Store generated resume data for modal display
+        setGeneratedResumeData(response.data.enhancedResume);
         
-        // Modal will remain closed - do not set setShowProfileModal(true) here
-        return; // Exit early on success to prevent any further modal state changes
+        // Show success content in modal instead of closing it
+        setShowSuccessContent(true);
+        setShowRoleSelection(false);
+        
+        return; // Exit early on success
       } else {
         // Only reopen modal on actual failure
         setShowProfileModal(true);
@@ -109,7 +113,120 @@ const ProfileCompletionModal = ({
 
         {/* Modal Body */}
         <div className="p-6 text-center">
-          {!showRoleSelection ? (
+          {showSuccessContent ? (
+            /* Success Content View */
+            <div className="space-y-6">
+              {/* Success Message */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <span className="text-3xl">🎉</span>
+                  <h3 className="font-bold text-green-700 text-lg">Your resume is ready!</h3>
+                </div>
+                <p className="text-green-600 text-sm">
+                  AI has successfully enhanced your resume with tailored content
+                </p>
+              </div>
+
+              {/* AI Generated Resume Details */}
+              <div className="bg-white rounded-xl border border-gray-200 text-left">
+                <div className="bg-gray-50 px-4 py-3 rounded-t-xl border-b border-gray-200">
+                  <h4 className="font-semibold text-gray-800 flex items-center">
+                    <span className="mr-2">🤖</span>
+                    AI Generated Resume Details
+                  </h4>
+                </div>
+                <div className="p-4 space-y-4 max-h-64 overflow-y-auto">
+                  {/* Basic Details */}
+                  <div>
+                    <h5 className="font-medium text-gray-700 mb-2">📋 Basic Information</h5>
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p><span className="font-medium">Name:</span> {generatedResumeData?.basicDetails?.name}</p>
+                      <p><span className="font-medium">Email:</span> {generatedResumeData?.basicDetails?.email}</p>
+                      <p><span className="font-medium">Location:</span> {generatedResumeData?.basicDetails?.location}</p>
+                    </div>
+                  </div>
+
+                  {/* Professional Summary */}
+                  <div>
+                    <h5 className="font-medium text-gray-700 mb-2">💼 Professional Summary</h5>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {generatedResumeData?.professionalSummary}
+                    </p>
+                  </div>
+
+                  {/* Skills */}
+                  <div>
+                    <h5 className="font-medium text-gray-700 mb-2">🚀 Enhanced Skills</h5>
+                    <div className="flex flex-wrap gap-2">
+                      {generatedResumeData?.skills?.slice(0, 8).map((skill, index) => (
+                        <span key={index} className="px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs">
+                          {skill}
+                        </span>
+                      ))}
+                      {generatedResumeData?.skills?.length > 8 && (
+                        <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs">
+                          +{generatedResumeData.skills.length - 8} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pro Tip */}
+              <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200 text-left">
+                <h4 className="font-semibold text-yellow-700 mb-2 flex items-center">
+                  <span className="mr-2">💡</span>
+                  Pro Tip
+                </h4>
+                <p className="text-yellow-700 text-sm mb-3">
+                  Add your missing details to improve your profile and stand out
+                </p>
+                <button
+                  onClick={() => {
+                    setCurrentPage('dashboard');
+                    setShowProfileModal(false);
+                    setShowSuccessContent(false);
+                  }}
+                  className="bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-600 transition-colors"
+                >
+                  Edit Profile
+                </button>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowPreview(true);
+                    setShowProfileModal(false);
+                    setShowSuccessContent(false);
+                  }}
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex-1"
+                >
+                  <span className="flex items-center justify-center space-x-2">
+                    <span>📊</span>
+                    <span>Preview & Compare</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => {
+                    // Reset all states to start over
+                    setShowSuccessContent(false);
+                    setGeneratedResumeData(null);
+                    setEnhancedResumeData(null);
+                    setShowProfileModal(false);
+                    setShowRoleSelection(false);
+                    localStorage.removeItem('enhancedResumeData');
+                  }}
+                  className="bg-gray-500 text-white px-4 py-3 rounded-lg font-medium hover:bg-gray-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                  title="Start a new resume"
+                >
+                  🔄
+                </button>
+              </div>
+            </div>
+          ) : !showRoleSelection ? (
             <>
               <p className="text-gray-700 text-lg leading-relaxed mb-4">
                 Looks like you're almost there!

@@ -113,6 +113,8 @@ function App() {
           uniqueRoles={uniqueRoles}
           handleRoleSelection={handleRoleSelection}
           setShowSuccessToast={setShowSuccessToast}
+          setShowPreview={setShowPreview}
+          setCurrentPage={setCurrentPage}
         />
 
         {/* Interview Requirement Modal */}

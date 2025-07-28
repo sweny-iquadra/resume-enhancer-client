@@ -9,6 +9,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
   const [tempProfessionalSummary, setTempProfessionalSummary] = useState('');
   const [skills, setSkills] = useState(['Angular', '3D-Printing']);
   const [isEditingSkills, setIsEditingSkills] = useState(false);
+  const [isAddingSkill, setIsAddingSkill] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState('');
   const [skillError, setSkillError] = useState(false);
   const [tempSkills, setTempSkills] = useState([]);
@@ -41,21 +42,19 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
       setSkills([...skills, selectedSkill]);
     }
     setSelectedSkill('');
-    setIsEditingSkills(false);
+    setIsAddingSkill(false);
   };
 
-  const handleCancelSkillEdit = () => {
+  const handleCancelSkillAdd = () => {
     setSelectedSkill('');
     setSkillError(false);
-    setTempSkills([]);
-    setIsEditingSkills(false);
+    setIsAddingSkill(false);
   };
 
   const handleAddSkillClick = () => {
-    setIsEditingSkills(true);
+    setIsAddingSkill(true);
     setSkillError(false);
     setSelectedSkill('');
-    setTempSkills([]);
   };
 
   const handleEditSkillsClick = () => {
@@ -208,8 +207,71 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                   </div>
                 </div>
 
-                {/* Edit mode - skills with delete buttons and action buttons */}
-                {isEditingSkills ? (
+                {/* Add mode - dropdown with buttons and skill list */}
+                {isAddingSkill ? (
+                  <div className="space-y-3">
+                    {/* Error message */}
+                    {skillError && (
+                      <div className="text-red-500 text-xs">
+                        * At least select one skill
+                      </div>
+                    )}
+
+                    {/* Dropdown */}
+                    <div className="relative">
+                      <select
+                        value={selectedSkill}
+                        onChange={(e) => {
+                          setSelectedSkill(e.target.value);
+                          setSkillError(false);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white appearance-none pr-10"
+                        style={{ color: '#999' }}
+                      >
+                        <option value="">Select Skills</option>
+                        {availableSkills.filter(skill => !skills.includes(skill)).map((skill) => (
+                          <option key={skill} value={skill} className="text-black">
+                            {skill}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="space-y-2">
+                      <button
+                        onClick={handleCancelSkillAdd}
+                        className="w-full bg-gray-200 text-black py-2 rounded-md font-medium hover:bg-gray-300 transition-colors text-sm"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSaveSkill}
+                        className="w-full text-white py-2 rounded-md font-bold transition-colors text-sm"
+                        style={{
+                          background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)'
+                        }}
+                      >
+                        Save
+                      </button>
+                    </div>
+
+                    {/* Current skills list */}
+                    <div className="space-y-1 pt-2">
+                      {skills.map((skill, index) => (
+                        <div key={index} className="text-sm font-bold text-black">
+                          {skill}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : isEditingSkills ? (
+                  /* Edit mode - skills with delete buttons and action buttons */
                   <div className="space-y-3">
                     {/* Skills list with delete buttons */}
                     <div className="space-y-2">
@@ -249,7 +311,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                     </div>
                   </div>
                 ) : (
-                  /* View mode - skills list matching screenshot */
+                  /* View mode - skills list */
                   <div className="space-y-2">
                     {skills.map((skill, index) => (
                       <div key={index}>

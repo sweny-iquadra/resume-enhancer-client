@@ -65,6 +65,13 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
             <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
               <span className="text-gray-600 text-xs">👤</span>
             </div>
+            <button
+              onClick={onLogout}
+              className="text-gray-600 hover:text-red-600 transition-colors text-sm font-medium px-3 py-1 hover:bg-red-50 rounded-lg"
+              title="Logout"
+            >
+              Logout
+            </button>
           </div>
         </div>
       </div>

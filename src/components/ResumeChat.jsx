@@ -28,6 +28,24 @@ const ResumeChat = ({
     }
   }, [enhancedResumeData]);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === 'Enter' && hasAttendedInterview && !isLoading && !enhancedResumeData && !showRoleSelection) {
+        e.preventDefault();
+        handleCreateResumeWithFeedback();
+      }
+      if (e.key === 'Escape') {
+        setShowResumeChat(false);
+      }
+    };
+
+    if (showResumeChat) {
+      document.addEventListener('keydown', handleKeyPress);
+      return () => document.removeEventListener('keydown', handleKeyPress);
+    }
+  }, [showResumeChat, hasAttendedInterview, isLoading, enhancedResumeData, showRoleSelection]);
+
   if (!showResumeChat) return null;
 
   const handleEditProfile = () => {
@@ -81,13 +99,57 @@ const ResumeChat = ({
           <div className="space-y-6">
             {/* Welcome Message */}
             {!isLoading && !enhancedResumeData && (
-              <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 border border-purple-100">
-                <h3 className="font-semibold text-purple-600 mb-3">
-                  Welcome to iQua.AI Resume enhancer
-                </h3>
-                <div className="text-gray-700 text-sm leading-relaxed space-y-2">
-                  <p>1. iQua.ai helps you create resumes tailored to your skills, job roles, and sectors you've explored through our interviews.</p>
-                  <p>2. Click the Create Resume button to let iQua build a resume uniquely designed for you!</p>
+              <div className="space-y-4">
+                <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 border border-purple-100">
+                  <h3 className="font-semibold text-purple-600 mb-3">
+                    Welcome to iQua.AI Resume enhancer
+                  </h3>
+                  <div className="text-gray-700 text-sm leading-relaxed space-y-2">
+                    <p>1. iQua.ai helps you create resumes tailored to your skills, job roles, and sectors you've explored through our interviews.</p>
+                    <p>2. Click the Create Resume button to let iQua build a resume uniquely designed for you!</p>
+                  </div>
+                </div>
+
+                {/* Progress Indicator */}
+                <div className="bg-white rounded-xl p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                    <span className="text-lg mr-2">📊</span>
+                    Your Progress
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Interview Completed</span>
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-xs px-2 py-1 rounded-full ${hasAttendedInterview 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {hasAttendedInterview ? '✓ Done' : 'Pending'}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Resume Creation</span>
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-xs px-2 py-1 rounded-full ${enhancedResumeData 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {enhancedResumeData ? '✓ Ready' : 'Available'}
+                        </span>
+                      </div>
+                    </div>
+                    {uniqueRoles.length > 0 && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Explored Roles</span>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                            {uniqueRoles.length} role{uniqueRoles.length > 1 ? 's' : ''}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -283,8 +345,9 @@ const ResumeChat = ({
                 <button
                   onClick={handleCreateResumeWithFeedback}
                   disabled={!hasAttendedInterview || isButtonLoading}
+                  title={hasAttendedInterview ? 'Create your AI-enhanced resume' : 'Complete an interview first to unlock'}
                   className={`group relative overflow-hidden px-6 py-3.5 rounded-xl transition-all duration-500 font-bold text-sm shadow-xl hover:shadow-2xl transform hover:scale-105 border-2 min-w-[140px] ${hasAttendedInterview && !isButtonLoading
-                      ? 'text-white cursor-pointer border-indigo-300 hover:border-indigo-200 hover:-translate-y-1'
+                      ? 'text-white cursor-pointer border-indigo-300 hover:border-indigo-200 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-indigo-300 focus:ring-opacity-50'
                       : 'bg-gradient-to-br from-gray-200 via-gray-300 to-gray-400 text-gray-600 cursor-not-allowed border-gray-300 opacity-60'
                     }`}
                   style={hasAttendedInterview && !isButtonLoading ? {
@@ -302,6 +365,9 @@ const ResumeChat = ({
                     <span className="font-bold tracking-wider text-xs uppercase leading-tight">
                       {isButtonLoading ? 'CREATING...' : 'CREATE RESUME'}
                     </span>
+                    {hasAttendedInterview && !isButtonLoading && (
+                      <span className="text-xs opacity-75 font-normal">Press Enter</span>
+                    )}
                   </span>
                   {hasAttendedInterview && (
                     <>
@@ -345,18 +411,27 @@ const ResumeChat = ({
             )}
           </div>
 
-          {/* Chat Input Area - At bottom of scrollable content */}
-          {!showRoleSelection && !isLoading && (
+          {/* Quick Actions - At bottom of scrollable content */}
+          {!showRoleSelection && !isLoading && !enhancedResumeData && (
             <div className="mt-6 pt-4 border-t border-gray-200 sticky bottom-0 bg-white">
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  placeholder="Ask me anything about resume building..."
-                  className="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                />
-                <button className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-3 rounded-xl hover:from-purple-700 hover:to-purple-800 transition-all shadow-md">
-                  <span className="text-sm">→</span>
-                </button>
+              <div className="space-y-3">
+                <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Quick Tips</h4>
+                <div className="grid grid-cols-1 gap-2 text-xs">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-start space-x-2">
+                    <span className="text-blue-500 text-sm">💡</span>
+                    <div>
+                      <p className="font-medium text-blue-700">Complete Your Profile</p>
+                      <p className="text-blue-600 mt-1">Add education, skills, and experience for a better resume</p>
+                    </div>
+                  </div>
+                  <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 flex items-start space-x-2">
+                    <span className="text-purple-500 text-sm">🎯</span>
+                    <div>
+                      <p className="font-medium text-purple-700">Take Multiple Interviews</p>
+                      <p className="text-purple-600 mt-1">Explore different roles to get tailored resume options</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

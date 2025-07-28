@@ -48,7 +48,7 @@ const ResumeChat = ({
   if (!showResumeChat) return null;
 
   const handleEditProfile = () => {
-    setCurrentPage('dashboard');
+    setCurrentPage('profile');
     setShowResumeChat(false);
   };
 

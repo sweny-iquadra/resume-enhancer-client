@@ -42,10 +42,10 @@ const ProfileCompletionModal = ({
 
 
   const proceedWithGeneration = async (roleToUse) => {
-    setShowProfileModal(false);
-    setIsLoading(true);
-
     try {
+      setIsLoading(true);
+      setShowProfileModal(false); // Close modal immediately when starting
+
       // Call the enhance resume API
       const response = await enhanceResumeAPI(roleToUse, userProfile);
 
@@ -55,13 +55,19 @@ const ProfileCompletionModal = ({
 
         // Update state
         setEnhancedResumeData(response.data.enhancedResume);
+        
+        // Modal will stay closed as resume was successful
       } else {
-        console.error('API call failed');
-        alert('Failed to enhance resume. Please try again.');
+        // Show error and reopen modal for retry
+        setShowProfileModal(true);
+        alert('❌ Failed to enhance resume. Please try again or complete your profile for better results.');
       }
     } catch (error) {
       console.error('Error calling enhance resume API:', error);
-      alert('An error occurred while enhancing your resume. Please try again.');
+      
+      // Show error and reopen modal for retry
+      setShowProfileModal(true);
+      alert('⚠️ An error occurred while enhancing your resume. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
     }

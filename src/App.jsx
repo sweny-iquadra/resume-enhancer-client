@@ -1,6 +1,6 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
+import './index.css';
 import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import InterviewPage from './components/InterviewPage';
@@ -9,6 +9,7 @@ import ResumePreview from './components/ResumePreview';
 import ProfileCompletionModal from './components/modals/ProfileCompletionModal';
 import InterviewRequirementModal from './components/modals/InterviewRequirementModal';
 import LoadingModal from './components/modals/LoadingModal';
+import SuccessToast from './components/modals/SuccessToast';
 import { useResumeLogic } from './hooks/useResumeLogic';
 
 function App() {

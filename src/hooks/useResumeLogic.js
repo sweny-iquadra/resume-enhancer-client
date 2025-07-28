@@ -54,10 +54,10 @@ export const useResumeLogic = () => {
   };
 
   const handleResumeEnhancement = async (role) => {
-    // Show loading modal instead of alert
-    setIsLoading(true);
-
     try {
+      // Show loading modal
+      setIsLoading(true);
+
       // Call the enhance resume API with user profile data
       const response = await enhanceResumeAPI(role, userProfile);
 
@@ -68,15 +68,29 @@ export const useResumeLogic = () => {
         // Update state with enhanced resume data
         setEnhancedResumeData(response.data.enhancedResume);
 
-        // Show the preview modal
-        setShowPreview(true);
+        // Show success feedback
+        console.log('✅ Resume enhanced successfully!');
       } else {
-        console.error('API call failed');
-        alert('Failed to enhance resume. Please try again.');
+        console.error('API call failed:', response);
+        
+        // Show user-friendly error message
+        alert('❌ Failed to enhance resume. Our AI encountered an issue. Please try again or check your profile completeness.');
+        
+        // If profile is incomplete, show profile modal for completion
+        if (!checkProfileCompletion(userProfile)) {
+          setShowProfileModal(true);
+        }
       }
     } catch (error) {
       console.error('Error calling enhance resume API:', error);
-      alert('An error occurred while enhancing your resume. Please try again.');
+      
+      // Show user-friendly error message
+      alert('⚠️ Network error occurred while enhancing your resume. Please check your internet connection and try again.');
+      
+      // If profile is incomplete, show profile modal for completion
+      if (!checkProfileCompletion(userProfile)) {
+        setShowProfileModal(true);
+      }
     } finally {
       setIsLoading(false);
     }

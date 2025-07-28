@@ -30,6 +30,9 @@ const ResumeChat = ({
     setIsButtonLoading(true);
     try {
       await handleCreateResumeClick();
+    } catch (error) {
+      console.error('Error in resume creation:', error);
+      alert('⚠️ Something went wrong while creating your resume. Please try again.');
     } finally {
       setIsButtonLoading(false);
     }

@@ -49,6 +49,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
   });
   const [certificateErrors, setCertificateErrors] = useState({});
   const [editingCertificateId, setEditingCertificateId] = useState(null);
+  const [deleteCertificateId, setDeleteCertificateId] = useState(null);
 
   // Available skills for dropdown
   const availableSkills = [
@@ -291,6 +292,40 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
     }
     
     return errors;
+  };
+
+  const handleDeleteCertificate = (id) => {
+    setDeleteCertificateId(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteCertificate = async () => {
+    try {
+      // Simulate API call for certificate deletion
+      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
+
+      // Remove the certificate from the UI
+      setCertificates(prev => prev.filter(cert => cert.id !== deleteCertificateId));
+      
+      // Close the confirmation popup
+      setShowDeleteModal(false);
+      setDeleteCertificateId(null);
+      
+      // Show success message
+      setSuccessTitle('Certificate Deleted!');
+      setSuccessMessage('Certificate has been deleted successfully.');
+      setShowSuccessToast(true);
+    } catch (error) {
+      setErrorMessage('Failed to delete certificate. Please try again.');
+      setShowErrorToast(true);
+      setShowDeleteModal(false);
+      setDeleteCertificateId(null);
+    }
+  };
+
+  const cancelDeleteCertificate = () => {
+    setShowDeleteModal(false);
+    setDeleteCertificateId(null);
   };
 
   const handleCertificateSubmit = async () => {
@@ -931,12 +966,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                                 ✏️
                               </button>
                               <button 
-                                onClick={() => {
-                                  setCertificates(prev => prev.filter(c => c.id !== cert.id));
-                                  setSuccessTitle('Certificate Deleted!');
-                                  setSuccessMessage('Certificate has been deleted successfully.');
-                                  setShowSuccessToast(true);
-                                }}
+                                onClick={() => handleDeleteCertificate(cert.id)}
                                 className="text-red-500 hover:text-red-700 p-1"
                               >
                                 🗑️
@@ -1323,8 +1353,8 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
       {/* Delete Confirmation Modal */}
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
-        onConfirm={confirmDeleteEducation}
-        onCancel={cancelDeleteEducation}
+        onConfirm={deleteCertificateId ? confirmDeleteCertificate : confirmDeleteEducation}
+        onCancel={deleteCertificateId ? cancelDeleteCertificate : cancelDeleteEducation}
       />
     </div>
   );

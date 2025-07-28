@@ -25,6 +25,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
     endDate: ''
   });
   const [educationErrors, setEducationErrors] = useState({});
+  const [editingEducationId, setEditingEducationId] = useState(null);
 
   // Available skills for dropdown
   const availableSkills = [
@@ -93,6 +94,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
 
   const handleAddEducation = () => {
     setShowEducationModal(true);
+    setEditingEducationId(null);
     // Reset form and errors when opening modal
     setEducationForm({
       qualification: '',
@@ -108,6 +110,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
 
   const handleCloseEducationModal = () => {
     setShowEducationModal(false);
+    setEditingEducationId(null);
     setEducationForm({
       qualification: '',
       academy: '',
@@ -118,6 +121,27 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
       endDate: ''
     });
     setEducationErrors({});
+  };
+
+  const handleEditEducation = (edu) => {
+    setEditingEducationId(edu.id);
+    setEducationForm({
+      qualification: edu.qualification,
+      academy: edu.academy,
+      field: edu.field,
+      score: edu.score,
+      scoreType: edu.scoreType,
+      startDate: edu.startDate,
+      endDate: edu.endDate
+    });
+    setEducationErrors({});
+    setShowEducationModal(true);
+  };
+
+  const handleDeleteEducation = (id) => {
+    if (window.confirm('Are you sure you want to delete this education entry?')) {
+      setEducation(prev => prev.filter(edu => edu.id !== id));
+    }
   };
 
   const handleEducationInputChange = (field, value) => {
@@ -184,8 +208,17 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
       return;
     }
     
-    // Add to education list
-    setEducation(prev => [...prev, { ...educationForm, id: Date.now() }]);
+    if (editingEducationId) {
+      // Update existing education entry
+      setEducation(prev => prev.map(edu => 
+        edu.id === editingEducationId 
+          ? { ...educationForm, id: editingEducationId }
+          : edu
+      ));
+    } else {
+      // Add new education entry
+      setEducation(prev => [...prev, { ...educationForm, id: Date.now() }]);
+    }
     
     // Close modal and reset form
     handleCloseEducationModal();
@@ -588,8 +621,52 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                       <div className="h-full"></div>
                     </>
                   ) : (
-                    <div className="text-center py-12">
-                      <p className="text-gray-500">Education records will be displayed here</p>
+                    <div className="pt-16 space-y-4">
+                      {education.map((edu) => (
+                        <div key={edu.id} className="bg-white border-b border-gray-200 pb-4">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <div className="font-bold text-gray-900 text-base mb-1">
+                                {edu.qualification}
+                              </div>
+                              <div className="text-gray-700 text-sm mb-1">
+                                {edu.academy}
+                              </div>
+                              <div className="text-gray-700 text-sm mb-1">
+                                {edu.field}
+                              </div>
+                              <div className="text-gray-700 text-sm mb-2">
+                                {edu.scoreType === 'percentage' ? 'Percentage' : 'CGPA'}: {edu.score}
+                              </div>
+                              <div className="text-gray-500 text-sm">
+                                {new Date(edu.startDate).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'short', 
+                                  day: 'numeric' 
+                                })} to {new Date(edu.endDate).toLocaleDateString('en-US', { 
+                                  year: 'numeric', 
+                                  month: 'short', 
+                                  day: 'numeric' 
+                                })}
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2 ml-4">
+                              <button 
+                                onClick={() => handleEditEducation(edu)}
+                                className="text-gray-600 hover:text-gray-800 p-1"
+                              >
+                                ✏️
+                              </button>
+                              <button 
+                                onClick={() => handleDeleteEducation(edu.id)}
+                                className="text-red-500 hover:text-red-700 p-1"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -616,7 +693,9 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                 background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)'
               }}
             >
-              <h3 className="text-xl font-semibold">Educational Details</h3>
+              <h3 className="text-xl font-semibold">
+                {editingEducationId ? 'Edit Educational Details' : 'Educational Details'}
+              </h3>
             </div>
 
             {/* Form Content */}
@@ -769,7 +848,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                     background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)'
                   }}
                 >
-                  Submit
+                  {editingEducationId ? 'Update' : 'Submit'}
                 </button>
               </div>
             </div>

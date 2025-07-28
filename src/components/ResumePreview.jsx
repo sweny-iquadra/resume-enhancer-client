@@ -93,7 +93,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         ['position', 'company', 'duration'].forEach(field => {
           const enhancedKey = `enhanced.workExperience.${i}.${field}`;
           const originalKey = `original.workExperience.${i}.${field}`;
-          
+
           if (selections[enhancedKey] && enhancedExp?.[field]) {
             expToAdd[field] = enhancedExp[field];
             hasContent = true;
@@ -105,17 +105,17 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
         // Handle responsibilities with mutual exclusion
         expToAdd.responsibilities = [];
-        
+
         // Get all responsibility indices from both resumes
         const maxResponsibilities = Math.max(
           originalExp?.responsibilities?.length || 0,
           enhancedExp?.responsibilities?.length || 0
         );
-        
+
         for (let respIndex = 0; respIndex < maxResponsibilities; respIndex++) {
           const enhancedKey = `enhanced.workExperience.${i}.responsibilities.${respIndex}`;
           const originalKey = `original.workExperience.${i}.responsibilities.${respIndex}`;
-          
+
           if (selections[enhancedKey] && enhancedExp?.responsibilities?.[respIndex]) {
             expToAdd.responsibilities.push(enhancedExp.responsibilities[respIndex]);
             hasContent = true;
@@ -143,7 +143,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         ['name', 'description'].forEach(field => {
           const enhancedKey = `enhanced.projects.${i}.${field}`;
           const originalKey = `original.projects.${i}.${field}`;
-          
+
           if (selections[enhancedKey] && enhancedProject?.[field]) {
             projectToAdd[field] = enhancedProject[field];
             hasContent = true;
@@ -155,17 +155,17 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
         // Handle technologies with mutual exclusion
         projectToAdd.technologies = [];
-        
+
         // Get all technology indices from both resumes
         const maxTechnologies = Math.max(
           originalProject?.technologies?.length || 0,
           enhancedProject?.technologies?.length || 0
         );
-        
+
         for (let techIndex = 0; techIndex < maxTechnologies; techIndex++) {
           const enhancedKey = `enhanced.projects.${i}.technologies.${techIndex}`;
           const originalKey = `original.projects.${i}.technologies.${techIndex}`;
-          
+
           if (selections[enhancedKey] && enhancedProject?.technologies?.[techIndex]) {
             projectToAdd.technologies.push(enhancedProject.technologies[techIndex]);
             hasContent = true;
@@ -197,16 +197,16 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const handleSelection = (key, isSelected) => {
     setSelections(prev => {
       const newSelections = { ...prev };
-      
+
       if (isSelected) {
         // When selecting a line, we need to deselect the corresponding line from the other resume
         const keyParts = key.split('.');
         const resumeType = keyParts[0]; // 'original' or 'enhanced'
         const otherResumeType = resumeType === 'original' ? 'enhanced' : 'original';
-        
+
         // Create the corresponding key for the other resume
         const correspondingKey = key.replace(`${resumeType}.`, `${otherResumeType}.`);
-        
+
         // Set the selected line and deselect the corresponding line from the other resume
         newSelections[key] = true;
         newSelections[correspondingKey] = false;
@@ -214,7 +214,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         // Simply deselect the line
         newSelections[key] = false;
       }
-      
+
       return newSelections;
     });
   };
@@ -222,20 +222,20 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   // Function to get all possible keys for a resume
   const getAllKeysForResume = (resumeData, prefix) => {
     const keys = [];
-    
+
     // Basic details
     Object.keys(resumeData.basicDetails).forEach(key => {
       keys.push(`${prefix}.basicDetails.${key}`);
     });
-    
+
     // Professional summary
     keys.push(`${prefix}.professionalSummary`);
-    
+
     // Skills
     resumeData.skills.forEach((_, index) => {
       keys.push(`${prefix}.skills.${index}`);
     });
-    
+
     // Work experience
     resumeData.workExperience.forEach((exp, index) => {
       keys.push(`${prefix}.workExperience.${index}.position`);
@@ -245,7 +245,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         keys.push(`${prefix}.workExperience.${index}.responsibilities.${respIndex}`);
       });
     });
-    
+
     // Projects
     resumeData.projects.forEach((project, index) => {
       keys.push(`${prefix}.projects.${index}.name`);
@@ -254,7 +254,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         keys.push(`${prefix}.projects.${index}.technologies.${techIndex}`);
       });
     });
-    
+
     return keys;
   };
 
@@ -263,24 +263,24 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     setSelections(prev => {
       const newSelections = { ...prev };
       const otherResumeType = resumeType === 'original' ? 'enhanced' : 'original';
-      
+
       // Get all keys for both resumes
       const selectedResumeData = resumeType === 'original' ? originalResume : enhancedResumeData;
       const otherResumeData = resumeType === 'original' ? enhancedResumeData : originalResume;
-      
+
       const selectedKeys = getAllKeysForResume(selectedResumeData, resumeType);
       const otherKeys = getAllKeysForResume(otherResumeData, otherResumeType);
-      
+
       // Select all from chosen resume
       selectedKeys.forEach(key => {
         newSelections[key] = true;
       });
-      
+
       // Deselect all from other resume
       otherKeys.forEach(key => {
         newSelections[key] = false;
       });
-      
+
       return newSelections;
     });
   };
@@ -609,7 +609,7 @@ Powered by iQua.ai
     const handleFieldEdit = (section, field, value, index = null, subIndex = null) => {
       setEditedResumeData(prev => {
         const updated = { ...prev };
-        
+
         if (section === 'basicDetails') {
           updated.basicDetails = { ...updated.basicDetails, [field]: value };
         } else if (section === 'professionalSummary') {
@@ -637,7 +637,7 @@ Powered by iQua.ai
           }
           updated.projects = newProjects;
         }
-        
+
         return updated;
       });
     };
@@ -645,7 +645,7 @@ Powered by iQua.ai
     const addNewItem = (section, type) => {
       setEditedResumeData(prev => {
         const updated = { ...prev };
-        
+
         if (section === 'skills') {
           updated.skills = [...updated.skills, 'New Skill'];
         } else if (section === 'workExperience') {
@@ -670,7 +670,7 @@ Powered by iQua.ai
           newProjects[type].technologies.push('New Technology');
           updated.projects = newProjects;
         }
-        
+
         return updated;
       });
     };
@@ -678,7 +678,7 @@ Powered by iQua.ai
     const removeItem = (section, index, subIndex = null) => {
       setEditedResumeData(prev => {
         const updated = { ...prev };
-        
+
         if (section === 'skills') {
           updated.skills = updated.skills.filter((_, i) => i !== index);
         } else if (section === 'workExperience') {
@@ -694,7 +694,7 @@ Powered by iQua.ai
           newProjects[index].technologies = newProjects[index].technologies.filter((_, i) => i !== subIndex);
           updated.projects = newProjects;
         }
-        
+
         return updated;
       });
     };
@@ -786,15 +786,15 @@ Powered by iQua.ai
           <span className="text-sm text-gray-600 font-medium">Final_Resume.docx</span>
           <div className="ml-auto flex items-center space-x-2">
             <button
-              onClick={() => setIsEditing(!isEditing)}
-              className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                isEditing 
-                  ? 'bg-green-500 text-white hover:bg-green-600' 
-                  : 'bg-blue-500 text-white hover:bg-blue-600'
-              }`}
-            >
-              {isEditing ? '💾 Done Editing' : '✏️ Edit'}
-            </button>
+                onClick={() => setIsEditing(!isEditing)}
+                className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                  isEditing 
+                    ? 'bg-green-500 text-white hover:bg-green-600' 
+                    : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
+              >
+                {isEditing ? '💾 Save' : '✏️ Edit'}
+              </button>
             <span className="text-xs text-gray-500">📄</span>
             <span className="text-xs text-gray-500">100%</span>
           </div>

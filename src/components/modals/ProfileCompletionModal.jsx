@@ -8,14 +8,15 @@ const ProfileCompletionModal = ({
   userProfile, 
   selectedRole, 
   setIsLoading, 
-  setEnhancedResumeData 
+  setEnhancedResumeData,
+  showRoleSelection,
+  setShowRoleSelection,
+  uniqueRoles,
+  handleRoleSelection
 }) => {
-  const [showRoleSelection, setShowRoleSelection] = useState(false);
   const [currentSelectedRole, setCurrentSelectedRole] = useState(selectedRole);
   
   if (!showProfileModal) return null;
-
-  const uniqueRoles = getUniqueJobRoles(userProfile);
 
   const handleOutsideClick = (e) => {
     if (e.target === e.currentTarget) {

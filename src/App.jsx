@@ -104,6 +104,10 @@ function App() {
           selectedRole={selectedRole}
           setIsLoading={setIsLoading}
           setEnhancedResumeData={setEnhancedResumeData}
+          showRoleSelection={showRoleSelection}
+          setShowRoleSelection={setShowRoleSelection}
+          uniqueRoles={uniqueRoles}
+          handleRoleSelection={handleRoleSelection}
         />
 
         {/* Interview Requirement Modal */}

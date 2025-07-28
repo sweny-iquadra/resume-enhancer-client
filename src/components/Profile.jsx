@@ -139,27 +139,38 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
     const errors = {};
     
     if (!educationForm.qualification.trim()) {
-      errors.qualification = 'Please fill this field';
+      errors.qualification = 'Please enter your qualification.';
     }
     
     if (!educationForm.academy.trim()) {
-      errors.academy = 'Please fill this field';
+      errors.academy = 'Please enter your academy/college/university.';
     }
     
     if (!educationForm.field.trim()) {
-      errors.field = 'Please fill this field';
+      errors.field = 'Please enter your field of study.';
     }
     
     if (!educationForm.score.trim()) {
-      errors.score = 'Please fill this field';
+      errors.score = 'Please enter a valid score';
+    } else {
+      const scoreValue = parseFloat(educationForm.score);
+      if (educationForm.scoreType === 'cgpa') {
+        if (isNaN(scoreValue) || scoreValue < 0 || scoreValue > 10) {
+          errors.score = 'Please enter a valid score';
+        }
+      } else if (educationForm.scoreType === 'percentage') {
+        if (isNaN(scoreValue) || scoreValue < 0 || scoreValue > 100) {
+          errors.score = 'Please enter a valid score';
+        }
+      }
     }
     
     if (!educationForm.startDate) {
-      errors.startDate = 'Please fill this field';
+      errors.startDate = 'Please select the start date.';
     }
     
     if (!educationForm.endDate) {
-      errors.endDate = 'Please fill this field';
+      errors.endDate = 'Please select the end date.';
     }
     
     return errors;

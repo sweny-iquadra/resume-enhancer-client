@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { enhanceResumeAPI } from '../../utils/userProfile';
-import ErrorToast from './ErrorToast';
+import React, { useState } from "react";
+import { enhanceResumeAPI } from "../../utils/userProfile";
+import ErrorToast from "./ErrorToast";
 
 const ProfileCompletionModal = ({
   showProfileModal,
@@ -15,7 +15,7 @@ const ProfileCompletionModal = ({
   handleRoleSelection,
   setShowSuccessToast,
   setShowPreview,
-  setCurrentPage
+  setCurrentPage,
 }) => {
   const [currentSelectedRole, setCurrentSelectedRole] = useState(selectedRole);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -23,7 +23,7 @@ const ProfileCompletionModal = ({
   const [generatedResumeData, setGeneratedResumeData] = useState(null);
   // Error toast state
   const [showErrorToast, setShowErrorToast] = useState(false);
-  const [errorToastMessage, setErrorToastMessage] = useState('');
+  const [errorToastMessage, setErrorToastMessage] = useState("");
 
   if (!showProfileModal) return null;
 
@@ -40,13 +40,12 @@ const ProfileCompletionModal = ({
       setIsGenerating(false);
     } else {
       // Proceed with normal generation using the first available role or current selected role
-      const roleToUse = currentSelectedRole || uniqueRoles[0] || userProfile.role;
+      const roleToUse =
+        currentSelectedRole || uniqueRoles[0] || userProfile.role;
       await proceedWithGeneration(roleToUse);
       setIsGenerating(false);
     }
   };
-
-
 
   const proceedWithGeneration = async (roleToUse) => {
     try {
@@ -55,9 +54,12 @@ const ProfileCompletionModal = ({
       // Call the enhance resume API
       const response = await enhanceResumeAPI(roleToUse, userProfile);
 
-      if (!response.success) {
+      if (response.success) {
         // Store in localStorage
-        localStorage.setItem('enhancedResumeData', JSON.stringify(response.data));
+        localStorage.setItem(
+          "enhancedResumeData",
+          JSON.stringify(response.data),
+        );
 
         // Update state
         setEnhancedResumeData(response.data.enhancedResume);
@@ -79,13 +81,17 @@ const ProfileCompletionModal = ({
       } else {
         // Only reopen modal on actual failure
         setShowProfileModal(true);
-        setErrorToastMessage('Failed to enhance resume. Please try again or complete your profile for better results.');
+        setErrorToastMessage(
+          "Failed to enhance resume. Please try again or complete your profile for better results.",
+        );
         setShowErrorToast(true);
       }
     } catch (error) {
-      console.error('Error calling enhance resume API:', error);
+      console.error("Error calling enhance resume API:", error);
       setShowProfileModal(true);
-      setErrorToastMessage('An error occurred while enhancing your resume. Please check your connection and try again.');
+      setErrorToastMessage(
+        "An error occurred while enhancing your resume. Please check your connection and try again.",
+      );
       setShowErrorToast(true);
     } finally {
       setIsLoading(false);
@@ -94,14 +100,21 @@ const ProfileCompletionModal = ({
 
   return (
     <>
-      <ErrorToast show={showErrorToast} setShow={setShowErrorToast} message={errorToastMessage} />
+      <ErrorToast
+        show={showErrorToast}
+        setShow={setShowErrorToast}
+        message={errorToastMessage}
+      />
       <div
         className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
         onClick={handleOutsideClick}
       >
         <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-fade-in">
           {/* Modal Header */}
-          <div className="text-white p-6 rounded-t-2xl text-center relative" style={{ backgroundColor: '#3935cd' }}>
+          <div
+            className="text-white p-6 rounded-t-2xl text-center relative"
+            style={{ backgroundColor: "#3935cd" }}
+          >
             {/* Close X Button */}
             <button
               onClick={() => setShowProfileModal(false)}
@@ -125,10 +138,13 @@ const ProfileCompletionModal = ({
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
                   <div className="flex items-center justify-center space-x-2 mb-2">
                     <span className="text-3xl">🎉</span>
-                    <h3 className="font-bold text-green-700 text-lg">Your resume is ready!</h3>
+                    <h3 className="font-bold text-green-700 text-lg">
+                      Your resume is ready!
+                    </h3>
                   </div>
                   <p className="text-green-600 text-sm">
-                    AI has successfully enhanced your resume with tailored content
+                    AI has successfully enhanced your resume with tailored
+                    content
                   </p>
                 </div>
 
@@ -143,17 +159,30 @@ const ProfileCompletionModal = ({
                   <div className="p-4 space-y-4 max-h-64 overflow-y-auto">
                     {/* Basic Details */}
                     <div>
-                      <h5 className="font-medium text-gray-700 mb-2">📋 Basic Information</h5>
+                      <h5 className="font-medium text-gray-700 mb-2">
+                        📋 Basic Information
+                      </h5>
                       <div className="text-sm text-gray-600 space-y-1">
-                        <p><span className="font-medium">Name:</span> {generatedResumeData?.basicDetails?.name}</p>
-                        <p><span className="font-medium">Email:</span> {generatedResumeData?.basicDetails?.email}</p>
-                        <p><span className="font-medium">Location:</span> {generatedResumeData?.basicDetails?.location}</p>
+                        <p>
+                          <span className="font-medium">Name:</span>{" "}
+                          {generatedResumeData?.basicDetails?.name}
+                        </p>
+                        <p>
+                          <span className="font-medium">Email:</span>{" "}
+                          {generatedResumeData?.basicDetails?.email}
+                        </p>
+                        <p>
+                          <span className="font-medium">Location:</span>{" "}
+                          {generatedResumeData?.basicDetails?.location}
+                        </p>
                       </div>
                     </div>
 
                     {/* Professional Summary */}
                     <div>
-                      <h5 className="font-medium text-gray-700 mb-2">💼 Professional Summary</h5>
+                      <h5 className="font-medium text-gray-700 mb-2">
+                        💼 Professional Summary
+                      </h5>
                       <p className="text-sm text-gray-600 leading-relaxed">
                         {generatedResumeData?.professionalSummary}
                       </p>
@@ -161,13 +190,20 @@ const ProfileCompletionModal = ({
 
                     {/* Skills */}
                     <div>
-                      <h5 className="font-medium text-gray-700 mb-2">🚀 Enhanced Skills</h5>
+                      <h5 className="font-medium text-gray-700 mb-2">
+                        🚀 Enhanced Skills
+                      </h5>
                       <div className="flex flex-wrap gap-2">
-                        {generatedResumeData?.skills?.slice(0, 8).map((skill, index) => (
-                          <span key={index} className="px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs">
-                            {skill}
-                          </span>
-                        ))}
+                        {generatedResumeData?.skills
+                          ?.slice(0, 8)
+                          .map((skill, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs"
+                            >
+                              {skill}
+                            </span>
+                          ))}
                         {generatedResumeData?.skills?.length > 8 && (
                           <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-xs">
                             +{generatedResumeData.skills.length - 8} more
@@ -185,11 +221,12 @@ const ProfileCompletionModal = ({
                     Pro Tip
                   </h4>
                   <p className="text-yellow-700 text-sm mb-3">
-                    Add your missing details to improve your profile and stand out
+                    Add your missing details to improve your profile and stand
+                    out
                   </p>
                   <button
                     onClick={() => {
-                      setCurrentPage('dashboard');
+                      setCurrentPage("dashboard");
                       setShowProfileModal(false);
                       setShowSuccessContent(false);
                     }}
@@ -222,7 +259,7 @@ const ProfileCompletionModal = ({
                       setEnhancedResumeData(null);
                       setShowProfileModal(false);
                       setShowRoleSelection(false);
-                      localStorage.removeItem('enhancedResumeData');
+                      localStorage.removeItem("enhancedResumeData");
                     }}
                     className="bg-gray-500 text-white px-4 py-3 rounded-lg font-medium hover:bg-gray-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                     title="Start a new resume"
@@ -237,12 +274,15 @@ const ProfileCompletionModal = ({
                   Looks like you're almost there!
                 </p>
                 <p className="text-gray-600 text-base leading-relaxed mb-6">
-                  Complete your profile to build a perfect resume tailored for you.
+                  Complete your profile to build a perfect resume tailored for
+                  you.
                 </p>
 
                 {/* Missing fields list */}
                 <div className="bg-gray-50 rounded-xl p-4 mb-6 text-left">
-                  <h4 className="font-semibold text-gray-800 mb-3">Missing Information:</h4>
+                  <h4 className="font-semibold text-gray-800 mb-3">
+                    Missing Information:
+                  </h4>
                   <ul className="space-y-2 text-sm text-gray-600">
                     {!userProfile.professionalSummary && (
                       <li className="flex items-center space-x-2">
@@ -265,20 +305,20 @@ const ProfileCompletionModal = ({
                     onClick={() => {
                       setShowProfileModal(false);
                       // Redirect to dashboard
-                      window.location.href = '/';
+                      window.location.href = "/";
                     }}
                     className="text-white px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex-1 max-w-[180px]"
                     style={{
-                      backgroundColor: '#3935cd',
-                      boxShadow: '0 8px 25px rgba(57, 53, 205, 0.3)'
+                      backgroundColor: "#3935cd",
+                      boxShadow: "0 8px 25px rgba(57, 53, 205, 0.3)",
                     }}
                     onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = '#2d28b8';
-                      e.target.style.transform = 'scale(1.05) translateY(-2px)';
+                      e.target.style.backgroundColor = "#2d28b8";
+                      e.target.style.transform = "scale(1.05) translateY(-2px)";
                     }}
                     onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = '#3935cd';
-                      e.target.style.transform = 'scale(1)';
+                      e.target.style.backgroundColor = "#3935cd";
+                      e.target.style.transform = "scale(1)";
                     }}
                   >
                     COMPLETE PROFILE
@@ -293,10 +333,11 @@ const ProfileCompletionModal = ({
                   <button
                     onClick={handleGenerateAnyway}
                     disabled={isGenerating}
-                    className={`border-2 px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold flex-1 max-w-[180px] flex items-center justify-center space-x-2 ${isGenerating
-                      ? 'text-gray-500 border-gray-200 bg-gray-50 cursor-not-allowed'
-                      : 'text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]'
-                      }`}
+                    className={`border-2 px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold flex-1 max-w-[180px] flex items-center justify-center space-x-2 ${
+                      isGenerating
+                        ? "text-gray-500 border-gray-200 bg-gray-50 cursor-not-allowed"
+                        : "text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                    }`}
                   >
                     {isGenerating ? (
                       <>
@@ -318,13 +359,17 @@ const ProfileCompletionModal = ({
                     Multiple Roles Detected
                   </h3>
                   <p className="text-gray-700 text-sm mb-4 leading-relaxed">
-                    We noticed you've explored multiple job roles with iQua.ai. Please select the role you'd like us to tailor this resume for:
+                    We noticed you've explored multiple job roles with iQua.ai.
+                    Please select the role you'd like us to tailor this resume
+                    for:
                   </p>
 
                   {/* Dropdown Style Selection */}
                   <div className="bg-white rounded-lg border border-blue-200 overflow-hidden shadow-sm">
                     <div className="p-3 bg-blue-50 border-b border-blue-200">
-                      <span className="text-sm font-medium text-blue-700">Select Role:</span>
+                      <span className="text-sm font-medium text-blue-700">
+                        Select Role:
+                      </span>
                     </div>
                     <div className="max-h-48 overflow-y-auto">
                       {uniqueRoles.map((role, index) => (

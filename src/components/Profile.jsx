@@ -293,7 +293,7 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
     return errors;
   };
 
-  const handleCertificateSubmit = () => {
+  const handleCertificateSubmit = async () => {
     const errors = validateCertificateForm();
     
     if (Object.keys(errors).length > 0) {
@@ -302,8 +302,25 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
     }
     
     try {
-      // Simulate API call - in real implementation, this would be an actual API call
-      // that could potentially fail and throw an error
+      // Simulate API call - replace with actual API endpoint
+      const response = await fetch('/api/certificates', {
+        method: editingCertificateId ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...certificateForm,
+          id: editingCertificateId || undefined
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save certificate');
+      }
+
+      const result = await response.json();
+
+      // Update local state with API response
       if (editingCertificateId) {
         setCertificates(prev => prev.map(cert => 
           cert.id === editingCertificateId 
@@ -312,19 +329,19 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
         ));
         setSuccessTitle('Certificate Updated!');
         setSuccessMessage('Your certificate details have been updated successfully.');
-        setShowSuccessToast(true);
       } else {
         setCertificates(prev => [...prev, { ...certificateForm, id: Date.now() }]);
         setSuccessTitle('Certificate Added!');
         setSuccessMessage('Your certificate details have been saved successfully.');
-        setShowSuccessToast(true);
       }
       
+      setShowSuccessToast(true);
       handleCloseCertificateModal();
     } catch (error) {
       // Only show error toast for actual API/backend failures
-      setErrorMessage('Failed to save certificate details. Please try again.');
+      setErrorMessage(error.message || 'Failed to save certificate details. Please try again.');
       setShowErrorToast(true);
+      // Do not close modal or update UI on API failure
     }
   };
 
@@ -902,14 +919,9 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                                 {cert.organization}
                               </div>
                               <div className="text-gray-700 text-sm mb-1">
-                                Credential ID: {cert.credentialId}
+                                {cert.credentialId}
                               </div>
-                              <div className="text-blue-600 text-sm mb-2 hover:underline">
-                                <a href={cert.credentialUrl} target="_blank" rel="noopener noreferrer">
-                                  {cert.credentialUrl}
-                                </a>
-                              </div>
-                              <div className="text-gray-500 text-sm">
+                              <div className="text-gray-500 text-sm mb-2">
                                 {new Date(cert.startDate).toLocaleDateString('en-US', { 
                                   year: 'numeric', 
                                   month: 'short', 
@@ -919,6 +931,11 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
                                   month: 'short', 
                                   day: 'numeric' 
                                 })}
+                              </div>
+                              <div className="text-blue-600 text-sm hover:underline">
+                                <a href={cert.credentialUrl} target="_blank" rel="noopener noreferrer">
+                                  Credential URL
+                                </a>
                               </div>
                             </div>
                             <div className="flex items-center space-x-2 ml-4">

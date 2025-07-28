@@ -5,6 +5,8 @@ import Header from './Header';
 const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }) => {
   const [activeTab, setActiveTab] = useState('Active Interview');
   const [professionalSummary, setProfessionalSummary] = useState('');
+  const [isEditingProfessionalSummary, setIsEditingProfessionalSummary] = useState(false);
+  const [tempProfessionalSummary, setTempProfessionalSummary] = useState('');
 
   const tabs = ['Active Interview', 'Education', 'Certificates'];
 
@@ -65,18 +67,60 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
 
               {/* Professional Summary */}
               <div className="mb-8">
-                <h3 className="text-sm font-medium text-blue-600 mb-3">Professional Summary</h3>
-                <div className="relative">
-                  <textarea
-                    value={professionalSummary}
-                    onChange={(e) => setProfessionalSummary(e.target.value)}
-                    placeholder="Add your professional summary..."
-                    className="w-full h-24 p-3 border border-gray-200 rounded-md text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <button className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
-                    <span className="text-sm">✏️</span>
-                  </button>
-                </div>
+                <h3 className="text-sm font-medium" style={{ color: '#9a9aff' }} className="mb-3">Professional Summary:</h3>
+                
+                {!isEditingProfessionalSummary ? (
+                  /* View Mode */
+                  <div className="relative bg-white rounded-lg shadow-md border border-gray-200 p-4 min-h-[120px]">
+                    <button 
+                      onClick={() => {
+                        setIsEditingProfessionalSummary(true);
+                        setTempProfessionalSummary(professionalSummary);
+                      }}
+                      className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                    >
+                      <span className="text-lg">✏️</span>
+                    </button>
+                    <div className="pr-8">
+                      {professionalSummary ? (
+                        <p className="text-gray-700 text-sm leading-relaxed">{professionalSummary}</p>
+                      ) : (
+                        <p className="text-gray-400 text-sm italic">Click the edit icon to add your professional summary...</p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  /* Edit Mode */
+                  <div className="relative bg-white rounded-lg shadow-md border border-gray-200 p-4">
+                    <textarea
+                      value={tempProfessionalSummary}
+                      onChange={(e) => setTempProfessionalSummary(e.target.value)}
+                      placeholder="Add your professional summary..."
+                      className="w-full h-24 text-sm resize-none border-0 outline-none focus:ring-0 p-0 text-gray-700 leading-relaxed"
+                      style={{ minHeight: '80px' }}
+                    />
+                    <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100">
+                      <button
+                        onClick={() => {
+                          setProfessionalSummary(tempProfessionalSummary);
+                          setIsEditingProfessionalSummary(false);
+                        }}
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => {
+                          setTempProfessionalSummary(professionalSummary);
+                          setIsEditingProfessionalSummary(false);
+                        }}
+                        className="text-red-500 hover:text-red-600 transition-colors p-2"
+                      >
+                        <span className="text-lg">❌</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Skill Set */}

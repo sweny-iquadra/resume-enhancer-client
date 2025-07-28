@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 
-const SuccessToast = ({ showSuccessToast, setShowSuccessToast }) => {
+const SuccessToast = ({ showSuccessToast, setShowSuccessToast, message, title }) => {
   useEffect(() => {
     if (showSuccessToast) {
       // Auto hide after 4 seconds
@@ -34,8 +34,8 @@ const SuccessToast = ({ showSuccessToast, setShowSuccessToast }) => {
           </div>
         </div>
         <div className="flex-1">
-          <h4 className="font-semibold text-sm">Resume Created Successfully!</h4>
-          <p className="text-purple-100 text-xs mt-1">Your enhanced resume is ready for preview</p>
+          <h4 className="font-semibold text-sm">{title || 'Success!'}</h4>
+          <p className="text-purple-100 text-xs mt-1">{message || 'Operation completed successfully'}</p>
         </div>
         <button
           onClick={() => setShowSuccessToast(false)}

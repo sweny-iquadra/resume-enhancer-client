@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import MDEditor from '@uiw/react-md-editor';
 
 const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const [selections, setSelections] = useState({});
@@ -628,101 +627,58 @@ Powered by iQua.ai
 
     const displayData = editedResumeData || resumeData;
 
-    // Generate HTML content from resume data
+    // Generate markdown content from resume data
     const generateResumeHTML = (data) => {
-      return `
-        <div style="font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.15; background: white; padding: 32px;">
-          <!-- Header Section -->
-          <div style="text-align: center; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid #333;">
-            <h1 style="font-size: 18pt; font-weight: bold; margin: 0; color: #1f2937;">${data.basicDetails.name}</h1>
-            <div style="font-size: 12pt; color: #374151; margin-top: 8px;">
-              <div>${data.basicDetails.email}</div>
-              <div>${data.basicDetails.phone}</div>
-              <div>${data.basicDetails.location}</div>
-            </div>
-          </div>
+      return `# ${data.basicDetails.name}
 
-          <!-- Professional Summary -->
-          <div style="margin-bottom: 24px;">
-            <h2 style="font-size: 14pt; font-weight: bold; text-transform: uppercase; color: #1f2937; border-bottom: 1px solid #333; padding-bottom: 2px; margin-bottom: 8px;">PROFESSIONAL SUMMARY</h2>
-            <p style="text-align: justify; color: #374151; margin: 0;">${data.professionalSummary}</p>
-          </div>
+**${data.basicDetails.email}** | **${data.basicDetails.phone}** | **${data.basicDetails.location}**
 
-          <!-- Technical Skills -->
-          <div style="margin-bottom: 24px;">
-            <h2 style="font-size: 14pt; font-weight: bold; text-transform: uppercase; color: #1f2937; border-bottom: 1px solid #333; padding-bottom: 2px; margin-bottom: 8px;">TECHNICAL SKILLS</h2>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-              ${data.skills.map(skill => `<span style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 11pt;">${skill}</span>`).join('')}
-            </div>
-          </div>
+---
 
-          <!-- Work Experience -->
-          <div style="margin-bottom: 24px;">
-            <h2 style="font-size: 14pt; font-weight: bold; text-transform: uppercase; color: #1f2937; border-bottom: 1px solid #333; padding-bottom: 2px; margin-bottom: 12px;">WORK EXPERIENCE</h2>
-            ${data.workExperience.map(exp => `
-              <div style="margin-bottom: 16px; border-left: 2px solid #e5e7eb; padding-left: 16px;">
-                <h3 style="font-weight: bold; color: #1f2937; margin: 0; font-size: 12pt;">${exp.position}</h3>
-                <div style="font-style: italic; color: #374151; margin: 4px 0;">${exp.company}</div>
-                <div style="color: #6b7280; margin: 4px 0;">${exp.duration}</div>
-                <ul style="margin: 8px 0 0 16px; padding: 0;">
-                  ${exp.responsibilities?.map(resp => `<li style="color: #374151; margin: 2px 0;">${resp}</li>`).join('') || ''}
-                </ul>
-              </div>
-            `).join('')}
-          </div>
+## PROFESSIONAL SUMMARY
 
-          <!-- Projects -->
-          <div style="margin-bottom: 24px;">
-            <h2 style="font-size: 14pt; font-weight: bold; text-transform: uppercase; color: #1f2937; border-bottom: 1px solid #333; padding-bottom: 2px; margin-bottom: 12px;">PROJECTS</h2>
-            ${data.projects?.map(project => `
-              <div style="margin-bottom: 16px; border-left: 2px solid #e5e7eb; padding-left: 16px;">
-                <h3 style="font-weight: bold; color: #1f2937; margin: 0; font-size: 12pt;">${project.name}</h3>
-                <p style="color: #374151; margin: 4px 0;">${project.description}</p>
-                <div style="margin: 4px 0;">
-                  <span style="font-weight: 500; color: #6b7280;">Technologies: </span>
-                  ${project.technologies?.map(tech => `<span style="background: #dbeafe; color: #1d4ed8; padding: 2px 6px; border-radius: 4px; margin-right: 4px; font-size: 11pt;">${tech}</span>`).join('') || ''}
-                </div>
-              </div>
-            `).join('') || ''}
-          </div>
+${data.professionalSummary}
 
-          <!-- Footer -->
-          <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: right;">
-            <p style="font-size: 9pt; color: #9ca3af; margin: 0;">Powered by iQua.ai</p>
-          </div>
-        </div>
+---
+
+## TECHNICAL SKILLS
+
+${data.skills.map(skill => `- ${skill}`).join('\n')}
+
+---
+
+## WORK EXPERIENCE
+
+${data.workExperience.map(exp => `
+### ${exp.position}
+**${exp.company}** | *${exp.duration}*
+
+${exp.responsibilities?.map(resp => `- ${resp}`).join('\n') || ''}
+`).join('\n')}
+
+---
+
+## PROJECTS
+
+${data.projects?.map(project => `
+### ${project.name}
+${project.description}
+
+**Technologies:** ${project.technologies?.join(', ') || ''}
+`).join('\n') || ''}
+
+---
+
+*Powered by iQua.ai*
       `;
     };
 
     // Rich text editor configuration
-    const quillModules = {
-      toolbar: [
-        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-        [{ 'font': [] }],
-        [{ 'size': ['small', false, 'large', 'huge'] }],
-        ['bold', 'italic', 'underline', 'strike'],
-        [{ 'color': [] }, { 'background': [] }],
-        [{ 'align': [] }],
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        [{ 'indent': '-1'}, { 'indent': '+1' }],
-        ['blockquote', 'code-block'],
-        ['link', 'image'],
-        ['clean']
-      ],
-      clipboard: {
-        matchVisual: false,
-      }
+    const editorConfig = {
+      preview: 'edit',
+      hideToolbar: false,
+      visibleDragBar: false,
     };
-
-    const quillFormats = [
-      'header', 'font', 'size',
-      'bold', 'italic', 'underline', 'strike',
-      'color', 'background',
-      'align',
-      'list', 'bullet', 'indent',
-      'blockquote', 'code-block',
-      'link', 'image'
-    ];
 
     // Parse HTML back to resume data (simplified)
     const parseHTMLToResumeData = (html) => {
@@ -781,67 +737,34 @@ Powered by iQua.ai
           {isRichTextMode ? (
             // Rich Text Editor Mode
             <div className="h-full">
-              <style>
-                {`
-                  .ql-editor {
-                    font-family: 'Times New Roman', serif !important;
-                    font-size: 12pt !important;
-                    line-height: 1.15 !important;
-                    min-height: 600px !important;
-                    background: white !important;
-                  }
-                  .ql-toolbar {
-                    border-top: none !important;
-                    border-left: none !important;
-                    border-right: none !important;
-                    background: #f8fafc !important;
-                  }
-                  .ql-container {
-                    border-bottom: none !important;
-                    border-left: none !important;
-                    border-right: none !important;
-                    font-family: 'Times New Roman', serif !important;
-                  }
-                  .ql-editor h1 {
-                    font-size: 18pt !important;
-                    font-weight: bold !important;
-                  }
-                  .ql-editor h2 {
-                    font-size: 14pt !important;
-                    font-weight: bold !important;
-                    text-transform: uppercase !important;
-                  }
-                  .ql-editor h3 {
-                    font-size: 12pt !important;
-                    font-weight: bold !important;
-                  }
-                `}
-              </style>
-              <ReactQuill
-                theme="snow"
-                value={richTextContent}
-                onChange={handleRichTextChange}
-                modules={quillModules}
-                formats={quillFormats}
-                style={{
-                  height: '600px',
-                  fontFamily: "'Times New Roman', serif"
-                }}
-              />
+              <div style={{ minHeight: '600px' }}>
+                <MDEditor
+                  value={richTextContent}
+                  onChange={handleRichTextChange}
+                  preview="edit"
+                  hideToolbar={false}
+                  visibleDragBar={false}
+                  data-color-mode="light"
+                  style={{
+                    minHeight: '600px',
+                    fontFamily: "'Times New Roman', serif"
+                  }}
+                />
+              </div>
             </div>
           ) : (
             // Preview Mode with structured layout
-            <div 
-              className="p-8 space-y-4"
-              style={{
-                fontFamily: 'Times New Roman, serif',
-                fontSize: '12pt',
-                lineHeight: '1.15',
-                background: 'white',
-                minHeight: '600px'
-              }}
-              dangerouslySetInnerHTML={{ __html: richTextContent }}
-            />
+            <div className="p-8 space-y-4" style={{ minHeight: '600px' }}>
+              <MDEditor.Markdown 
+                source={richTextContent} 
+                style={{
+                  fontFamily: 'Times New Roman, serif',
+                  fontSize: '12pt',
+                  lineHeight: '1.15',
+                  background: 'white'
+                }}
+              />
+            </div>
           )}
         </div>
 
@@ -851,15 +774,15 @@ Powered by iQua.ai
             <div className="text-sm text-blue-700">
               <strong>💡 Formatting Tips:</strong>
               <ul className="mt-2 ml-4 space-y-1">
-                <li>• Use Header 1 for your name, Header 2 for sections (EXPERIENCE, SKILLS, etc.)</li>
-                <li>• Keep fonts professional - Times New Roman, Arial, or Calibri work best</li>
-                <li>• Use bullet points for responsibilities and achievements</li>
-                <li>• Maintain consistent spacing and alignment throughout</li>
-                <li>• Keep colors minimal - black text on white background is standard</li>
+                <li>• Use # for your name, ## for sections (EXPERIENCE, SKILLS, etc.)</li>
+                <li>• Use **text** for bold, *text* for italic</li>
+                <li>• Use - or * for bullet points</li>
+                <li>• Use --- for horizontal lines/dividers</li>
+                <li>• Keep formatting simple and professional</li>
               </ul>
             </div>
           </div>
-        )}
+        )}</li></ul></div></div>}
       </div>
     );
   };

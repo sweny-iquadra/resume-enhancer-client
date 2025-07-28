@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 
 const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
@@ -53,7 +52,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       Object.keys(originalResume.basicDetails).forEach(key => {
         const originalKey = `original.basicDetails.${key}`;
         const enhancedKey = `enhanced.basicDetails.${key}`;
-        
+
         if (selections[enhancedKey]) {
           final.basicDetails[key] = enhancedResumeData.basicDetails[key];
         } else if (selections[originalKey]) {
@@ -85,7 +84,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       for (let i = 0; i < maxWorkExp; i++) {
         const originalExp = originalResume.workExperience[i];
         const enhancedExp = enhancedResumeData.workExperience[i];
-        
+
         const expToAdd = {};
         let hasContent = false;
 
@@ -125,7 +124,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       for (let i = 0; i < maxProjects; i++) {
         const originalProject = originalResume.projects[i];
         const enhancedProject = enhancedResumeData.projects?.[i];
-        
+
         const projectToAdd = {};
         let hasContent = false;
 
@@ -230,7 +229,7 @@ Powered by iQua.ai
   const InteractiveWordDocument = ({ resumeData, title, isOriginal = false, prefix }) => {
     const getClickableLine = (key, content, displayContent = null) => {
       const isSelected = selections[key];
-      
+
       return (
         <div className="flex items-start gap-2 group">
           <input
@@ -488,7 +487,7 @@ Powered by iQua.ai
   // Final Resume Preview Component
   const FinalResumePreview = ({ resumeData }) => {
     if (!resumeData) return null;
-    
+
     return (
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
         {/* Document Header */}
@@ -588,46 +587,39 @@ Powered by iQua.ai
               }}>
                 WORK EXPERIENCE
               </h2>
-              {resumeData.workExperience.map((exp, index) => (
-                <div key={index} className="mb-4">
+              {resumeData.workExperience.map((job, index) => (
+                <div key={`work-${index}-${job.company}`} className="mb-4">
                   <div className="flex justify-between items-start mb-1">
-                    {exp.position && (
-                      <h3 className="font-bold text-gray-900" style={{
+                    <div>
+                      <h4 className="font-semibold text-gray-900" style={{
                         fontFamily: 'Times New Roman, serif',
                         fontSize: '12pt',
                         fontWeight: 'bold'
                       }}>
-                        {exp.position}
-                      </h3>
-                    )}
-                    {exp.duration && (
-                      <span className="text-gray-700 text-right" style={{
+                        {job.position}
+                      </h4>
+                      <p className="text-gray-700" style={{
                         fontFamily: 'Times New Roman, serif',
-                        fontSize: '12pt'
+                        fontSize: '11pt',
+                        fontStyle: 'italic'
                       }}>
-                        {exp.duration}
-                      </span>
-                    )}
-                  </div>
-                  {exp.company && (
-                    <div className="text-gray-800 mb-2 italic" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '12pt',
-                      fontStyle: 'italic'
-                    }}>
-                      {exp.company}
+                        {job.company}
+                      </p>
                     </div>
-                  )}
-                  {exp.responsibilities && exp.responsibilities.length > 0 && (
-                    <ul className="ml-4" style={{ listStyleType: 'disc' }}>
-                      {exp.responsibilities.map((resp, respIndex) => (
-                        <li key={respIndex} className="text-gray-800 mb-1" style={{
-                          fontFamily: 'Times New Roman, serif',
-                          fontSize: '12pt',
-                          lineHeight: '1.15'
-                        }}>
-                          {resp}
-                        </li>
+                    <span className="text-sm text-gray-600" style={{
+                      fontFamily: 'Times New Roman, serif',
+                      fontSize: '11pt'
+                    }}>
+                      {job.duration}
+                    </span>
+                  </div>
+                  {job.responsibilities && (
+                    <ul className="list-disc list-inside text-sm text-gray-700 space-y-1" style={{
+                      fontFamily: 'Times New Roman, serif',
+                      fontSize: '11pt'
+                    }}>
+                      {job.responsibilities.map((resp, respIndex) => (
+                        <li key={`resp-${index}-${respIndex}`}>{resp}</li>
                       ))}
                     </ul>
                   )}
@@ -649,32 +641,27 @@ Powered by iQua.ai
                 PROJECTS
               </h2>
               {resumeData.projects.map((project, index) => (
-                <div key={index} className="mb-3">
-                  {project.name && (
-                    <h3 className="font-bold text-gray-900" style={{
+                <div key={`project-${index}-${project.name}`} className="mb-4">
+                  <h4 className="font-semibold text-gray-900 mb-1" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '12pt',
+                    fontWeight: 'bold'
+                  }}>
+                    {project.name}
+                  </h4>
+                  <p className="text-sm text-gray-700 mb-2" style={{
+                    fontFamily: 'Times New Roman, serif',
+                    fontSize: '11pt'
+                  }}>
+                    {project.description}
+                  </p>
+                  {project.technologies && (
+                    <p className="text-sm text-gray-600" style={{
                       fontFamily: 'Times New Roman, serif',
-                      fontSize: '12pt',
-                      fontWeight: 'bold'
-                    }}>
-                      {project.name}
-                    </h3>
-                  )}
-                  {project.description && (
-                    <p className="text-gray-800 mb-1" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '12pt',
-                      lineHeight: '1.15'
-                    }}>
-                      {project.description}
-                    </p>
-                  )}
-                  {project.technologies && project.technologies.length > 0 && (
-                    <p className="text-gray-700 text-sm" style={{
-                      fontFamily: 'Times New Roman, serif',
-                      fontSize: '11pt',
+                      fontSize: '10pt',
                       fontStyle: 'italic'
                     }}>
-                      <span className="font-medium">Technologies:</span> {project.technologies.join(', ')}
+                      <strong>Technologies:</strong> {project.technologies.join(', ')}
                     </p>
                   )}
                 </div>

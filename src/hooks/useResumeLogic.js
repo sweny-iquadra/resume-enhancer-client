@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { createUserProfile, checkProfileCompletion, getCompletedInterviewsCount, getUniqueJobRoles, enhanceResumeAPI } from '../utils/userProfile';
 
@@ -26,7 +25,7 @@ export const useResumeLogic = () => {
       // Proceed with single role or default role
       const defaultRole = uniqueRoles[0] || userProfile.role;
       setSelectedRole(defaultRole);
-      
+
       if (!checkProfileCompletion(userProfile)) {
         setShowProfileModal(true);
       } else {
@@ -47,7 +46,7 @@ export const useResumeLogic = () => {
     const formattedRole = role.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     setSelectedRole(formattedRole);
     setShowRoleSelection(false);
-    
+
     // Profile is already confirmed complete at this point - proceed with resume enhancement
     handleResumeEnhancement(role); // Use original role for display purposes
   };
@@ -55,18 +54,18 @@ export const useResumeLogic = () => {
   const handleResumeEnhancement = async (role) => {
     // Show loading modal instead of alert
     setIsLoading(true);
-    
+
     try {
       // Call the enhance resume API with user profile data
       const response = await enhanceResumeAPI(role, userProfile);
-      
+
       if (response.success) {
         // Store in localStorage
         localStorage.setItem('enhancedResumeData', JSON.stringify(response.data));
-        
+
         // Update state with enhanced resume data
         setEnhancedResumeData(response.data.enhancedResume);
-        
+
         // Show the preview modal
         setShowPreview(true);
       } else {
@@ -106,13 +105,11 @@ export const useResumeLogic = () => {
     setShowRoleSelection,
     handleRoleSelection,
     uniqueRoles,
-    completedInterviewsCount,
     isLoading,
     setIsLoading,
     enhancedResumeData,
     setEnhancedResumeData,
     showPreview,
-    setShowPreview,
-    handleResumeEnhancement
+    setShowPreview
   };
 };

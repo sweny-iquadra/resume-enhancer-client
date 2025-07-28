@@ -45,9 +45,6 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
 
         {/* Resume Enhancer Icon & User Profile */}
         <div className="flex items-center space-x-4">
-          {currentPage === 'profile' && (
-            <span className="text-gray-700 font-medium text-sm">Resume Enhancer</span>
-          )}
           <div 
             onClick={() => setShowResumeChat(!showResumeChat)}
             className="w-10 h-10 rounded-lg flex items-center justify-center hover:shadow-xl transition-all duration-300 cursor-pointer shadow-lg transform hover:scale-110 hover:-translate-y-1 active:scale-95" 

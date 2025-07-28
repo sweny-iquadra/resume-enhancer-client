@@ -1,7 +1,6 @@
-
 import React from 'react';
 
-const Dashboard = () => {
+const Dashboard = ({ setCurrentPage }) => {
   const features = [
     {
       id: 1,
@@ -32,6 +31,16 @@ const Dashboard = () => {
       borderColor: 'border-blue-200'
     }
   ];
+
+  const handleFeatureClick = (id) => {
+    if (id === 1) {
+      // Navigate to Profile component
+      setCurrentPage('profile');
+    } else {
+      // Handle click events for other features
+      console.log(`Clicked feature with ID: ${id}`);
+    }
+  };
 
   return (
     <main className="flex items-center justify-center min-h-[calc(100vh-80px)] px-6 py-12">
@@ -92,6 +101,7 @@ const Dashboard = () => {
             {features.map((feature) => (
               <div
                 key={feature.id}
+                onClick={() => handleFeatureClick(feature.id)}
                 className={`${feature.bgColor} ${feature.borderColor} border-2 p-8 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group hover:-translate-y-1`}
               >
                 <div className="flex flex-col items-center text-center space-y-4">

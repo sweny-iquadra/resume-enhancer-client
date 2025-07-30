@@ -22,139 +22,257 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   // Convert parsed resume data to the expected format for original resume
   const getOriginalResumeFromParsed = () => {
     if (!parsedResumeData?.parsed_resumes?.current_resumes) {
-      // Fallback to original mock data
-      return {
-        basicDetails: {
-          name: "John Smith",
-          email: "john.smith@email.com",
-          phone: "+1 (555) 123-4567",
-          location: "New York, NY"
-        },
-        professionalSummary: "Experienced software developer with 2+ years in web development. Skilled in JavaScript and React with a passion for creating user-friendly applications.",
-        skills: ["JavaScript", "React", "Node.js", "Python", "SQL", "Git"],
-        workExperience: [
-          {
-            company: "Tech Solutions Inc",
-            position: "Junior Developer",
-            duration: "2020-2022",
-            responsibilities: [
-              "Developed web applications using React and JavaScript",
-              "Collaborated with cross-functional teams on various projects",
-              "Maintained and updated existing codebase for improved performance"
-            ]
-          }
-        ],
-        projects: [
-          {
-            name: "E-commerce Website",
-            description: "Created a responsive e-commerce website with shopping cart functionality",
-            technologies: ["HTML", "CSS", "JavaScript", "React"]
-          }
-        ]
-      };
+      return null; // Return null if no data available
     }
 
     const currentResumes = parsedResumeData.parsed_resumes.current_resumes;
     
-    // Extract contact information
+    // Extract contact information dynamically
     const contactInfo = currentResumes["Contact Information"] || [];
-    const name = contactInfo.find(item => item.includes("SRI DURGA CHANDA")) || contactInfo[0] || "Name Not Found";
-    const email = contactInfo.find(item => item.includes("@")) || "email@example.com";
-    const phone = contactInfo.find(item => item.includes("9182437984")) || contactInfo.find(item => item.includes("Phone:")) || "+91 0000000000";
+    const name = contactInfo.find(item => item.includes("SRI DURGA CHANDA")) || 
+                 contactInfo.find(item => !item.includes("Phone:") && !item.includes("Email:") && !item.includes("LinkedIn:") && !item.includes("GitHub:") && !item.includes("@") && !item.includes("+91")) || 
+                 "Name Not Available";
+    const email = contactInfo.find(item => item.includes("@")) || "Email Not Available";
+    const phone = contactInfo.find(item => item.includes("+91") || item.includes("Phone:")) || "Phone Not Available";
+    const linkedIn = contactInfo.find(item => item.includes("LinkedIn:") || item.includes("linkedin.com")) || "";
+    const github = contactInfo.find(item => item.includes("GitHub:") || item.includes("github.com")) || "";
+    
+    // Extract education info dynamically
+    const education = currentResumes["Education"] || [];
+    const location = education.length > 0 ? 
+      (education[0].includes("Andhra Pradesh") ? "Andhra Pradesh, India" : "Location from Education") :
+      "Location Not Available";
+    
+    // Extract professional summary from experience or create from education
+    const experience = currentResumes["Professional Experience"] || [];
+    const educationInfo = currentResumes["Education"] || [];
+    const professionalSummary = experience.length > 0 ? 
+      experience[0] : 
+      (educationInfo.length > 0 ? 
+        `${educationInfo[0].includes("CSE") ? "Computer Science Engineering" : "Engineering"} student with academic excellence and technical skills.` :
+        "Professional summary not available");
+    
+    // Dynamic skills extraction
+    const skills = currentResumes["Technical Skills"] || [];
+    
+    // Dynamic work experience
+    const workExperience = [];
+    if (experience.length > 0) {
+      // Group experience items into work experience entries
+      const companyInfo = experience.find(item => item.includes("Technical Hub")) || experience[0] || "";
+      const duration = experience.find(item => item.includes("2023")) || "Duration not specified";
+      const responsibilities = experience.filter(item => 
+        !item.includes("Technical Hub") && 
+        !item.includes("2023") && 
+        item.trim().length > 0
+      );
+      
+      workExperience.push({
+        company: companyInfo.includes("Technical Hub") ? "Technical Hub" : "Company from experience",
+        position: companyInfo.includes("Java") ? "Java Intern" : "Position from experience",
+        duration: duration,
+        responsibilities: responsibilities
+      });
+    }
+    
+    // Dynamic projects extraction
+    const projectsData = currentResumes["Projects"] || [];
+    const projects = [];
+    
+    // Group project data by project names
+    const projectNames = projectsData.filter(item => item.includes("|"));
+    const projectDescriptions = projectsData.filter(item => !item.includes("|") && item.length > 10);
+    
+    projectNames.forEach((projectLine, index) => {
+      const parts = projectLine.split("|");
+      if (parts.length >= 2) {
+        const name = parts[0].trim();
+        const techString = parts[1].trim();
+        const technologies = techString.split(",").map(tech => tech.trim());
+        
+        // Find corresponding description
+        const description = projectDescriptions[index] || "Project description not available";
+        
+        projects.push({
+          name: name,
+          description: description,
+          technologies: technologies
+        });
+      }
+    });
     
     return {
       basicDetails: {
         name: name.replace("Phone:", "").replace("Email:", "").trim(),
         email: email.replace("Email:", "").trim(),
         phone: phone.replace("Phone:", "").trim(),
-        location: "Andhra Pradesh, India"
+        location: location,
+        linkedIn: linkedIn.replace("LinkedIn:", "").trim(),
+        github: github.replace("GitHub:", "").trim()
       },
-      professionalSummary: "Computer Science Engineering student with strong programming skills and hands-on experience in web development technologies.",
-      skills: currentResumes["Technical Skills"] || [],
-      workExperience: [
-        {
-          company: "Technical Hub",
-          position: "Java Intern",
-          duration: "May 2023 - July 2023",
-          responsibilities: currentResumes["Professional Experience"] || []
-        }
-      ],
-      projects: [
-        {
-          name: "Shops and Stalls",
-          description: "Web application for managing accounts and transactions",
-          technologies: ["React.js", "SCSS", "Node.js", "MongoDB"]
-        },
-        {
-          name: "Hostel Hoppers",
-          description: "Web application for hostel management",
-          technologies: ["HTML", "CSS", "React.js", "Node.js", "MongoDB", "Bootstrap"]
-        },
-        {
-          name: "Travel the World",
-          description: "Travel agency website",
-          technologies: ["HTML", "CSS", "Bootstrap"]
-        }
-      ]
+      professionalSummary: professionalSummary,
+      skills: skills,
+      workExperience: workExperience,
+      projects: projects,
+      education: education,
+      achievements: currentResumes["Achievements"] || [],
+      certifications: currentResumes["Certifications"] || [],
+      interests: currentResumes["Interests"] || []
     };
   };
 
   // Convert parsed resume data to the expected format for enhanced resume
   const getEnhancedResumeFromParsed = () => {
     if (!parsedResumeData?.parsed_resumes?.enhanced_resume) {
-      return enhancedResumeData;
+      return null; // Return null if no enhanced data available
     }
 
     const enhancedResumes = parsedResumeData.parsed_resumes.enhanced_resume;
     
-    // Extract contact information
+    // Extract contact information dynamically
     const contactInfo = enhancedResumes["Contact Information"] || [];
-    const email = contactInfo.find(item => item.includes("@")) || "chandasridurga@gmail.com";
-    const phone = contactInfo.find(item => item.includes("+91")) || "+91 9182437984";
+    const email = contactInfo.find(item => item.includes("@")) || "Email Not Available";
+    const phone = contactInfo.find(item => item.includes("+91") || item.includes("Direct Contact:")) || "Phone Not Available";
+    const linkedIn = contactInfo.find(item => item.includes("LinkedIn") || item.includes("linkedin.com")) || "";
+    const github = contactInfo.find(item => item.includes("GitHub") || item.includes("github.com")) || "";
+    
+    // Extract name dynamically
+    const name = contactInfo.find(item => 
+      !item.includes("@") && 
+      !item.includes("+91") && 
+      !item.includes("LinkedIn") && 
+      !item.includes("GitHub") &&
+      !item.includes("Direct Contact:") &&
+      !item.includes("Professional Email:")
+    ) || "SRI DURGA CHANDA";
+    
+    // Extract education info dynamically
+    const education = enhancedResumes["Education"] || [];
+    const location = education.length > 0 ? 
+      (education[0].includes("Andhra Pradesh") ? "Andhra Pradesh, India" : "Location from Education") :
+      "Location Not Available";
+    
+    // Extract professional summary from experience or education
+    const experience = enhancedResumes["Professional Experience"] || [];
+    const educationInfo = enhancedResumes["Education"] || [];
+    const professionalSummary = experience.length > 0 ? 
+      experience[0] : 
+      (educationInfo.length > 0 ? 
+        educationInfo[0] :
+        "Professional summary not available");
+    
+    // Dynamic skills extraction
+    const skills = enhancedResumes["Technical Skills"] || [];
+    
+    // Dynamic work experience
+    const workExperience = [];
+    if (experience.length > 0) {
+      // Group experience items into work experience entries
+      const companyInfo = experience.find(item => item.includes("Technical Hub")) || experience[0] || "";
+      const duration = experience.find(item => item.includes("2023")) || "Duration not specified";
+      const responsibilities = experience.filter(item => 
+        !item.includes("Technical Hub") && 
+        !item.includes("2023") && 
+        item.trim().length > 0
+      );
+      
+      workExperience.push({
+        company: companyInfo.includes("Technical Hub") ? "Technical Hub" : "Company from experience",
+        position: companyInfo.includes("Java") ? "Java Intern" : "Position from experience", 
+        duration: duration,
+        responsibilities: responsibilities
+      });
+    }
+    
+    // Dynamic projects extraction
+    const projectsData = enhancedResumes["Projects"] || [];
+    const projects = [];
+    
+    // Enhanced projects have more detailed descriptions
+    projectsData.forEach((projectLine, index) => {
+      if (projectLine.includes("|") || projectLine.includes("Utilized") || projectLine.includes("Leveraged") || projectLine.includes("Employed")) {
+        let name = "";
+        let description = projectLine;
+        let technologies = [];
+        
+        if (projectLine.includes("|")) {
+          const parts = projectLine.split("|");
+          name = parts[0].trim();
+          description = parts[1].trim();
+        } else if (projectLine.includes("Shops and Stalls")) {
+          name = "Shops and Stalls";
+        } else if (projectLine.includes("Hostel Hoppers")) {
+          name = "Hostel Hoppers";
+        } else if (projectLine.includes("Travel the World")) {
+          name = "Travel the World";
+        }
+        
+        // Extract technologies from description
+        const techMatch = description.match(/(React\.js|HTML|CSS|JavaScript|Node\.js|MongoDB|Bootstrap|SCSS)/g);
+        if (techMatch) {
+          technologies = [...new Set(techMatch)]; // Remove duplicates
+        }
+        
+        if (name && description) {
+          projects.push({
+            name: name,
+            description: description,
+            technologies: technologies
+          });
+        }
+      }
+    });
     
     return {
       basicDetails: {
-        name: "SRI DURGA CHANDA",
+        name: name.trim(),
         email: email.replace("Professional Email:", "").trim(),
         phone: phone.replace("Direct Contact:", "").trim(),
-        location: "Andhra Pradesh, India"
+        location: location,
+        linkedIn: linkedIn.replace("LinkedIn Profile:", "").trim(),
+        github: github.replace("GitHub Portfolio:", "").trim()
       },
-      professionalSummary: "Computer Science Engineering graduate with expertise in modern web technologies and proven track record in problem-solving.",
-      skills: enhancedResumes["Technical Skills"] || [],
-      workExperience: [
-        {
-          company: "Technical Hub",
-          position: "Java Intern",
-          duration: "May 2023 - July 2023",
-          responsibilities: enhancedResumes["Professional Experience"] || []
-        }
-      ],
-      projects: [
-        {
-          name: "Shops and Stalls",
-          description: "Robust web application for efficient management of accounts, power bills, and transactions",
-          technologies: ["React.js", "SCSS", "Node.js", "MongoDB"]
-        },
-        {
-          name: "Hostel Hoppers",
-          description: "Comprehensive web application for streamlined hostel management",
-          technologies: ["HTML", "CSS", "React.js", "Node.js", "MongoDB", "Bootstrap"]
-        },
-        {
-          name: "Travel the World",
-          description: "Professional travel agency website with detailed information",
-          technologies: ["HTML", "CSS", "Bootstrap"]
-        }
-      ]
+      professionalSummary: professionalSummary,
+      skills: skills,
+      workExperience: workExperience,
+      projects: projects,
+      education: education,
+      achievements: enhancedResumes["Achievements"] || [],
+      certifications: enhancedResumes["Certifications"] || [],
+      interests: enhancedResumes["Interests"] || []
     };
   };
 
   const originalResume = getOriginalResumeFromParsed();
   const dynamicEnhancedResume = getEnhancedResumeFromParsed();
 
+  // If no parsed data is available, don't render the preview
+  if (!originalResume && !dynamicEnhancedResume) {
+    return (
+      <div 
+        className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+        onClick={handleOutsideClick}
+      >
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center">
+          <div className="text-6xl mb-4">📄</div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Resume Data Available</h3>
+          <p className="text-gray-600 mb-4">
+            Unable to load parsed resume data. Please try generating a new resume.
+          </p>
+          <button
+            onClick={() => setShowPreview(false)}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Build final resume based on selections
   useEffect(() => {
-    if (!dynamicEnhancedResume) return;
+    if (!dynamicEnhancedResume && !originalResume) return;
 
     const buildFinalResume = () => {
       const final = {

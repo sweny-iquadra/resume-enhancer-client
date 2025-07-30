@@ -1,0 +1,155 @@
+{
+  "student_id": "103",
+  "limit": 3,
+  "file_count": 3,
+  "files": [
+    {
+      "key": "students/1.0.0/103/interview_sets/1/profiles/9/Chanda Sri Durga.pdf",
+      "student_id": "103",
+      "interview_set_id": "1",
+      "profile_id": "9",
+      "filename": "Chanda Sri Durga.pdf",
+      "size": 86916,
+      "last_modified": "2025-07-14T06:39:01+00:00"
+    },
+    {
+      "key": "students/1.0.0/103/interview_sets/1/profiles/8/Chanda Sri Durga.pdf",
+      "student_id": "103",
+      "interview_set_id": "1",
+      "profile_id": "8",
+      "filename": "Chanda Sri Durga.pdf",
+      "size": 86916,
+      "last_modified": "2025-07-14T06:39:00+00:00"
+    },
+    {
+      "key": "students/1.0.0/103/interview_sets/1/profiles/6/Placement Resume.pdf",
+      "student_id": "103",
+      "interview_set_id": "1",
+      "profile_id": "6",
+      "filename": "Placement Resume.pdf",
+      "size": 70096,
+      "last_modified": "2025-07-14T06:38:57+00:00"
+    }
+  ],
+  "parsed_resumes": {
+    "current_resumes": {
+      "Contact Information": [
+        "Phone: 9182437984",
+        "Email: chandasridurga@gmail.com",
+        "LinkedIn: linkedin.com",
+        "GitHub: github.com",
+        "SRI DURGA CHANDA",
+        "+91 9182437984",
+        "gmail.com",
+        "linkedin.com",
+        "github.com"
+      ],
+      "Education": [
+        "Aditya Engineering College Surampalem, Andhra Pradesh - B Tech, CSE, CGPA-8.77 (2021 - 2025)",
+        "Sri Chaitanya Jr College Vijayawada, Andhra Pradesh - BIEAP, MPC, Marks-968/1000 (2019 - 2021)",
+        "Aditya Engineering College Surampalem, Andhra Pradesh, B Tech, CSE, CGPA-8.77 2021 - 2025",
+        "Sri Chaitanya Jr College Vijayawada, Andhra Pradesh, BIEAP, MPC, Marks-968/1000 2019 - 2021"
+      ],
+      "Technical Skills": [
+        "Programming Languages: C, C++, Python, Java, SQL",
+        "Tools and Technologies: HTML, CSS, JavaScript, ReactJs, NodeJs, MongoDB, Redhat Linux",
+        "Concepts: Operating System"
+      ],
+      "Professional Experience": [
+        "Technical Hub - Java Internship (May 2023 - July 2023)",
+        "Worked with ”PROBLEM SOLVING AND JAVA” and also excelling in major conjects in java.",
+        "Successfully tackling complex issues and immensed in various problem solving methodologies.",
+        "Proficient in analyzing problems and crafting efficient Java solutions.",
+        "Technical Hub, Java Internship May 2023 - July 2023",
+        "Successfully tackling complex issues and achieving 5-star rating on HackerRank."
+      ],
+      "Projects": [
+        "Shops and Stalls |React.js, SCSS, Node.js, MongoDB",
+        "Hostel Hoppers |HTML, CSS, React.js, Node.js, MongoDB, Bootstrap",
+        "Travel the World |HTML,CSS",
+        "A web application for managing accounts, power bills, and other transactions in shops.",
+        "This web application features a fully dynamic behaviour, It is especially an admin-focused application.",
+        "Overview of shop’s financial status.",
+        "A web application for managing the incoming and outgoing process of hostel residents, including check-ins, check-outs.",
+        "Designed an intuitive user interface with React.js.",
+        "CRUD operations on user and Admin accounts .Assign permissions by Admin.",
+        "Travel the World |HTML, CSS, Bootstrap",
+        "Travel agency website project called ”Travel the World” using HTML and CSS.",
+        "A static website for a travel agency featuring destinations, packages, and booking information."
+      ],
+      "Achievements": [
+        "Solved 300+ problems in Codechef Codechef",
+        "Solved 200+ problems in Leetcode Leetcode",
+        "Solved 100+ problems in GeeksForGeeks GFG",
+        "Achieved 5-star badge in Python, C++, Problem Solving HackerRank"
+      ],
+      "Certifications": [
+        "HTML CSS JavaScript: Certified as IT specialist in HTML, CSS, Javascrpt from Pearson",
+        "Python: INFORMATION TECHNOLOGY SPECIALIST IN PYTHON from Pearson",
+        "Java: Java Certified from Pearson",
+        "Red Hat: Certified as RED HAT SYSTEM ADMINISTRATOR",
+        "Cisco: CISCO NETACAD CPP certification",
+        "Cisco: CISCO NETACAD CPP certification from cisco"
+      ],
+      "Interests": [
+        "Technology Enthusiast",
+        "Fascinated by Interesting Facts",
+        "Dancing"
+      ]
+    },
+    "enhanced_resume": {
+      "Contact Information": [
+        "Direct Contact: +91 9182437984",
+        "Professional Email: chandasridurga@gmail.com",
+        "LinkedIn Profile: linkedin.com/in/sridurgachanda",
+        "GitHub Portfolio: github.com/sridurgachanda"
+      ],
+      "Education": [
+        "Graduated with a B Tech in Computer Science Engineering, achieving a CGPA of 8.77 from Aditya Engineering College, Surampalem, Andhra Pradesh (2021 - 2025)",
+        "Secured 968 out of 1000 marks in MPC at Sri Chaitanya Jr College, Vijayawada, Andhra Pradesh (2019 - 2021)",
+        "Accomplished a B Tech in Computer Science Engineering with a CGPA of 8.77 from Aditya Engineering College, Surampalem, Andhra Pradesh (2021 - 2025)",
+        "Earned 968 out of 1000 marks in MPC at Sri Chaitanya Jr College, Vijayawada, Andhra Pradesh (2019 - 2021)"
+      ],
+      "Technical Skills": [
+        "Proficient in Programming Languages: C, C++, Python, Java, SQL",
+        "Mastered Tools and Technologies: HTML, CSS, JavaScript, ReactJs, NodeJs, MongoDB, Redhat Linux",
+        "In-depth understanding of Operating System Concepts"
+      ],
+      "Professional Experience": [
+        "Technical Hub - Java Internship (May 2023 - July 2023)",
+        "Mastered \"Problem Solving and Java\", excelling in key Java concepts.",
+        "Effectively resolved complex issues, utilizing diverse problem-solving methodologies.",
+        "Demonstrated proficiency in analyzing challenges and engineering efficient Java solutions.",
+        "Technical Hub, Java Internship May 2023 - July 2023",
+        "Resolved complex issues, earning a 5-star rating on HackerRank through strategic problem-solving."
+      ],
+      "Projects": [
+        "Shops and Stalls | Utilized React.js, SCSS, Node.js, MongoDB to develop a robust web application for efficient management of accounts, power bills, and other transactions in shops.",
+        "Implemented a fully dynamic, admin-focused web application, enhancing shop's financial oversight.",
+        "Hostel Hoppers | Leveraged HTML, CSS, React.js, Node.js, MongoDB, Bootstrap to create a comprehensive web application for streamlined management of hostel resident processes, including check-ins and check-outs.",
+        "Designed an intuitive user interface using React.js, improving user experience.",
+        "Executed CRUD operations on user and Admin accounts, enabling precise control over permissions by Admin.",
+        "Travel the World | Employed HTML, CSS, Bootstrap to construct a static website for a travel agency, \"Travel the World\", featuring detailed information on destinations, packages, and booking procedures."
+      ],
+      "Achievements": [
+        "Resolved over 300 coding challenges on Codechef",
+        "Overcame 200+ complex coding problems on Leetcode",
+        "Successfully tackled 100+ technical problems on GeeksForGeeks",
+        "Earned prestigious 5-star badges in Python, C++, and Problem Solving on HackerRank"
+      ],
+      "Certifications": [
+        "1. Pearson-Certified IT Specialist with expertise in HTML, CSS, and JavaScript.",
+        "2. Pearson-Endorsed Information Technology Specialist with a focus on Python.",
+        "3. Java Certified Professional from Pearson with a proven track record.",
+        "4. Red Hat Certified System Administrator with extensive experience.",
+        "5. Holder of Cisco Netacad CPP Certification with a focus on network solutions.",
+        "6. Cisco-Endorsed Netacad CPP Certified Professional with a specialization in network management."
+      ],
+      "Interests": [
+        "Passionate Innovator in Emerging Technologies",
+        "Engrossed in Pursuit of Intriguing Knowledge",
+        "Dynamic Dance Performer"
+      ]
+    }
+  }
+}

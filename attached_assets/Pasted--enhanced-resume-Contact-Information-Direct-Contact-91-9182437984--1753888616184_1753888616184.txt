@@ -1,0 +1,34 @@
+"enhanced_resume": {
+      "Contact Information": [
+        "Direct Contact: +91 9182437984",
+        "Professional Email: chandasridurga@gmail.com",
+        "LinkedIn Profile: linkedin.com/in/sridurgachanda",
+        "GitHub Portfolio: github.com/sridurgachanda"
+      ],
+      "Education": [
+        "Graduated with a B Tech in Computer Science Engineering, achieving a CGPA of 8.77 from Aditya Engineering College, Surampalem, Andhra Pradesh (2021 - 2025)",
+        "Secured 968 out of 1000 marks in MPC at Sri Chaitanya Jr College, Vijayawada, Andhra Pradesh (2019 - 2021)",
+        "Accomplished a B Tech in Computer Science Engineering with a CGPA of 8.77 from Aditya Engineering College, Surampalem, Andhra Pradesh (2021 - 2025)",
+        "Earned 968 out of 1000 marks in MPC at Sri Chaitanya Jr College, Vijayawada, Andhra Pradesh (2019 - 2021)"
+      ],
+      "Technical Skills": [
+        "Proficient in Programming Languages: C, C++, Python, Java, SQL",
+        "Mastered Tools and Technologies: HTML, CSS, JavaScript, ReactJs, NodeJs, MongoDB, Redhat Linux",
+        "In-depth understanding of Operating System Concepts"
+      ],
+      "Professional Experience": [
+        "Technical Hub - Java Internship (May 2023 - July 2023)",
+        "Mastered \"Problem Solving and Java\", excelling in key Java concepts.",
+        "Effectively resolved complex issues, utilizing diverse problem-solving methodologies.",
+        "Demonstrated proficiency in analyzing challenges and engineering efficient Java solutions.",
+        "Technical Hub, Java Internship May 2023 - July 2023",
+        "Resolved complex issues, earning a 5-star rating on HackerRank through strategic problem-solving."
+      ],
+      "Projects": [
+        "Shops and Stalls | Utilized React.js, SCSS, Node.js, MongoDB to develop a robust web application for efficient management of accounts, power bills, and other transactions in shops.",
+        "Implemented a fully dynamic, admin-focused web application, enhancing shop's financial oversight.",
+        "Hostel Hoppers | Leveraged HTML, CSS, React.js, Node.js, MongoDB, Bootstrap to create a comprehensive web application for streamlined management of hostel resident processes, including check-ins and check-outs.",
+        "Designed an intuitive user interface using React.js, improving user experience.",
+        "Executed CRUD operations on user and Admin accounts, enabling precise control over permissions by Admin.",
+        "Travel the World | Employed HTML, CSS, Bootstrap to construct a static website for a travel agency, \"Travel the World\", featuring detailed information on destinations, packages, and booking procedures."
+      ],

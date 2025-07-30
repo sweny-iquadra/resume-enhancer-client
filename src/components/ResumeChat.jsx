@@ -289,11 +289,11 @@ const ResumeChat = ({
                        // console.log('API Response:', parsedResumeResponse);
 
                         // Set the actual API response data
-                        const parsedResumeResponse = await response.json();
-                        console.log('API Response:', parsedResumeResponse);
+                        const parsedResumeResponse1 = await response.json();
+                        console.log('API Response:', parsedResumeResponse1);
 
                         // Set the actual API response data
-                        const actualParsedResumeResponse = {
+                        const parsedResumeResponse = {
                           "student_id": "103",
                           "limit": 3,
                           "file_count": 3,
@@ -458,7 +458,7 @@ const ResumeChat = ({
                         };
 
                         // Store the actual API response and show preview
-                        localStorage.setItem('parsedResumeData', JSON.stringify(actualParsedResumeResponse));
+                        localStorage.setItem('parsedResumeData', JSON.stringify(parsedResumeResponse));
                         setShowPreview(true);
                       } catch (error) {
                         console.error('Error fetching parsed resume:', error);

@@ -255,9 +255,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
   // Build final resume based on selections - Always run this effect
   useEffect(() => {
-    if (!dynamicEnhancedResume && !originalResume) return;
-
     const buildFinalResume = () => {
+      if (!dynamicEnhancedResume && !originalResume) return;
+
       const final = {
         basicDetails: {},
         professionalSummary: "",
@@ -432,7 +432,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         projects: []
       });
     }
-  }, [selections, dynamicEnhancedResume, originalResume]);
+  }, [selections]);
 
   // Early return after all hooks have been called
   if (!showPreview) return null;

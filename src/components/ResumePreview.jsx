@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import MDEditor from '@uiw/react-md-editor';
 
@@ -5,6 +6,13 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const [selections, setSelections] = useState({});
   const [finalResume, setFinalResume] = useState(null);
   const [parsedResumeData, setParsedResumeData] = useState(null);
+
+  // Define handleOutsideClick before any potential early returns
+  const handleOutsideClick = (e) => {
+    if (e.target === e.currentTarget) {
+      setShowPreview(false);
+    }
+  };
 
   // Load parsed resume data from localStorage when component mounts
   useEffect(() => {
@@ -246,37 +254,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const originalResume = getOriginalResumeFromParsed();
   const dynamicEnhancedResume = getEnhancedResumeFromParsed();
 
-  const handleOutsideClick = (e) => {
-    if (e.target === e.currentTarget) {
-      setShowPreview(false);
-    }
-  };
-
-  // If no parsed data is available, don't render the preview
-  if (!originalResume && !dynamicEnhancedResume) {
-    return (
-      <div 
-        className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
-        onClick={handleOutsideClick}
-      >
-        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center">
-          <div className="text-6xl mb-4">📄</div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Resume Data Available</h3>
-          <p className="text-gray-600 mb-4">
-            Unable to load parsed resume data. Please try generating a new resume.
-          </p>
-          <button
-            onClick={() => setShowPreview(false)}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Build final resume based on selections
+  // Build final resume based on selections - Always run this effect
   useEffect(() => {
     if (!dynamicEnhancedResume && !originalResume) return;
 
@@ -290,42 +268,53 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       };
 
       // Basic Details - line by line with mutual exclusion
-      Object.keys(originalResume.basicDetails).forEach(key => {
-        const originalKey = `original.basicDetails.${key}`;
-        const enhancedKey = `enhanced.basicDetails.${key}`;
+      if (originalResume && originalResume.basicDetails) {
+        Object.keys(originalResume.basicDetails).forEach(key => {
+          const originalKey = `original.basicDetails.${key}`;
+          const enhancedKey = `enhanced.basicDetails.${key}`;
 
-        // Due to mutual exclusion, only one can be true at a time
-        if (selections[enhancedKey]) {
-          final.basicDetails[key] = dynamicEnhancedResume.basicDetails[key];
-        } else if (selections[originalKey]) {
-          final.basicDetails[key] = originalResume.basicDetails[key];
-        }
-      });
+          // Due to mutual exclusion, only one can be true at a time
+          if (selections[enhancedKey] && dynamicEnhancedResume && dynamicEnhancedResume.basicDetails) {
+            final.basicDetails[key] = dynamicEnhancedResume.basicDetails[key];
+          } else if (selections[originalKey]) {
+            final.basicDetails[key] = originalResume.basicDetails[key];
+          }
+        });
+      }
 
       // Professional Summary with mutual exclusion
-      if (selections['enhanced.professionalSummary']) {
+      if (selections['enhanced.professionalSummary'] && dynamicEnhancedResume) {
         final.professionalSummary = dynamicEnhancedResume.professionalSummary;
-      } else if (selections['original.professionalSummary']) {
+      } else if (selections['original.professionalSummary'] && originalResume) {
         final.professionalSummary = originalResume.professionalSummary;
       }
 
       // Skills - individual skill selection
-      originalResume.skills.forEach((skill, index) => {
-        if (selections[`original.skills.${index}`]) {
-          final.skills.push(skill);
-        }
-      });
-      dynamicEnhancedResume.skills.forEach((skill, index) => {
-        if (selections[`enhanced.skills.${index}`] && !final.skills.includes(skill)) {
-          final.skills.push(skill);
-        }
-      });
+      if (originalResume && originalResume.skills) {
+        originalResume.skills.forEach((skill, index) => {
+          if (selections[`original.skills.${index}`]) {
+            final.skills.push(skill);
+          }
+        });
+      }
+      
+      if (dynamicEnhancedResume && dynamicEnhancedResume.skills) {
+        dynamicEnhancedResume.skills.forEach((skill, index) => {
+          if (selections[`enhanced.skills.${index}`] && !final.skills.includes(skill)) {
+            final.skills.push(skill);
+          }
+        });
+      }
 
       // Work Experience - line by line
-      const maxWorkExp = Math.max(originalResume.workExperience.length, dynamicEnhancedResume.workExperience.length);
+      const maxWorkExp = Math.max(
+        originalResume?.workExperience?.length || 0, 
+        dynamicEnhancedResume?.workExperience?.length || 0
+      );
+      
       for (let i = 0; i < maxWorkExp; i++) {
-        const originalExp = originalResume.workExperience[i];
-        const enhancedExp = dynamicEnhancedResume.workExperience[i];
+        const originalExp = originalResume?.workExperience?.[i];
+        const enhancedExp = dynamicEnhancedResume?.workExperience?.[i];
 
         const expToAdd = {};
         let hasContent = false;
@@ -372,10 +361,14 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       }
 
       // Projects - line by line
-      const maxProjects = Math.max(originalResume.projects.length, dynamicEnhancedResume.projects?.length || 0);
+      const maxProjects = Math.max(
+        originalResume?.projects?.length || 0, 
+        dynamicEnhancedResume?.projects?.length || 0
+      );
+      
       for (let i = 0; i < maxProjects; i++) {
-        const originalProject = originalResume.projects[i];
-        const enhancedProject = dynamicEnhancedResume.projects?.[i];
+        const originalProject = originalResume?.projects?.[i];
+        const enhancedProject = dynamicEnhancedResume?.projects?.[i];
 
         const projectToAdd = {};
         let hasContent = false;
@@ -425,9 +418,36 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     };
 
     buildFinalResume();
-  }, [selections, dynamicEnhancedResume]);
+  }, [selections, dynamicEnhancedResume, originalResume]);
 
-  if (!showPreview || !dynamicEnhancedResume) return null;
+  // Early return after all hooks have been called
+  if (!showPreview) return null;
+
+  // If no parsed data is available, show error state
+  if (!originalResume && !dynamicEnhancedResume) {
+    return (
+      <div 
+        className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+        onClick={handleOutsideClick}
+      >
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center">
+          <div className="text-6xl mb-4">📄</div>
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Resume Data Available</h3>
+          <p className="text-gray-600 mb-4">
+            Unable to load parsed resume data. Please try generating a new resume.
+          </p>
+          <button
+            onClick={() => setShowPreview(false)}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!dynamicEnhancedResume) return null;
 
   const handleSelection = (key, isSelected) => {
     setSelections(prev => {
@@ -457,38 +477,52 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   // Function to get all possible keys for a resume
   const getAllKeysForResume = (resumeData, prefix) => {
     const keys = [];
+    
+    if (!resumeData) return keys;
 
     // Basic details
-    Object.keys(resumeData.basicDetails).forEach(key => {
-      keys.push(`${prefix}.basicDetails.${key}`);
-    });
+    if (resumeData.basicDetails) {
+      Object.keys(resumeData.basicDetails).forEach(key => {
+        keys.push(`${prefix}.basicDetails.${key}`);
+      });
+    }
 
     // Professional summary
     keys.push(`${prefix}.professionalSummary`);
 
     // Skills
-    resumeData.skills.forEach((_, index) => {
-      keys.push(`${prefix}.skills.${index}`);
-    });
+    if (resumeData.skills) {
+      resumeData.skills.forEach((_, index) => {
+        keys.push(`${prefix}.skills.${index}`);
+      });
+    }
 
     // Work experience
-    resumeData.workExperience.forEach((exp, index) => {
-      keys.push(`${prefix}.workExperience.${index}.position`);
-      keys.push(`${prefix}.workExperience.${index}.company`);
-      keys.push(`${prefix}.workExperience.${index}.duration`);
-      exp.responsibilities.forEach((_, respIndex) => {
-        keys.push(`${prefix}.workExperience.${index}.responsibilities.${respIndex}`);
+    if (resumeData.workExperience) {
+      resumeData.workExperience.forEach((exp, index) => {
+        keys.push(`${prefix}.workExperience.${index}.position`);
+        keys.push(`${prefix}.workExperience.${index}.company`);
+        keys.push(`${prefix}.workExperience.${index}.duration`);
+        if (exp.responsibilities) {
+          exp.responsibilities.forEach((_, respIndex) => {
+            keys.push(`${prefix}.workExperience.${index}.responsibilities.${respIndex}`);
+          });
+        }
       });
-    });
+    }
 
     // Projects
-    resumeData.projects.forEach((project, index) => {
-      keys.push(`${prefix}.projects.${index}.name`);
-      keys.push(`${prefix}.projects.${index}.description`);
-      project.technologies.forEach((_, techIndex) => {
-        keys.push(`${prefix}.projects.${index}.technologies.${techIndex}`);
+    if (resumeData.projects) {
+      resumeData.projects.forEach((project, index) => {
+        keys.push(`${prefix}.projects.${index}.name`);
+        keys.push(`${prefix}.projects.${index}.description`);
+        if (project.technologies) {
+          project.technologies.forEach((_, techIndex) => {
+            keys.push(`${prefix}.projects.${index}.technologies.${techIndex}`);
+          });
+        }
       });
-    });
+    }
 
     return keys;
   };
@@ -634,29 +668,29 @@ Powered by iQua.ai
           <div className="text-center mb-6 pb-3 border-b-2 border-gray-300 space-y-2">
             {getClickableLine(
               `${prefix}.basicDetails.name`,
-              resumeData.basicDetails.name,
+              resumeData?.basicDetails?.name || '',
               <h1 className="text-2xl font-bold text-gray-900" style={{
                 fontFamily: 'Times New Roman, serif',
                 fontSize: '18pt',
                 fontWeight: 'bold'
               }}>
-                {resumeData.basicDetails.name}
+                {resumeData?.basicDetails?.name || ''}
               </h1>
             )}
             {getClickableLine(
               `${prefix}.basicDetails.email`,
-              resumeData.basicDetails.email,
-              <span className="text-sm text-gray-700">{resumeData.basicDetails.email}</span>
+              resumeData?.basicDetails?.email || '',
+              <span className="text-sm text-gray-700">{resumeData?.basicDetails?.email || ''}</span>
             )}
             {getClickableLine(
               `${prefix}.basicDetails.phone`,
-              resumeData.basicDetails.phone,
-              <span className="text-sm text-gray-700">{resumeData.basicDetails.phone}</span>
+              resumeData?.basicDetails?.phone || '',
+              <span className="text-sm text-gray-700">{resumeData?.basicDetails?.phone || ''}</span>
             )}
             {getClickableLine(
               `${prefix}.basicDetails.location`,
-              resumeData.basicDetails.location,
-              <span className="text-sm text-gray-700">{resumeData.basicDetails.location}</span>
+              resumeData?.basicDetails?.location || '',
+              <span className="text-sm text-gray-700">{resumeData?.basicDetails?.location || ''}</span>
             )}
           </div>
 
@@ -673,14 +707,14 @@ Powered by iQua.ai
             </h2>
             {getClickableLine(
               `${prefix}.professionalSummary`,
-              resumeData.professionalSummary,
+              resumeData?.professionalSummary || '',
               <p className="text-gray-800 text-justify" style={{
                 fontFamily: 'Times New Roman, serif',
                 fontSize: '12pt',
                 lineHeight: '1.15',
                 textAlign: 'justify'
               }}>
-                {resumeData.professionalSummary}
+                {resumeData?.professionalSummary || ''}
               </p>
             )}
           </div>
@@ -697,7 +731,7 @@ Powered by iQua.ai
               TECHNICAL SKILLS
             </h2>
             <div className="space-y-1">
-              {resumeData.skills.map((skill, index) => (
+              {(resumeData?.skills || []).map((skill, index) => (
                 <div key={index}>
                   {getClickableLine(
                     `${prefix}.skills.${index}`,
@@ -720,42 +754,42 @@ Powered by iQua.ai
             }}>
               WORK EXPERIENCE
             </h2>
-            {resumeData.workExperience.map((exp, index) => (
+            {(resumeData?.workExperience || []).map((exp, index) => (
               <div key={index} className="space-y-2">
                 {getClickableLine(
                   `${prefix}.workExperience.${index}.position`,
-                  exp.position,
+                  exp?.position || '',
                   <h3 className="font-bold text-gray-900" style={{
                     fontFamily: 'Times New Roman, serif',
                     fontSize: '12pt',
                     fontWeight: 'bold'
                   }}>
-                    {exp.position}
+                    {exp?.position || ''}
                   </h3>
                 )}
                 {getClickableLine(
                   `${prefix}.workExperience.${index}.company`,
-                  exp.company,
+                  exp?.company || '',
                   <div className="text-gray-800 italic" style={{
                     fontFamily: 'Times New Roman, serif',
                     fontSize: '12pt',
                     fontStyle: 'italic'
                   }}>
-                    {exp.company}
+                    {exp?.company || ''}
                   </div>
                 )}
                 {getClickableLine(
                   `${prefix}.workExperience.${index}.duration`,
-                  exp.duration,
+                  exp?.duration || '',
                   <span className="text-gray-700" style={{
                     fontFamily: 'Times New Roman, serif',
                     fontSize: '12pt'
                   }}>
-                    {exp.duration}
+                    {exp?.duration || ''}
                   </span>
                 )}
                 <div className="ml-4 space-y-1">
-                  {exp.responsibilities.map((resp, respIndex) => (
+                  {(exp?.responsibilities || []).map((resp, respIndex) => (
                     <div key={respIndex}>
                       {getClickableLine(
                         `${prefix}.workExperience.${index}.responsibilities.${respIndex}`,
@@ -787,33 +821,33 @@ Powered by iQua.ai
             }}>
               PROJECTS
             </h2>
-            {resumeData.projects.map((project, index) => (
+            {(resumeData?.projects || []).map((project, index) => (
               <div key={index} className="space-y-2">
                 {getClickableLine(
                   `${prefix}.projects.${index}.name`,
-                  project.name,
+                  project?.name || '',
                   <h3 className="font-bold text-gray-900" style={{
                     fontFamily: 'Times New Roman, serif',
                     fontSize: '12pt',
                     fontWeight: 'bold'
                   }}>
-                    {project.name}
+                    {project?.name || ''}
                   </h3>
                 )}
                 {getClickableLine(
                   `${prefix}.projects.${index}.description`,
-                  project.description,
+                  project?.description || '',
                   <p className="text-gray-800" style={{
                     fontFamily: 'Times New Roman, serif',
                     fontSize: '12pt',
                     lineHeight: '1.15'
                   }}>
-                    {project.description}
+                    {project?.description || ''}
                   </p>
                 )}
                 <div className="space-y-1">
                   <span className="font-medium text-gray-700">Technologies: </span>
-                  {project.technologies.map((tech, techIndex) => (
+                  {(project?.technologies || []).map((tech, techIndex) => (
                     <div key={techIndex} className="inline-block">
                       {getClickableLine(
                         `${prefix}.projects.${index}.technologies.${techIndex}`,
@@ -915,13 +949,6 @@ ${project?.description || 'Project description'}
 
 *Powered by iQua.ai*
       `;
-    };
-
-    // Rich text editor configuration
-    const editorConfig = {
-      preview: 'edit',
-      hideToolbar: false,
-      visibleDragBar: false,
     };
 
     // Parse HTML back to resume data (simplified)

@@ -246,6 +246,12 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const originalResume = getOriginalResumeFromParsed();
   const dynamicEnhancedResume = getEnhancedResumeFromParsed();
 
+  const handleOutsideClick = (e) => {
+    if (e.target === e.currentTarget) {
+      setShowPreview(false);
+    }
+  };
+
   // If no parsed data is available, don't render the preview
   if (!originalResume && !dynamicEnhancedResume) {
     return (
@@ -422,12 +428,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   }, [selections, dynamicEnhancedResume]);
 
   if (!showPreview || !dynamicEnhancedResume) return null;
-
-  const handleOutsideClick = (e) => {
-    if (e.target === e.currentTarget) {
-      setShowPreview(false);
-    }
-  };
 
   const handleSelection = (key, isSelected) => {
     setSelections(prev => {

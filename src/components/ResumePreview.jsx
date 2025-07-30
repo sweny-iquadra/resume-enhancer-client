@@ -848,7 +848,7 @@ Powered by iQua.ai
                     {project?.name || ''}
                   </h3>
                 )}
-                {getClickableLine(<old_str>
+                {getClickableLine(
                   `${prefix}.projects.${index}.description`,
                   project?.description || '',
                   <p className="text-gray-800" style={{

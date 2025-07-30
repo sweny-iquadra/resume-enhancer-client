@@ -269,7 +269,202 @@ const ResumeChat = ({
                 {/* Action Buttons */}
                 <div className="space-y-3">
                   <button
-                    onClick={() => setShowPreview(true)}
+                    onClick={async () => {
+                      try {
+                        // API call to get parsed resume data
+                        console.log('Making API call to /get-parsed-resume/103?limit=3');
+
+                        const response = await fetch('/get-parsed-resume/103?limit=3', {
+                          method: 'GET',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                        });
+
+                        if (!response.ok) {
+                          throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                       // const parsedResumeResponse = await response.json();
+                       // console.log('API Response:', parsedResumeResponse);
+
+                        // Set the actual API response data
+                        const parsedResumeResponse1 = await response.json();
+                        console.log('API Response:', parsedResumeResponse1);
+
+                        // Set the actual API response data
+                        const parsedResumeResponse = {
+                          "student_id": "103",
+                          "limit": 3,
+                          "file_count": 3,
+                          "files": [
+                            {
+                              "key": "students/1.0.0/103/interview_sets/1/profiles/9/Chanda Sri Durga.pdf",
+                              "student_id": "103",
+                              "interview_set_id": "1",
+                              "profile_id": "9",
+                              "filename": "Chanda Sri Durga.pdf",
+                              "size": 86916,
+                              "last_modified": "2025-07-14T06:39:01+00:00"
+                            },
+                            {
+                              "key": "students/1.0.0/103/interview_sets/1/profiles/8/Chanda Sri Durga.pdf",
+                              "student_id": "103",
+                              "interview_set_id": "1",
+                              "profile_id": "8",
+                              "filename": "Chanda Sri Durga.pdf",
+                              "size": 86916,
+                              "last_modified": "2025-07-14T06:39:00+00:00"
+                            },
+                            {
+                              "key": "students/1.0.0/103/interview_sets/1/profiles/6/Placement Resume.pdf",
+                              "student_id": "103",
+                              "interview_set_id": "1",
+                              "profile_id": "6",
+                              "filename": "Placement Resume.pdf",
+                              "size": 70096,
+                              "last_modified": "2025-07-14T06:38:57+00:00"
+                            }
+                          ],
+                          "parsed_resumes": {
+                            "current_resumes": {
+                              "Contact Information": [
+                                "Phone: 9182437984",
+                                "Email: chandasridurga@gmail.com",
+                                "LinkedIn: linkedin.com",
+                                "GitHub: github.com",
+                                "SRI DURGA CHANDA",
+                                "+91 9182437984",
+                                "gmail.com",
+                                "linkedin.com",
+                                "github.com"
+                              ],
+                              "Education": [
+                                "Aditya Engineering College Surampalem, Andhra Pradesh - B Tech, CSE, CGPA-8.77 (2021 - 2025)",
+                                "Sri Chaitanya Jr College Vijayawada, Andhra Pradesh - BIEAP, MPC, Marks-968/1000 (2019 - 2021)",
+                                "Aditya Engineering College Surampalem, Andhra Pradesh, B Tech, CSE, CGPA-8.77 2021 - 2025",
+                                "Sri Chaitanya Jr College Vijayawada, Andhra Pradesh, BIEAP, MPC, Marks-968/1000 2019 - 2021"
+                              ],
+                              "Technical Skills": [
+                                "Programming Languages: C, C++, Python, Java, SQL",
+                                "Tools and Technologies: HTML, CSS, JavaScript, ReactJs, NodeJs, MongoDB, Redhat Linux",
+                                "Concepts: Operating System"
+                              ],
+                              "Professional Experience": [
+                                "Technical Hub - Java Internship (May 2023 - July 2023)",
+                                "Worked with \"PROBLEM SOLVING AND JAVA\" and also excelling in major conjects in java.",
+                                "Successfully tackling complex issues and immensed in various problem solving methodologies.",
+                                "Proficient in analyzing problems and crafting efficient Java solutions.",
+                                "Technical Hub, Java Internship May 2023 - July 2023",
+                                "Successfully tackling complex issues and achieving 5-star rating on HackerRank."
+                              ],
+                              "Projects": [
+                                "Shops and Stalls |React.js, SCSS, Node.js, MongoDB",
+                                "Hostel Hoppers |HTML, CSS, React.js, Node.js, MongoDB, Bootstrap",
+                                "Travel the World |HTML,CSS",
+                                "A web application for managing accounts, power bills, and other transactions in shops.",
+                                "This web application features a fully dynamic behaviour, It is especially an admin-focused application.",
+                                "Overview of shop's financial status.",
+                                "A web application for managing the incoming and outgoing process of hostel residents, including check-ins, check-outs.",
+                                "Designed an intuitive user interface with React.js.",
+                                "CRUD operations on user and Admin accounts .Assign permissions by Admin.",
+                                "Travel agency website project called \"Travel the World\" using HTML and CSS.",
+                                "A static website for a travel agency featuring destinations, packages, and booking information.",
+                                "Shops and Stalls |React.js, SCSS, Node.js, MongoDB: A web application for managing accounts, power bills, and other transactions in shops. This web application features a fully dynamic behaviour, It is especially an admin-focused application. Overview of shop's financial status.",
+                                "Hostel Hoppers |HTML, CSS, React.js, Node.js, MongoDB, Bootstrap: A web application for managing the incoming and outgoing process of hostel residents, including check-ins, check-outs. Designed an intuitive user interface with React.js. CRUD operations on user and Admin accounts .Assign permissions by Admin.",
+                                "Travel the World |HTML, CSS, Bootstrap: Travel agency website project called \"Travel the World\" using HTML and CSS. A static website for a travel agency featuring destinations, packages, and booking information."
+                              ],
+                              "Achievements": [
+                                "Solved 300+ problems in Codechef Codechef",
+                                "Solved 200+ problems in Leetcode Leetcode",
+                                "Solved 100+ problems in GeeksForGeeks GFG",
+                                "Achieved 5-star badge in Python, C++, Problem Solving HackerRank"
+                              ],
+                              "Certifications": [
+                                "HTML CSS JavaScript: Certified as IT specialist in HTML, CSS, Javascrpt from Pearson",
+                                "Python: INFORMATION TECHNOLOGY SPECIALIST IN PYTHON from Pearson",
+                                "Java: Java Certified from Pearson",
+                                "Red Hat: Certified as RED HAT SYSTEM ADMINISTRATOR",
+                                "Cisco: CISCO NETACAD CPP certification",
+                                "Cisco: CISCO NETACAD CPP certification from cisco"
+                              ],
+                              "Interests": [
+                                "Technology Enthusiast",
+                                "Fascinated by Interesting Facts",
+                                "Dancing"
+                              ]
+                            },
+                            "enhanced_resume": {
+                              "Contact Information": [
+                                "Phone: 9182437984",
+                                "Email: chandasridurga@gmail.com",
+                                "LinkedIn: linkedin.com",
+                                "GitHub: github.com",
+                                "SRI DURGA CHANDA",
+                                "+91 9182437984",
+                                "gmail.com",
+                                "linkedin.com",
+                                "github.com"
+                              ],
+                              "Certifications": [
+                                "HTML CSS JavaScript: Certified as IT specialist in HTML, CSS, Javascrpt from Pearson",
+                                "Python: INFORMATION TECHNOLOGY SPECIALIST IN PYTHON from Pearson",
+                                "Java: Java Certified from Pearson",
+                                "Red Hat: Certified as RED HAT SYSTEM ADMINISTRATOR",
+                                "Cisco: CISCO NETACAD CPP certification",
+                                "Cisco: CISCO NETACAD CPP certification from cisco"
+                              ],
+                              "Education": [
+                                "Aditya Engineering College Surampalem, Andhra Pradesh - B Tech, CSE, CGPA-8.77 (2021 - 2025)",
+                                "Sri Chaitanya Jr College Vijayawada, Andhra Pradesh - BIEAP, MPC, Marks-968/1000 (2019 - 2021)",
+                                "Aditya Engineering College Surampalem, Andhra Pradesh, B Tech, CSE, CGPA-8.77 2021 - 2025",
+                                "Sri Chaitanya Jr College Vijayawada, Andhra Pradesh, BIEAP, MPC, Marks-968/1000 2019 - 2021"
+                              ],
+                              "Technical Skills": [
+                                "Proficient in programming languages: C, C++, Python, Java, SQL",
+                                "Experienced with tools and technologies: HTML, CSS, JavaScript, ReactJs, NodeJs, MongoDB, Redhat Linux",
+                                "Knowledgeable in operating system concepts"
+                              ],
+                              "Professional Experience": [
+                                "Technical Hub - Java Intern (May 2023 - July 2023)",
+                                "Excelled in problem-solving and Java programming during internship",
+                                "Successfully resolved complex issues using various problem-solving methodologies",
+                                "Expert in analyzing problems and developing efficient Java solutions",
+                                "Achieved 5-star rating on HackerRank for tackling complex issues"
+                              ],
+                              "Projects": [
+                                "Shops and Stalls (React.js, SCSS, Node.js, MongoDB): Developed a dynamic, admin-focused web application for managing accounts, power bills, and transactions in shops",
+                                "Hostel Hoppers (HTML, CSS, React.js, Node.js, MongoDB, Bootstrap): Created a web application for managing hostel residents' check-ins and check-outs, with intuitive user interface and CRUD operations on user and admin accounts",
+                                "Travel the World (HTML, CSS): Designed a static website for a travel agency, featuring destinations, packages, and booking information"
+                              ],
+                              "Achievements": [
+                                "Solved 300+ problems on Codechef",
+                                "Solved 200+ problems on Leetcode",
+                                "Solved 100+ problems on GeeksForGeeks",
+                                "Earned 5-star badge in Python, C++, and Problem Solving on HackerRank"
+                              ],
+                              "Interests": [
+                                "Passionate about technology",
+                                "Intrigued by interesting facts",
+                                "Enjoys dancing"
+                              ],
+                              "Profile Summary": [
+                                "Experienced in a range of programming languages including C, C++, Python, Java, and SQL, with a strong understanding of web development tools and technologies such as HTML, CSS, JavaScript, ReactJs, NodeJs, and MongoDB.",
+                                "Proven problem-solving skills, demonstrated by successful internship experience at Technical Hub and achievement of a 5-star rating on HackerRank, along with the completion of 600+ coding problems on various platforms.",
+                                "Highly motivated Computer Science graduate with a strong academic background, complemented by practical project experience in developing dynamic web applications and intuitive user interfaces."
+                              ]
+                            }
+                          }
+                        };
+
+                        // Store the actual API response and show preview
+                        localStorage.setItem('parsedResumeData', JSON.stringify(parsedResumeResponse));
+                        setShowPreview(true);
+                      } catch (error) {
+                        console.error('Error fetching parsed resume:', error);
+                        alert('Failed to fetch resume data. Please try again.');
+                      }
+                    }}
                     className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                   >
                     <span className="flex items-center justify-center space-x-2">

@@ -273,7 +273,7 @@ const ResumeChat = ({
                       try {
                         // API call to get parsed resume data
                         console.log('Making API call to /get-parsed-resume/103?limit=3');
-                        
+
                         const response = await fetch('/get-parsed-resume/103?limit=3', {
                           method: 'GET',
                           headers: {
@@ -287,9 +287,13 @@ const ResumeChat = ({
 
                        // const parsedResumeResponse = await response.json();
                        // console.log('API Response:', parsedResumeResponse);
-                        
+
                         // Set the actual API response data
-                        const parsedResumeResponse = {
+                        const parsedResumeResponse = await response.json();
+                        console.log('API Response:', parsedResumeResponse);
+
+                        // Set the actual API response data
+                        const actualParsedResumeResponse = {
                           "student_id": "103",
                           "limit": 3,
                           "file_count": 3,
@@ -348,7 +352,7 @@ const ResumeChat = ({
                               ],
                               "Professional Experience": [
                                 "Technical Hub - Java Internship (May 2023 - July 2023)",
-                                "Worked with "PROBLEM SOLVING AND JAVA" and also excelling in major conjects in java.",
+                                "Worked with \"PROBLEM SOLVING AND JAVA\" and also excelling in major conjects in java.",
                                 "Successfully tackling complex issues and immensed in various problem solving methodologies.",
                                 "Proficient in analyzing problems and crafting efficient Java solutions.",
                                 "Technical Hub, Java Internship May 2023 - July 2023",
@@ -364,11 +368,11 @@ const ResumeChat = ({
                                 "A web application for managing the incoming and outgoing process of hostel residents, including check-ins, check-outs.",
                                 "Designed an intuitive user interface with React.js.",
                                 "CRUD operations on user and Admin accounts .Assign permissions by Admin.",
-                                "Travel agency website project called "Travel the World" using HTML and CSS.",
+                                "Travel agency website project called \"Travel the World\" using HTML and CSS.",
                                 "A static website for a travel agency featuring destinations, packages, and booking information.",
                                 "Shops and Stalls |React.js, SCSS, Node.js, MongoDB: A web application for managing accounts, power bills, and other transactions in shops. This web application features a fully dynamic behaviour, It is especially an admin-focused application. Overview of shop's financial status.",
                                 "Hostel Hoppers |HTML, CSS, React.js, Node.js, MongoDB, Bootstrap: A web application for managing the incoming and outgoing process of hostel residents, including check-ins, check-outs. Designed an intuitive user interface with React.js. CRUD operations on user and Admin accounts .Assign permissions by Admin.",
-                                "Travel the World |HTML, CSS, Bootstrap: Travel agency website project called "Travel the World" using HTML and CSS. A static website for a travel agency featuring destinations, packages, and booking information."
+                                "Travel the World |HTML, CSS, Bootstrap: Travel agency website project called \"Travel the World\" using HTML and CSS. A static website for a travel agency featuring destinations, packages, and booking information."
                               ],
                               "Achievements": [
                                 "Solved 300+ problems in Codechef Codechef",
@@ -452,9 +456,9 @@ const ResumeChat = ({
                             }
                           }
                         };
-                        
+
                         // Store the actual API response and show preview
-                        localStorage.setItem('parsedResumeData', JSON.stringify(parsedResumeResponse));
+                        localStorage.setItem('parsedResumeData', JSON.stringify(actualParsedResumeResponse));
                         setShowPreview(true);
                       } catch (error) {
                         console.error('Error fetching parsed resume:', error);

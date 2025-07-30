@@ -4,41 +4,157 @@ import MDEditor from '@uiw/react-md-editor';
 const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const [selections, setSelections] = useState({});
   const [finalResume, setFinalResume] = useState(null);
+  const [parsedResumeData, setParsedResumeData] = useState(null);
 
-  // Original resume data (mock data for comparison) - styled like a real resume
-  const originalResume = {
-    basicDetails: {
-      name: "John Smith",
-      email: "john.smith@email.com",
-      phone: "+1 (555) 123-4567",
-      location: "New York, NY"
-    },
-    professionalSummary: "Experienced software developer with 2+ years in web development. Skilled in JavaScript and React with a passion for creating user-friendly applications.",
-    skills: ["JavaScript", "React", "Node.js", "Python", "SQL", "Git"],
-    workExperience: [
-      {
-        company: "Tech Solutions Inc",
-        position: "Junior Developer",
-        duration: "2020-2022",
-        responsibilities: [
-          "Developed web applications using React and JavaScript",
-          "Collaborated with cross-functional teams on various projects",
-          "Maintained and updated existing codebase for improved performance"
+  // Load parsed resume data from localStorage when component mounts
+  useEffect(() => {
+    const storedData = localStorage.getItem('parsedResumeData');
+    if (storedData) {
+      try {
+        const parsed = JSON.parse(storedData);
+        setParsedResumeData(parsed);
+      } catch (error) {
+        console.error('Error parsing stored resume data:', error);
+      }
+    }
+  }, [showPreview]);
+
+  // Convert parsed resume data to the expected format for original resume
+  const getOriginalResumeFromParsed = () => {
+    if (!parsedResumeData?.parsed_resumes?.current_resumes) {
+      // Fallback to original mock data
+      return {
+        basicDetails: {
+          name: "John Smith",
+          email: "john.smith@email.com",
+          phone: "+1 (555) 123-4567",
+          location: "New York, NY"
+        },
+        professionalSummary: "Experienced software developer with 2+ years in web development. Skilled in JavaScript and React with a passion for creating user-friendly applications.",
+        skills: ["JavaScript", "React", "Node.js", "Python", "SQL", "Git"],
+        workExperience: [
+          {
+            company: "Tech Solutions Inc",
+            position: "Junior Developer",
+            duration: "2020-2022",
+            responsibilities: [
+              "Developed web applications using React and JavaScript",
+              "Collaborated with cross-functional teams on various projects",
+              "Maintained and updated existing codebase for improved performance"
+            ]
+          }
+        ],
+        projects: [
+          {
+            name: "E-commerce Website",
+            description: "Created a responsive e-commerce website with shopping cart functionality",
+            technologies: ["HTML", "CSS", "JavaScript", "React"]
+          }
         ]
-      }
-    ],
-    projects: [
-      {
-        name: "E-commerce Website",
-        description: "Created a responsive e-commerce website with shopping cart functionality",
-        technologies: ["HTML", "CSS", "JavaScript", "React"]
-      }
-    ]
+      };
+    }
+
+    const currentResumes = parsedResumeData.parsed_resumes.current_resumes;
+    
+    // Extract contact information
+    const contactInfo = currentResumes["Contact Information"] || [];
+    const name = contactInfo.find(item => item.includes("SRI DURGA CHANDA")) || contactInfo[0] || "Name Not Found";
+    const email = contactInfo.find(item => item.includes("@")) || "email@example.com";
+    const phone = contactInfo.find(item => item.includes("9182437984")) || contactInfo.find(item => item.includes("Phone:")) || "+91 0000000000";
+    
+    return {
+      basicDetails: {
+        name: name.replace("Phone:", "").replace("Email:", "").trim(),
+        email: email.replace("Email:", "").trim(),
+        phone: phone.replace("Phone:", "").trim(),
+        location: "Andhra Pradesh, India"
+      },
+      professionalSummary: "Computer Science Engineering student with strong programming skills and hands-on experience in web development technologies.",
+      skills: currentResumes["Technical Skills"] || [],
+      workExperience: [
+        {
+          company: "Technical Hub",
+          position: "Java Intern",
+          duration: "May 2023 - July 2023",
+          responsibilities: currentResumes["Professional Experience"] || []
+        }
+      ],
+      projects: [
+        {
+          name: "Shops and Stalls",
+          description: "Web application for managing accounts and transactions",
+          technologies: ["React.js", "SCSS", "Node.js", "MongoDB"]
+        },
+        {
+          name: "Hostel Hoppers",
+          description: "Web application for hostel management",
+          technologies: ["HTML", "CSS", "React.js", "Node.js", "MongoDB", "Bootstrap"]
+        },
+        {
+          name: "Travel the World",
+          description: "Travel agency website",
+          technologies: ["HTML", "CSS", "Bootstrap"]
+        }
+      ]
+    };
   };
+
+  // Convert parsed resume data to the expected format for enhanced resume
+  const getEnhancedResumeFromParsed = () => {
+    if (!parsedResumeData?.parsed_resumes?.enhanced_resume) {
+      return enhancedResumeData;
+    }
+
+    const enhancedResumes = parsedResumeData.parsed_resumes.enhanced_resume;
+    
+    // Extract contact information
+    const contactInfo = enhancedResumes["Contact Information"] || [];
+    const email = contactInfo.find(item => item.includes("@")) || "chandasridurga@gmail.com";
+    const phone = contactInfo.find(item => item.includes("+91")) || "+91 9182437984";
+    
+    return {
+      basicDetails: {
+        name: "SRI DURGA CHANDA",
+        email: email.replace("Professional Email:", "").trim(),
+        phone: phone.replace("Direct Contact:", "").trim(),
+        location: "Andhra Pradesh, India"
+      },
+      professionalSummary: "Computer Science Engineering graduate with expertise in modern web technologies and proven track record in problem-solving.",
+      skills: enhancedResumes["Technical Skills"] || [],
+      workExperience: [
+        {
+          company: "Technical Hub",
+          position: "Java Intern",
+          duration: "May 2023 - July 2023",
+          responsibilities: enhancedResumes["Professional Experience"] || []
+        }
+      ],
+      projects: [
+        {
+          name: "Shops and Stalls",
+          description: "Robust web application for efficient management of accounts, power bills, and transactions",
+          technologies: ["React.js", "SCSS", "Node.js", "MongoDB"]
+        },
+        {
+          name: "Hostel Hoppers",
+          description: "Comprehensive web application for streamlined hostel management",
+          technologies: ["HTML", "CSS", "React.js", "Node.js", "MongoDB", "Bootstrap"]
+        },
+        {
+          name: "Travel the World",
+          description: "Professional travel agency website with detailed information",
+          technologies: ["HTML", "CSS", "Bootstrap"]
+        }
+      ]
+    };
+  };
+
+  const originalResume = getOriginalResumeFromParsed();
+  const dynamicEnhancedResume = getEnhancedResumeFromParsed();
 
   // Build final resume based on selections
   useEffect(() => {
-    if (!enhancedResumeData) return;
+    if (!dynamicEnhancedResume) return;
 
     const buildFinalResume = () => {
       const final = {
@@ -56,7 +172,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
         // Due to mutual exclusion, only one can be true at a time
         if (selections[enhancedKey]) {
-          final.basicDetails[key] = enhancedResumeData.basicDetails[key];
+          final.basicDetails[key] = dynamicEnhancedResume.basicDetails[key];
         } else if (selections[originalKey]) {
           final.basicDetails[key] = originalResume.basicDetails[key];
         }
@@ -64,7 +180,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
       // Professional Summary with mutual exclusion
       if (selections['enhanced.professionalSummary']) {
-        final.professionalSummary = enhancedResumeData.professionalSummary;
+        final.professionalSummary = dynamicEnhancedResume.professionalSummary;
       } else if (selections['original.professionalSummary']) {
         final.professionalSummary = originalResume.professionalSummary;
       }
@@ -75,17 +191,17 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           final.skills.push(skill);
         }
       });
-      enhancedResumeData.skills.forEach((skill, index) => {
+      dynamicEnhancedResume.skills.forEach((skill, index) => {
         if (selections[`enhanced.skills.${index}`] && !final.skills.includes(skill)) {
           final.skills.push(skill);
         }
       });
 
       // Work Experience - line by line
-      const maxWorkExp = Math.max(originalResume.workExperience.length, enhancedResumeData.workExperience.length);
+      const maxWorkExp = Math.max(originalResume.workExperience.length, dynamicEnhancedResume.workExperience.length);
       for (let i = 0; i < maxWorkExp; i++) {
         const originalExp = originalResume.workExperience[i];
-        const enhancedExp = enhancedResumeData.workExperience[i];
+        const enhancedExp = dynamicEnhancedResume.workExperience[i];
 
         const expToAdd = {};
         let hasContent = false;
@@ -132,10 +248,10 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       }
 
       // Projects - line by line
-      const maxProjects = Math.max(originalResume.projects.length, enhancedResumeData.projects?.length || 0);
+      const maxProjects = Math.max(originalResume.projects.length, dynamicEnhancedResume.projects?.length || 0);
       for (let i = 0; i < maxProjects; i++) {
         const originalProject = originalResume.projects[i];
-        const enhancedProject = enhancedResumeData.projects?.[i];
+        const enhancedProject = dynamicEnhancedResume.projects?.[i];
 
         const projectToAdd = {};
         let hasContent = false;
@@ -185,9 +301,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     };
 
     buildFinalResume();
-  }, [selections, enhancedResumeData]);
+  }, [selections, dynamicEnhancedResume]);
 
-  if (!showPreview || !enhancedResumeData) return null;
+  if (!showPreview || !dynamicEnhancedResume) return null;
 
   const handleOutsideClick = (e) => {
     if (e.target === e.currentTarget) {
@@ -261,7 +377,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
   // Function to check if all items from a resume type are selected
   const areAllSelectedForResumeType = (resumeType) => {
-    const resumeData = resumeType === 'original' ? originalResume : enhancedResumeData;
+    const resumeData = resumeType === 'original' ? originalResume : dynamicEnhancedResume;
     const keys = getAllKeysForResume(resumeData, resumeType);
     return keys.length > 0 && keys.every(key => selections[key] === true);
   };
@@ -274,8 +390,8 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       const allCurrentlySelected = areAllSelectedForResumeType(resumeType);
 
       // Get all keys for both resumes
-      const selectedResumeData = resumeType === 'original' ? originalResume : enhancedResumeData;
-      const otherResumeData = resumeType === 'original' ? enhancedResumeData : originalResume;
+      const selectedResumeData = resumeType === 'original' ? originalResume : dynamicEnhancedResume;
+      const otherResumeData = resumeType === 'original' ? dynamicEnhancedResume : originalResume;
 
       const selectedKeys = getAllKeysForResume(selectedResumeData, resumeType);
       const otherKeys = getAllKeysForResume(otherResumeData, otherResumeType);
@@ -855,7 +971,7 @@ ${project?.description || 'Project description'}
                 </button>
               </div>
               <InteractiveWordDocument 
-                resumeData={enhancedResumeData} 
+                resumeData={dynamicEnhancedResume} 
                 title="Enhanced_Resume.docx"
                 isOriginal={false}
                 prefix="enhanced"

@@ -35,19 +35,24 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     const currentResumes = parsedResumeData.parsed_resumes.current_resumes;
     const normalizedData = {};
 
-    // Dynamically process all sections in current_resumes
+    // Dynamically process all sections in current_resumes with deduplication
     Object.keys(currentResumes).forEach(sectionKey => {
       const sectionData = currentResumes[sectionKey];
       if (Array.isArray(sectionData)) {
-        normalizedData[sectionKey] = sectionData.map(item => ({
+        // Remove duplicates using Set and filter out empty strings
+        const deduplicatedData = Array.from(new Set(sectionData.filter(item => item && item.trim())));
+        normalizedData[sectionKey] = deduplicatedData.map((item, index) => ({
           content: item,
-          key: `original.${sectionKey}.${sectionData.indexOf(item)}`
+          key: `original.${sectionKey}.${index}`
         }));
       } else {
-        normalizedData[sectionKey] = [{
-          content: sectionData,
-          key: `original.${sectionKey}.0`
-        }];
+        // Handle non-array data
+        if (sectionData && sectionData.trim()) {
+          normalizedData[sectionKey] = [{
+            content: sectionData,
+            key: `original.${sectionKey}.0`
+          }];
+        }
       }
     });
 
@@ -63,19 +68,24 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     const enhancedResumes = parsedResumeData.parsed_resumes.enhanced_resume;
     const normalizedData = {};
 
-    // Dynamically process all sections in enhanced_resume
+    // Dynamically process all sections in enhanced_resume with deduplication
     Object.keys(enhancedResumes).forEach(sectionKey => {
       const sectionData = enhancedResumes[sectionKey];
       if (Array.isArray(sectionData)) {
-        normalizedData[sectionKey] = sectionData.map(item => ({
+        // Remove duplicates using Set and filter out empty strings
+        const deduplicatedData = Array.from(new Set(sectionData.filter(item => item && item.trim())));
+        normalizedData[sectionKey] = deduplicatedData.map((item, index) => ({
           content: item,
-          key: `enhanced.${sectionKey}.${sectionData.indexOf(item)}`
+          key: `enhanced.${sectionKey}.${index}`
         }));
       } else {
-        normalizedData[sectionKey] = [{
-          content: sectionData,
-          key: `enhanced.${sectionKey}.0`
-        }];
+        // Handle non-array data
+        if (sectionData && sectionData.trim()) {
+          normalizedData[sectionKey] = [{
+            content: sectionData,
+            key: `enhanced.${sectionKey}.0`
+          }];
+        }
       }
     });
 

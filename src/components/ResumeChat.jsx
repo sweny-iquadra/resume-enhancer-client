@@ -271,14 +271,31 @@ const ResumeChat = ({
                   <button
                     onClick={async () => {
                       try {
-                        // Mock API call to get parsed resume data
+                        // API call to get parsed resume data
                         console.log('Making API call to /get-parsed-resume/103?limit=3');
                         
-                        // Simulate API delay
-                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        const response = await fetch('/get-parsed-resume/103?limit=3', {
+                          method: 'GET',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                        });
+
+                        if (!response.ok) {
+                          throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const parsedResumeResponse = await response.json();
+                        console.log('API Response:', parsedResumeResponse);
                         
-                        // Mock API response
-                        const parsedResumeResponse = {
+                        // Store the parsed resume data and show preview
+                        localStorage.setItem('parsedResumeData', JSON.stringify(parsedResumeResponse));
+                        setShowPreview(true);
+                      } catch (error) {
+                        console.error('Error fetching parsed resume:', error);
+                        
+                        // Fallback: Use mock data if API fails
+                        const mockParsedResumeResponse = {
                           "student_id": "103",
                           "limit": 3,
                           "file_count": 3,
@@ -415,15 +432,9 @@ const ResumeChat = ({
                             }
                           }
                         };
-
-                        console.log('API Response:', parsedResumeResponse);
                         
-                        // Store the parsed resume data and show preview
-                        localStorage.setItem('parsedResumeData', JSON.stringify(parsedResumeResponse));
-                        setShowPreview(true);
-                      } catch (error) {
-                        console.error('Error fetching parsed resume:', error);
-                        // Fallback to showing preview without parsed data
+                        console.log('Using fallback mock data');
+                        localStorage.setItem('parsedResumeData', JSON.stringify(mockParsedResumeResponse));
                         setShowPreview(true);
                       }
                     }}

@@ -285,8 +285,8 @@ const ResumeChat = ({
                           throw new Error(`HTTP error! status: ${response.status}`);
                         }
 
-                        const parsedResumeResponse = await response.json();
-                        console.log('API Response:', parsedResumeResponse);
+                       // const parsedResumeResponse = await response.json();
+                       // console.log('API Response:', parsedResumeResponse);
                         
                         // Set the actual API response data
                         const parsedResumeResponse = {

@@ -26,6 +26,83 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     }
   }, [showPreview]);
 
+  // Advanced deduplication function for complex content
+  const advancedDeduplicate = (items) => {
+    if (!Array.isArray(items)) return items;
+
+    const seen = new Set();
+    const deduplicatedItems = [];
+
+    items.forEach(item => {
+      if (!item || !item.trim()) return;
+
+      // Normalize the content for comparison
+      const normalizedContent = item
+        .toLowerCase()
+        .replace(/[^\w\s@.-]/g, ' ')  // Replace special chars with spaces (except email chars)
+        .replace(/\s+/g, ' ')        // Replace multiple spaces with single space
+        .trim();
+
+      // Extract key information for more intelligent matching
+      const keyWords = normalizedContent
+        .split(' ')
+        .filter(word => word.length > 2)  // Filter out short words
+        .sort()  // Sort for consistent comparison
+        .join(' ');
+
+      // Check for similar content (fuzzy matching)
+      let isDuplicate = false;
+      
+      for (const seenKey of seen) {
+        // Calculate similarity ratio
+        const similarity = calculateSimilarity(keyWords, seenKey);
+        if (similarity > 0.8) {  // 80% similarity threshold
+          isDuplicate = true;
+          break;
+        }
+      }
+
+      if (!isDuplicate) {
+        seen.add(keyWords);
+        deduplicatedItems.push(item);
+      }
+    });
+
+    return deduplicatedItems;
+  };
+
+  // Calculate similarity between two strings
+  const calculateSimilarity = (str1, str2) => {
+    const longer = str1.length > str2.length ? str1 : str2;
+    const shorter = str1.length > str2.length ? str2 : str1;
+    
+    if (longer.length === 0) return 1.0;
+    
+    const editDistance = getEditDistance(longer, shorter);
+    return (longer.length - editDistance) / longer.length;
+  };
+
+  // Calculate edit distance (Levenshtein distance)
+  const getEditDistance = (str1, str2) => {
+    const matrix = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
+    
+    for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
+    for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
+    
+    for (let j = 1; j <= str2.length; j++) {
+      for (let i = 1; i <= str1.length; i++) {
+        const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+        matrix[j][i] = Math.min(
+          matrix[j][i - 1] + 1,       // deletion
+          matrix[j - 1][i] + 1,       // insertion  
+          matrix[j - 1][i - 1] + indicator // substitution
+        );
+      }
+    }
+    
+    return matrix[str2.length][str1.length];
+  };
+
   // Convert parsed resume data to a normalized format for original resume
   const getOriginalResumeFromParsed = () => {
     if (!parsedResumeData?.parsed_resumes?.current_resumes) {
@@ -35,12 +112,12 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     const currentResumes = parsedResumeData.parsed_resumes.current_resumes;
     const normalizedData = {};
 
-    // Dynamically process all sections in current_resumes with deduplication
+    // Dynamically process all sections in current_resumes with advanced deduplication
     Object.keys(currentResumes).forEach(sectionKey => {
       const sectionData = currentResumes[sectionKey];
       if (Array.isArray(sectionData)) {
-        // Remove duplicates using Set and filter out empty strings
-        const deduplicatedData = Array.from(new Set(sectionData.filter(item => item && item.trim())));
+        // Use advanced deduplication for complex content matching
+        const deduplicatedData = advancedDeduplicate(sectionData);
         normalizedData[sectionKey] = deduplicatedData.map((item, index) => ({
           content: item,
           key: `original.${sectionKey}.${index}`
@@ -68,12 +145,12 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     const enhancedResumes = parsedResumeData.parsed_resumes.enhanced_resume;
     const normalizedData = {};
 
-    // Dynamically process all sections in enhanced_resume with deduplication
+    // Dynamically process all sections in enhanced_resume with advanced deduplication
     Object.keys(enhancedResumes).forEach(sectionKey => {
       const sectionData = enhancedResumes[sectionKey];
       if (Array.isArray(sectionData)) {
-        // Remove duplicates using Set and filter out empty strings
-        const deduplicatedData = Array.from(new Set(sectionData.filter(item => item && item.trim())));
+        // Use advanced deduplication for complex content matching
+        const deduplicatedData = advancedDeduplicate(sectionData);
         normalizedData[sectionKey] = deduplicatedData.map((item, index) => ({
           content: item,
           key: `enhanced.${sectionKey}.${index}`

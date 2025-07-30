@@ -26,392 +26,108 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     }
   }, [showPreview]);
 
-  // Convert parsed resume data to the expected format for original resume
+  // Convert parsed resume data to a normalized format for original resume
   const getOriginalResumeFromParsed = () => {
     if (!parsedResumeData?.parsed_resumes?.current_resumes) {
-      return null; // Return null if no data available
+      return null;
     }
 
     const currentResumes = parsedResumeData.parsed_resumes.current_resumes;
+    const normalizedData = {};
 
-    // Extract contact information dynamically
-    const contactInfo = currentResumes["Contact Information"] || [];
-    const name = contactInfo.find(item => item.includes("SRI DURGA CHANDA")) || 
-                 contactInfo.find(item => !item.includes("Phone:") && !item.includes("Email:") && !item.includes("LinkedIn:") && !item.includes("GitHub:") && !item.includes("@") && !item.includes("+91")) || 
-                 "Name Not Available";
-    const email = contactInfo.find(item => item.includes("@")) || "Email Not Available";
-    const phone = contactInfo.find(item => item.includes("+91") || item.includes("Phone:")) || "Phone Not Available";
-    const linkedIn = contactInfo.find(item => item.includes("LinkedIn:") || item.includes("linkedin.com")) || "";
-    const github = contactInfo.find(item => item.includes("GitHub:") || item.includes("github.com")) || "";
-
-    // Extract education info dynamically
-    const education = currentResumes["Education"] || [];
-    const location = education.length > 0 ? 
-      (education[0].includes("Andhra Pradesh") ? "Andhra Pradesh, India" : "Location from Education") :
-      "Location Not Available";
-
-    // Extract professional summary from experience or create from education
-    const experience = currentResumes["Professional Experience"] || [];
-    const educationInfo = currentResumes["Education"] || [];
-    const professionalSummary = experience.length > 0 ? 
-      experience[0] : 
-      (educationInfo.length > 0 ? 
-        `${educationInfo[0].includes("CSE") ? "Computer Science Engineering" : "Engineering"} student with academic excellence and technical skills.` :
-        "Professional summary not available");
-
-    // Dynamic skills extraction
-    const skills = currentResumes["Technical Skills"] || [];
-
-    // Dynamic work experience
-    const workExperience = [];
-    if (experience.length > 0) {
-      // Group experience items into work experience entries
-      const companyInfo = experience.find(item => item.includes("Technical Hub")) || experience[0] || "";
-      const duration = experience.find(item => item.includes("2023")) || "Duration not specified";
-      const responsibilities = experience.filter(item => 
-        !item.includes("Technical Hub") && 
-        !item.includes("2023") && 
-        item.trim().length > 0
-      );
-
-      workExperience.push({
-        company: companyInfo.includes("Technical Hub") ? "Technical Hub" : "Company from experience",
-        position: companyInfo.includes("Java") ? "Java Intern" : "Position from experience",
-        duration: duration,
-        responsibilities: responsibilities
-      });
-    }
-
-    // Dynamic projects extraction
-    const projectsData = currentResumes["Projects"] || [];
-    const projects = [];
-
-    // Group project data by project names
-    const projectNames = projectsData.filter(item => item.includes("|"));
-    const projectDescriptions = projectsData.filter(item => !item.includes("|") && item.length > 10);
-
-    projectNames.forEach((projectLine, index) => {
-      const parts = projectLine.split("|");
-      if (parts.length >= 2) {
-        const name = parts[0].trim();
-        const techString = parts[1].trim();
-        const technologies = techString.split(",").map(tech => tech.trim());
-
-        // Find corresponding description
-        const description = projectDescriptions[index] || "Project description not available";
-
-        projects.push({
-          name: name,
-          description: description,
-          technologies: technologies
-        });
+    // Dynamically process all sections in current_resumes
+    Object.keys(currentResumes).forEach(sectionKey => {
+      const sectionData = currentResumes[sectionKey];
+      if (Array.isArray(sectionData)) {
+        normalizedData[sectionKey] = sectionData.map(item => ({
+          content: item,
+          key: `original.${sectionKey}.${sectionData.indexOf(item)}`
+        }));
+      } else {
+        normalizedData[sectionKey] = [{
+          content: sectionData,
+          key: `original.${sectionKey}.0`
+        }];
       }
     });
 
-    return {
-      basicDetails: {
-        name: name.replace("Phone:", "").replace("Email:", "").trim(),
-        email: email.replace("Email:", "").trim(),
-        phone: phone.replace("Phone:", "").trim(),
-        location: location,
-        linkedIn: linkedIn.replace("LinkedIn:", "").trim(),
-        github: github.replace("GitHub:", "").trim()
-      },
-      professionalSummary: professionalSummary,
-      skills: skills,
-      workExperience: workExperience,
-      projects: projects,
-      education: education,
-      achievements: currentResumes["Achievements"] || [],
-      certifications: currentResumes["Certifications"] || [],
-      interests: currentResumes["Interests"] || []
-    };
+    return normalizedData;
   };
 
-  // Convert parsed resume data to the expected format for enhanced resume
+  // Convert parsed resume data to a normalized format for enhanced resume
   const getEnhancedResumeFromParsed = () => {
     if (!parsedResumeData?.parsed_resumes?.enhanced_resume) {
-      return null; // Return null if no enhanced data available
+      return null;
     }
 
     const enhancedResumes = parsedResumeData.parsed_resumes.enhanced_resume;
+    const normalizedData = {};
 
-    // Extract contact information dynamically
-    const contactInfo = enhancedResumes["Contact Information"] || [];
-    const email = contactInfo.find(item => item.includes("@")) || "Email Not Available";
-    const phone = contactInfo.find(item => item.includes("+91") || item.includes("Direct Contact:")) || "Phone Not Available";
-    const linkedIn = contactInfo.find(item => item.includes("LinkedIn") || item.includes("linkedin.com")) || "";
-    const github = contactInfo.find(item => item.includes("GitHub") || item.includes("github.com")) || "";
-
-    // Extract name dynamically
-    const name = contactInfo.find(item => 
-      !item.includes("@") && 
-      !item.includes("+91") && 
-      !item.includes("LinkedIn") && 
-      !item.includes("GitHub") &&
-      !item.includes("Direct Contact:") &&
-      !item.includes("Professional Email:")
-    ) || "SRI DURGA CHANDA";
-
-    // Extract education info dynamically
-    const education = enhancedResumes["Education"] || [];
-    const location = education.length > 0 ? 
-      (education[0].includes("Andhra Pradesh") ? "Andhra Pradesh, India" : "Location from Education") :
-      "Location Not Available";
-
-    // Extract professional summary from experience or education
-    const experience = enhancedResumes["Professional Experience"] || [];
-    const educationInfo = enhancedResumes["Education"] || [];
-    const professionalSummary = experience.length > 0 ? 
-      experience[0] : 
-      (educationInfo.length > 0 ? 
-        educationInfo[0] :
-        "Professional summary not available");
-
-    // Dynamic skills extraction
-    const skills = enhancedResumes["Technical Skills"] || [];
-
-    // Dynamic work experience
-    const workExperience = [];
-    if (experience.length > 0) {
-      // Group experience items into work experience entries
-      const companyInfo = experience.find(item => item.includes("Technical Hub")) || experience[0] || "";
-      const duration = experience.find(item => item.includes("2023")) || "Duration not specified";
-      const responsibilities = experience.filter(item => 
-        !item.includes("Technical Hub") && 
-        !item.includes("2023") && 
-        item.trim().length > 0
-      );
-
-      workExperience.push({
-        company: companyInfo.includes("Technical Hub") ? "Technical Hub" : "Company from experience",
-        position: companyInfo.includes("Java") ? "Java Intern" : "Position from experience", 
-        duration: duration,
-        responsibilities: responsibilities
-      });
-    }
-
-    // Dynamic projects extraction
-    const projectsData = enhancedResumes["Projects"] || [];
-    const projects = [];
-
-    // Enhanced projects have more detailed descriptions
-    projectsData.forEach((projectLine, index) => {
-      if (projectLine.includes("|") || projectLine.includes("Utilized") || projectLine.includes("Leveraged") || projectLine.includes("Employed")) {
-        let name = "";
-        let description = projectLine;
-        let technologies = [];
-
-        if (projectLine.includes("|")) {
-          const parts = projectLine.split("|");
-          name = parts[0].trim();
-          description = parts[1].trim();
-        } else if (projectLine.includes("Shops and Stalls")) {
-          name = "Shops and Stalls";
-        } else if (projectLine.includes("Hostel Hoppers")) {
-          name = "Hostel Hoppers";
-        } else if (projectLine.includes("Travel the World")) {
-          name = "Travel the World";
-        }
-
-        // Extract technologies from description
-        const techMatch = description.match(/(React\.js|HTML|CSS|JavaScript|Node\.js|MongoDB|Bootstrap|SCSS)/g);
-        if (techMatch) {
-          technologies = [...new Set(techMatch)]; // Remove duplicates
-        }
-
-        if (name && description) {
-          projects.push({
-            name: name,
-            description: description,
-            technologies: technologies
-          });
-        }
+    // Dynamically process all sections in enhanced_resume
+    Object.keys(enhancedResumes).forEach(sectionKey => {
+      const sectionData = enhancedResumes[sectionKey];
+      if (Array.isArray(sectionData)) {
+        normalizedData[sectionKey] = sectionData.map(item => ({
+          content: item,
+          key: `enhanced.${sectionKey}.${sectionData.indexOf(item)}`
+        }));
+      } else {
+        normalizedData[sectionKey] = [{
+          content: sectionData,
+          key: `enhanced.${sectionKey}.0`
+        }];
       }
     });
 
-    return {
-      basicDetails: {
-        name: name.trim(),
-        email: email.replace("Professional Email:", "").trim(),
-        phone: phone.replace("Direct Contact:", "").trim(),
-        location: location,
-        linkedIn: linkedIn.replace("LinkedIn Profile:", "").trim(),
-        github: github.replace("GitHub Portfolio:", "").trim()
-      },
-      professionalSummary: professionalSummary,
-      skills: skills,
-      workExperience: workExperience,
-      projects: projects,
-      education: education,
-      achievements: enhancedResumes["Achievements"] || [],
-      certifications: enhancedResumes["Certifications"] || [],
-      interests: enhancedResumes["Interests"] || []
-    };
+    return normalizedData;
   };
 
   const originalResume = getOriginalResumeFromParsed();
   const dynamicEnhancedResume = getEnhancedResumeFromParsed();
 
-  // Build final resume based on selections - Always run this effect
+  // Build final resume based on selections
   useEffect(() => {
     const buildFinalResume = () => {
       if (!dynamicEnhancedResume && !originalResume) return;
 
-      const final = {
-        basicDetails: {},
-        professionalSummary: "",
-        skills: [],
-        workExperience: [],
-        projects: []
-      };
+      const final = {};
 
-      // Basic Details - line by line with mutual exclusion
-      if (originalResume && originalResume.basicDetails) {
-        Object.keys(originalResume.basicDetails).forEach(key => {
-          const originalKey = `original.basicDetails.${key}`;
-          const enhancedKey = `enhanced.basicDetails.${key}`;
+      // Combine all section keys from both resumes
+      const allSectionKeys = new Set([
+        ...(originalResume ? Object.keys(originalResume) : []),
+        ...(dynamicEnhancedResume ? Object.keys(dynamicEnhancedResume) : [])
+      ]);
 
-          // Due to mutual exclusion, only one can be true at a time
-          if (selections[enhancedKey] && dynamicEnhancedResume && dynamicEnhancedResume.basicDetails) {
-            final.basicDetails[key] = dynamicEnhancedResume.basicDetails[key];
-          } else if (selections[originalKey]) {
-            final.basicDetails[key] = originalResume.basicDetails[key];
-          }
-        });
-      }
+      // Process each section dynamically
+      allSectionKeys.forEach(sectionKey => {
+        const originalSection = originalResume?.[sectionKey] || [];
+        const enhancedSection = dynamicEnhancedResume?.[sectionKey] || [];
+        const selectedItems = [];
 
-      // Professional Summary with mutual exclusion
-      if (selections['enhanced.professionalSummary'] && dynamicEnhancedResume) {
-        final.professionalSummary = dynamicEnhancedResume.professionalSummary;
-      } else if (selections['original.professionalSummary'] && originalResume) {
-        final.professionalSummary = originalResume.professionalSummary;
-      }
-
-      // Skills - individual skill selection
-      if (originalResume && originalResume.skills) {
-        originalResume.skills.forEach((skill, index) => {
-          if (selections[`original.skills.${index}`]) {
-            final.skills.push(skill);
-          }
-        });
-      }
-
-      if (dynamicEnhancedResume && dynamicEnhancedResume.skills) {
-        dynamicEnhancedResume.skills.forEach((skill, index) => {
-          if (selections[`enhanced.skills.${index}`] && !final.skills.includes(skill)) {
-            final.skills.push(skill);
-          }
-        });
-      }
-
-      // Work Experience - line by line
-      const maxWorkExp = Math.max(
-        originalResume?.workExperience?.length || 0, 
-        dynamicEnhancedResume?.workExperience?.length || 0
-      );
-
-      for (let i = 0; i < maxWorkExp; i++) {
-        const originalExp = originalResume?.workExperience?.[i];
-        const enhancedExp = dynamicEnhancedResume?.workExperience?.[i];
-
-        const expToAdd = {};
-        let hasContent = false;
-
-        // Check position, company, duration with mutual exclusion
-        ['position', 'company', 'duration'].forEach(field => {
-          const enhancedKey = `enhanced.workExperience.${i}.${field}`;
-          const originalKey = `original.workExperience.${i}.${field}`;
-
-          if (selections[enhancedKey] && enhancedExp?.[field]) {
-            expToAdd[field] = enhancedExp[field];
-            hasContent = true;
-          } else if (selections[originalKey] && originalExp?.[field]) {
-            expToAdd[field] = originalExp[field];
-            hasContent = true;
+        // Check original section items
+        originalSection.forEach(item => {
+          if (selections[item.key]) {
+            selectedItems.push({
+              content: item.content,
+              source: 'original'
+            });
           }
         });
 
-        // Handle responsibilities with mutual exclusion
-        expToAdd.responsibilities = [];
-
-        // Get all responsibility indices from both resumes
-        const maxResponsibilities = Math.max(
-          originalExp?.responsibilities?.length || 0,
-          enhancedExp?.responsibilities?.length || 0
-        );
-
-        for (let respIndex = 0; respIndex < maxResponsibilities; respIndex++) {
-          const enhancedKey = `enhanced.workExperience.${i}.responsibilities.${respIndex}`;
-          const originalKey = `original.workExperience.${i}.responsibilities.${respIndex}`;
-
-          if (selections[enhancedKey] && enhancedExp?.responsibilities?.[respIndex]) {
-            expToAdd.responsibilities.push(enhancedExp.responsibilities[respIndex]);
-            hasContent = true;
-          } else if (selections[originalKey] && originalExp?.responsibilities?.[respIndex]) {
-            expToAdd.responsibilities.push(originalExp.responsibilities[respIndex]);
-            hasContent = true;
+        // Check enhanced section items
+        enhancedSection.forEach(item => {
+          if (selections[item.key]) {
+            selectedItems.push({
+              content: item.content,
+              source: 'enhanced'
+            });
           }
+        });
+
+        if (selectedItems.length > 0) {
+          final[sectionKey] = selectedItems;
         }
-
-        if (hasContent) {
-          final.workExperience.push(expToAdd);
-        }
-      }
-
-      // Projects - line by line
-      const maxProjects = Math.max(
-        originalResume?.projects?.length || 0, 
-        dynamicEnhancedResume?.projects?.length || 0
-      );
-
-      for (let i = 0; i < maxProjects; i++) {
-        const originalProject = originalResume?.projects?.[i];
-        const enhancedProject = dynamicEnhancedResume?.projects?.[i];
-
-        const projectToAdd = {};
-        let hasContent = false;
-
-        // Check name, description with mutual exclusion
-        ['name', 'description'].forEach(field => {
-          const enhancedKey = `enhanced.projects.${i}.${field}`;
-          const originalKey = `original.projects.${i}.${field}`;
-
-          if (selections[enhancedKey] && enhancedProject?.[field]) {
-            projectToAdd[field] = enhancedProject[field];
-            hasContent = true;
-          } else if (selections[originalKey] && originalProject?.[field]) {
-            projectToAdd[field] = originalProject[field];
-            hasContent = true;
-          }
-        });
-
-        // Handle technologies with mutual exclusion
-        projectToAdd.technologies = [];
-
-        // Get all technology indices from both resumes
-        const maxTechnologies = Math.max(
-          originalProject?.technologies?.length || 0,
-          enhancedProject?.technologies?.length || 0
-        );
-
-        for (let techIndex = 0; techIndex < maxTechnologies; techIndex++) {
-          const enhancedKey = `enhanced.projects.${i}.technologies.${techIndex}`;
-          const originalKey = `original.projects.${i}.technologies.${techIndex}`;
-
-          if (selections[enhancedKey] && enhancedProject?.technologies?.[techIndex]) {
-            projectToAdd.technologies.push(enhancedProject.technologies[techIndex]);
-            hasContent = true;
-          } else if (selections[originalKey] && originalProject?.technologies?.[techIndex]) {
-            projectToAdd.technologies.push(originalProject.technologies[techIndex]);
-            hasContent = true;
-          }
-        }
-
-        if (hasContent) {
-          final.projects.push(projectToAdd);
-        }
-      }
+      });
 
       setFinalResume(final);
     };
@@ -424,13 +140,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       buildFinalResume();
     } else if (hasData && !hasSelections) {
       // Set empty final resume structure when no selections
-      setFinalResume({
-        basicDetails: {},
-        professionalSummary: "",
-        skills: [],
-        workExperience: [],
-        projects: []
-      });
+      setFinalResume({});
     }
   }, [selections]);
 
@@ -494,49 +204,13 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
     if (!resumeData) return keys;
 
-    // Basic details
-    if (resumeData.basicDetails) {
-      Object.keys(resumeData.basicDetails).forEach(key => {
-        keys.push(`${prefix}.basicDetails.${key}`);
+    // Dynamically get all keys from all sections
+    Object.keys(resumeData).forEach(sectionKey => {
+      const sectionItems = resumeData[sectionKey] || [];
+      sectionItems.forEach(item => {
+        keys.push(item.key);
       });
-    }
-
-    // Professional summary
-    keys.push(`${prefix}.professionalSummary`);
-
-    // Skills
-    if (resumeData.skills) {
-      resumeData.skills.forEach((_, index) => {
-        keys.push(`${prefix}.skills.${index}`);
-      });
-    }
-
-    // Work experience
-    if (resumeData.workExperience) {
-      resumeData.workExperience.forEach((exp, index) => {
-        keys.push(`${prefix}.workExperience.${index}.position`);
-        keys.push(`${prefix}.workExperience.${index}.company`);
-        keys.push(`${prefix}.workExperience.${index}.duration`);
-        if (exp.responsibilities) {
-          exp.responsibilities.forEach((_, respIndex) => {
-            keys.push(`${prefix}.workExperience.${index}.responsibilities.${respIndex}`);
-          });
-        }
-      });
-    }
-
-    // Projects
-    if (resumeData.projects) {
-      resumeData.projects.forEach((project, index) => {
-        keys.push(`${prefix}.projects.${index}.name`);
-        keys.push(`${prefix}.projects.${index}.description`);
-        if (project.technologies) {
-          project.technologies.forEach((_, techIndex) => {
-            keys.push(`${prefix}.projects.${index}.technologies.${techIndex}`);
-          });
-        }
-      });
-    }
+    });
 
     return keys;
   };
@@ -588,40 +262,28 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     if (!finalResume) return;
 
     // Generate content from finalResume object with proper formatting
-    const resumeContent = `
-${finalResume.basicDetails.name || ''}
-${finalResume.basicDetails.email || ''} | ${finalResume.basicDetails.phone || ''}
-${finalResume.basicDetails.location || ''}
+    let resumeContent = '';
 
-PROFESSIONAL SUMMARY
-${finalResume.professionalSummary || ''}
+    // Dynamically build resume content from all sections
+    Object.keys(finalResume).forEach(sectionKey => {
+      resumeContent += `\n${sectionKey.toUpperCase()}\n`;
+      resumeContent += '='.repeat(sectionKey.length) + '\n';
 
-TECHNICAL SKILLS
-${finalResume.skills.join(' • ')}
+      const sectionItems = finalResume[sectionKey] || [];
+      sectionItems.forEach(item => {
+        resumeContent += `• ${item.content}\n`;
+      });
+      resumeContent += '\n';
+    });
 
-WORK EXPERIENCE
-${finalResume.workExperience.map(exp => `
-${exp.position || ''}
-${exp.company || ''} | ${exp.duration || ''}
-${exp.responsibilities?.map(resp => `• ${resp}`).join('\n') || ''}
-`).join('\n')}
-
-PROJECTS
-${finalResume.projects?.map(project => `
-${project.name || ''}
-${project.description || ''}
-Technologies: ${project.technologies?.join(', ') || ''}
-`).join('\n') || ''}
-
-Powered by iQua.ai
-    `.trim();
+    resumeContent += '\nPowered by iQua.ai';
 
     // Create and download file
     const blob = new Blob([resumeContent], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `resume_${finalResume.basicDetails.name?.replace(/\s+/g, '_') || 'resume'}.${format.toLowerCase()}`;
+    a.download = `resume_dynamic.${format.toLowerCase()}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -630,7 +292,7 @@ Powered by iQua.ai
     console.log(`Downloading resume as ${format}`);
   };
 
-  // Interactive Word Document Component with line-by-line selection
+  // Interactive Word Document Component with dynamic section rendering
   const InteractiveWordDocument = ({ resumeData, title, isOriginal = false, prefix }) => {
     const getClickableLine = (key, content, displayContent = null) => {
       const isSelected = selections[key];
@@ -649,10 +311,35 @@ Powered by iQua.ai
             }`}
             onClick={() => handleSelection(key, !isSelected)}
           >
-            {displayContent || content}
+            {displayContent || (
+              <span className="text-sm text-gray-800">{content}</span>
+            )}
           </div>
         </div>
       );
+    };
+
+    // Function to format section titles
+    const formatSectionTitle = (sectionKey) => {
+      return sectionKey
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/^./, str => str.toUpperCase())
+        .trim();
+    };
+
+    // Function to get appropriate emoji for section
+    const getSectionEmoji = (sectionKey) => {
+      const emojiMap = {
+        'Contact Information': '📞',
+        'Education': '🎓',
+        'Technical Skills': '🚀',
+        'Professional Experience': '💼',
+        'Projects': '🏗️',
+        'Achievements': '🏆',
+        'Certifications': '📜',
+        'Interests': '💡'
+      };
+      return emojiMap[sectionKey] || '📋';
     };
 
     return (
@@ -672,208 +359,78 @@ Powered by iQua.ai
         </div>
 
         {/* Document Content */}
-        <div className="p-8 min-h-[600px] space-y-4" style={{
+        <div className="p-8 min-h-[600px] space-y-6" style={{
           fontFamily: 'Times New Roman, serif',
           fontSize: '12pt',
           lineHeight: '1.15',
           background: 'white'
         }}>
-          {/* Header Section */}
-          <div className="text-center mb-6 pb-3 border-b-2 border-gray-300 space-y-2">
-            {getClickableLine(
-              `${prefix}.basicDetails.name`,
-              resumeData?.basicDetails?.name || '',
-              <h1 className="text-2xl font-bold text-gray-900" style={{
-                fontFamily: 'Times New Roman, serif',
-                fontSize: '18pt',
-                fontWeight: 'bold'
-              }}>
-                {resumeData?.basicDetails?.name || ''}
-              </h1>
-            )}
-            {getClickableLine(
-              `${prefix}.basicDetails.email`,
-              resumeData?.basicDetails?.email || '',
-              <span className="text-sm text-gray-700">{resumeData?.basicDetails?.email || ''}</span>
-            )}
-            {getClickableLine(
-              `${prefix}.basicDetails.phone`,
-              resumeData?.basicDetails?.phone || '',
-              <span className="text-sm text-gray-700">{resumeData?.basicDetails?.phone || ''}</span>
-            )}
-            {getClickableLine(
-              `${prefix}.basicDetails.location`,
-              resumeData?.basicDetails?.location || '',
-              <span className="text-sm text-gray-700">{resumeData?.basicDetails?.location || ''}</span>
-            )}
-          </div>
+          {/* Dynamically render all sections */}
+          {resumeData && Object.keys(resumeData).map((sectionKey, sectionIndex) => {
+            const sectionItems = resumeData[sectionKey] || [];
 
-          {/* Professional Summary */}
-          <div className="mb-6 space-y-2">
-            <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '14pt',
-              fontWeight: 'bold',
-              borderBottom: '1px solid #333',
-              paddingBottom: '2px'
-            }}>
-              PROFESSIONAL SUMMARY
-            </h2>
-            {getClickableLine(
-              `${prefix}.professionalSummary`,
-              resumeData?.professionalSummary || '',
-              <p className="text-gray-800 text-justify" style={{
-                fontFamily: 'Times New Roman, serif',
-                fontSize: '12pt',
-                lineHeight: '1.15',
-                textAlign: 'justify'
-              }}>
-                {resumeData?.professionalSummary || ''}
-              </p>
-            )}
-          </div>
+            return (
+              <div key={sectionIndex} className="mb-6 space-y-2">
+                <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase flex items-center" style={{
+                  fontFamily: 'Times New Roman, serif',
+                  fontSize: '14pt',
+                  fontWeight: 'bold',
+                  borderBottom: '1px solid #333',
+                  paddingBottom: '2px'
+                }}>
+                  <span className="mr-2">{getSectionEmoji(sectionKey)}</span>
+                  {formatSectionTitle(sectionKey)}
+                </h2>
 
-          {/* Technical Skills */}
-          <div className="mb-6 space-y-2">
-            <h2 className="text-lg font-bold mb-2 text-gray-900 uppercase" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '14pt',
-              fontWeight: 'bold',
-              borderBottom: '1px solid #333',
-              paddingBottom: '2px'
-            }}>
-              TECHNICAL SKILLS
-            </h2>
-            <div className="space-y-1">
-              {(resumeData?.skills || []).map((skill, index) => (
-                <div key={index}>
-                  {getClickableLine(
-                    `${prefix}.skills.${index}`,
-                    skill,
-                    <span className="inline-block bg-gray-100 px-2 py-1 rounded text-sm mr-2 mb-1">{skill}</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Work Experience */}
-          <div className="mb-6 space-y-4">
-            <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '14pt',
-              fontWeight: 'bold',
-              borderBottom: '1px solid #333',
-              paddingBottom: '2px'
-            }}>
-              WORK EXPERIENCE
-            </h2>
-            {(resumeData?.workExperience || []).map((exp, index) => (
-              <div key={index} className="space-y-2">
-                {getClickableLine(
-                  `${prefix}.workExperience.${index}.position`,
-                  exp?.position || '',
-                  <h3 className="font-bold text-gray-900" style={{
-                    fontFamily: 'Times New Roman, serif',
-                    fontSize: '12pt',
-                    fontWeight: 'bold'
-                  }}>
-                    {exp?.position || ''}
-                  </h3>
-                )}
-                {getClickableLine(
-                  `${prefix}.workExperience.${index}.company`,
-                  exp?.company || '',
-                  <div className="text-gray-800 italic" style={{
-                    fontFamily: 'Times New Roman, serif',
-                    fontSize: '12pt',
-                    fontStyle: 'italic'
-                  }}>
-                    {exp?.company || ''}
-                  </div>
-                )}
-                {getClickableLine(
-                  `${prefix}.workExperience.${index}.duration`,
-                  exp?.duration || '',
-                  <span className="text-gray-700" style={{
-                    fontFamily: 'Times New Roman, serif',
-                    fontSize: '12pt'
-                  }}>
-                    {exp?.duration || ''}
-                  </span>
-                )}
-                <div className="ml-4 space-y-1">
-                  {(exp?.responsibilities || []).map((resp, respIndex) => (
-                    <div key={respIndex}>
+                <div className="space-y-2">
+                  {sectionItems.map((item, itemIndex) => (
+                    <div key={itemIndex}>
                       {getClickableLine(
-                        `${prefix}.workExperience.${index}.responsibilities.${respIndex}`,
-                        resp,
-                        <li className="text-gray-800" style={{
+                        item.key,
+                        item.content,
+                        <div className="text-gray-800" style={{
                           fontFamily: 'Times New Roman, serif',
                           fontSize: '12pt',
-                          lineHeight: '1.15',
-                          listStyleType: 'disc'
+                          lineHeight: '1.15'
                         }}>
-                          {resp}
-                        </li>
+                          {/* Handle special formatting for certain sections */}
+                          {sectionKey === 'Contact Information' && item.content.includes('@') ? (
+                            <span className="text-blue-600 underline">{item.content}</span>
+                          ) : sectionKey === 'Technical Skills' && item.content.includes(':') ? (
+                            <div>
+                              <span className="font-semibold">{item.content.split(':')[0]}:</span>
+                              <span className="ml-1">{item.content.split(':')[1]}</span>
+                            </div>
+                          ) : sectionKey === 'Projects' && item.content.includes('|') ? (
+                            <div>
+                              <span className="font-semibold text-purple-700">{item.content.split('|')[0]}</span>
+                              <span className="text-gray-600 text-sm ml-2">| {item.content.split('|')[1]}</span>
+                            </div>
+                          ) : sectionKey === 'Education' && item.content.includes('CGPA') ? (
+                            <div className="bg-blue-50 p-2 rounded border-l-4 border-blue-400">
+                              {item.content}
+                            </div>
+                          ) : sectionKey === 'Achievements' ? (
+                            <div className="flex items-center">
+                              <span className="text-yellow-500 mr-2">🏆</span>
+                              {item.content}
+                            </div>
+                          ) : sectionKey === 'Certifications' ? (
+                            <div className="flex items-center">
+                              <span className="text-green-500 mr-2">✓</span>
+                              {item.content}
+                            </div>
+                          ) : (
+                            item.content
+                          )}
+                        </div>
                       )}
                     </div>
                   ))}
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Projects */}
-          <div className="mb-6 space-y-4">
-            <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{
-              fontFamily: 'Times New Roman, serif',
-              fontSize: '14pt',
-              fontWeight: 'bold',
-              borderBottom: '1px solid #333',
-              paddingBottom: '2px'
-            }}>
-              PROJECTS
-            </h2>
-            {(resumeData?.projects || []).map((project, index) => (
-              <div key={index} className="space-y-2">
-                {getClickableLine(
-                  `${prefix}.projects.${index}.name`,
-                  project?.name || '',
-                  <h3 className="font-bold text-gray-900" style={{
-                    fontFamily: 'Times New Roman, serif',
-                    fontSize: '12pt',
-                    fontWeight: 'bold'
-                  }}>
-                    {project?.name || ''}
-                  </h3>
-                )}
-                {getClickableLine(
-                  `${prefix}.projects.${index}.description`,
-                  project?.description || '',
-                  <p className="text-gray-800" style={{
-                    fontFamily: 'Times New Roman, serif',
-                    fontSize: '12pt',
-                    lineHeight: '1.15'
-                  }}>
-                    {project?.description || ''}
-                  </p>
-                )}
-                <div className="space-y-1">
-                  <span className="font-medium text-gray-700">Technologies: </span>
-                  {(project?.technologies || []).map((tech, techIndex) => (
-                    <div key={techIndex} className="inline-block">
-                      {getClickableLine(
-                        `${prefix}.projects.${index}.technologies.${techIndex}`,
-                        tech,
-                        <span className="inline-block bg-blue-100 px-2 py-1 rounded text-sm mr-2 mb-1">{tech}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+            );
+          })}
 
           {/* Footer */}
           <div className="mt-8 pt-4 border-t border-gray-200 text-right">
@@ -911,58 +468,21 @@ Powered by iQua.ai
 
     // Generate markdown content from resume data
     const generateResumeHTML = (data) => {
-      // Safely access basic details with fallbacks
-      const name = data?.basicDetails?.name || 'Your Name';
-      const email = data?.basicDetails?.email || 'your.email@example.com';
-      const phone = data?.basicDetails?.phone || '+1 (555) 123-4567';
-      const location = data?.basicDetails?.location || 'Your Location';
-      const summary = data?.professionalSummary || 'Professional summary will appear here';
-      const skills = data?.skills || [];
-      const workExperience = data?.workExperience || [];
-      const projects = data?.projects || [];
+      let content = '# Dynamic Resume\n\n';
 
-      return `# ${name}
+      // Dynamically generate content from all sections
+      Object.keys(data).forEach(sectionKey => {
+        content += `## ${sectionKey.toUpperCase()}\n\n`;
 
-**${email}** | **${phone}** | **${location}**
+        const sectionItems = data[sectionKey] || [];
+        sectionItems.forEach(item => {
+          content += `- ${item.content} *(${item.source})*\n`;
+        });
+        content += '\n';
+      });
 
----
-
-## PROFESSIONAL SUMMARY
-
-${summary}
-
----
-
-## TECHNICAL SKILLS
-
-${skills.map(skill => `- ${skill}`).join('\n')}
-
----
-
-## WORK EXPERIENCE
-
-${workExperience.map(exp => `
-### ${exp?.position || 'Position Title'}
-**${exp?.company || 'Company Name'}** | *${exp?.duration || 'Duration'}*
-
-${exp?.responsibilities?.map(resp => `- ${resp}`).join('\n') || ''}
-`).join('\n')}
-
----
-
-## PROJECTS
-
-${projects.map(project => `
-### ${project?.name || 'Project Name'}
-${project?.description || 'Project description'}
-
-**Technologies:** ${project?.technologies?.join(', ') || 'Technologies used'}
-`).join('\n')}
-
----
-
-*Powered by iQua.ai*
-      `;
+      content += '\n---\n\n*Powered by iQua.ai*';
+      return content;
     };
 
     // Parse HTML back to resume data (simplified)
@@ -1143,8 +663,8 @@ ${project?.description || 'Project description'}
                 <h4 className="text-lg font-semibold text-gray-800 mb-2">Final Resume</h4>
                 <p className="text-sm text-gray-600">Live preview & edit</p>
               </div>
-              {finalResume && <FinalResumePreview resumeData={finalResume} />}
-              {!finalResume && (
+              {finalResume && Object.keys(finalResume).length > 0 && <FinalResumePreview resumeData={finalResume} />}
+              {(!finalResume || Object.keys(finalResume).length === 0) && (
                 <div className="bg-white rounded-lg p-8 text-center text-gray-500">
                   <div className="mb-4">📄</div>
                   <p>Select content from either version to build your resume</p>
@@ -1163,7 +683,7 @@ ${project?.description || 'Project description'}
             <div className="flex space-x-3">
               <button
                 onClick={() => downloadResume('PDF')}
-                disabled={!finalResume}
+                disabled={!finalResume || Object.keys(finalResume).length === 0}
                 className="bg-red-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-600 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>📄</span>
@@ -1171,7 +691,7 @@ ${project?.description || 'Project description'}
               </button>
               <button
                 onClick={() => downloadResume('DOC')}
-                disabled={!finalResume}
+                disabled={!finalResume || Object.keys(finalResume).length === 0}
                 className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>📃</span>

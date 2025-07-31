@@ -160,7 +160,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   // If no parsed data is available, show error state
   if (!originalResume && !dynamicEnhancedResume) {
     return (
-      <div 
+      <div
         className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
         onClick={handleOutsideClick}
       >
@@ -271,35 +271,290 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const downloadResume = (format) => {
     if (!finalResume) return;
 
-    // Generate content from finalResume object with proper formatting
+    // Generate content that matches the Final Resume Preview layout
     let resumeContent = '';
 
-    // Dynamically build resume content from all sections
-    Object.keys(finalResume).forEach(sectionKey => {
-      resumeContent += `\n${sectionKey.toUpperCase()}\n`;
-      resumeContent += '='.repeat(sectionKey.length) + '\n';
+    // Add header styling
+    resumeContent += 'DYNAMIC RESUME\n';
+    resumeContent += '='.repeat(50) + '\n\n';
 
+    // Dynamically build resume content from all sections with proper formatting
+    Object.keys(finalResume).forEach(sectionKey => {
       const sectionItems = finalResume[sectionKey] || [];
-      sectionItems.forEach(item => {
-        resumeContent += `• ${item.content}\n`;
-      });
-      resumeContent += '\n';
+
+      if (sectionItems.length > 0) {
+        // Add section header with proper formatting
+        resumeContent += `${sectionKey.toUpperCase()}\n`;
+        resumeContent += '-'.repeat(sectionKey.length) + '\n\n';
+
+        // Add section items with proper bullet points
+        sectionItems.forEach(item => {
+          if (shouldHaveBulletPoints(sectionKey)) {
+            resumeContent += `• ${item.content}\n`;
+          } else {
+            resumeContent += `${item.content}\n`;
+          }
+        });
+
+        resumeContent += '\n';
+      }
     });
 
-    resumeContent += '\nPowered by iQua.ai';
+    // Add footer
+    resumeContent += '\n' + '='.repeat(50) + '\n';
+    resumeContent += 'Powered by iQua.ai\n';
 
-    // Create and download file
-    const blob = new Blob([resumeContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `resume_dynamic.${format.toLowerCase()}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    if (format === 'PDF') {
+      // For PDF, we'll create a more structured HTML document
+      const htmlContent = generatePDFHTML(finalResume);
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'resume_dynamic.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } else {
+      // For DOC format, create a properly formatted text file
+      const blob = new Blob([resumeContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'resume_dynamic.doc';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
 
     console.log(`Downloading resume as ${format}`);
+  };
+
+  // Function to generate HTML for PDF download
+  const generatePDFHTML = (resumeData) => {
+    let html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Dynamic Resume</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            line-height: 1.15;
+            margin: 1in;
+            color: #333;
+            background: white;
+        }
+        .header {
+            text-align: center;
+            font-size: 18pt;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 14pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .section-content {
+            margin-left: 20px;
+        }
+        .bullet-item {
+            margin-bottom: 5px;
+            text-indent: -20px;
+            padding-left: 20px;
+        }
+        .bullet-point {
+            color: #666;
+            margin-right: 8px;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 9pt;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+        .contact-info {
+            font-weight: normal;
+        }
+        .contact-info a {
+            color: #0066cc;
+            text-decoration: underline;
+        }
+        .education-item {
+            background-color: #f0f8ff;
+            padding: 8px;
+            border-left: 4px solid #0066cc;
+            margin-bottom: 8px;
+        }
+        .achievement-item {
+            display: flex;
+            align-items: center;
+        }
+        .achievement-icon {
+            color: #ffd700;
+            margin-right: 8px;
+        }
+        .certification-item {
+            display: flex;
+            align-items: center;
+        }
+        .certification-icon {
+            color: #28a745;
+            margin-right: 8px;
+        }
+        .skills-item {
+            display: flex;
+            align-items: flex-start;
+        }
+        .skills-bullet {
+            color: #666;
+            margin-right: 8px;
+            margin-top: 2px;
+        }
+        .summary-item {
+            display: flex;
+            align-items: flex-start;
+        }
+        .summary-bullet {
+            color: #666;
+            margin-right: 8px;
+            margin-top: 2px;
+        }
+        .work-experience-item {
+            display: flex;
+            align-items: flex-start;
+        }
+        .work-experience-bullet {
+            color: #666;
+            margin-right: 8px;
+            margin-top: 2px;
+        }
+        .projects-item {
+            display: flex;
+            align-items: flex-start;
+        }
+        .projects-bullet {
+            color: #666;
+            margin-right: 8px;
+            margin-top: 2px;
+        }
+        .top-skills-item {
+            display: flex;
+            align-items: flex-start;
+        }
+        .top-skills-bullet {
+            color: #666;
+            margin-right: 8px;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">DYNAMIC RESUME</div>
+`;
+
+    // Dynamically generate content from all sections
+    Object.keys(resumeData).forEach(sectionKey => {
+      const sectionItems = resumeData[sectionKey] || [];
+
+      if (sectionItems.length > 0) {
+        html += `<div class="section">\n`;
+        html += `    <div class="section-title">${sectionKey.toUpperCase()}</div>\n`;
+        html += `    <div class="section-content">\n`;
+
+        sectionItems.forEach(item => {
+          if (sectionKey.toLowerCase() === 'contact information') {
+            // Contact information without bullets
+            html += `        <div class="contact-info">${item.content}</div>\n`;
+          } else if (sectionKey.toLowerCase() === 'education' && item.content.includes('CGPA')) {
+            // Special education formatting with blue background
+            html += `        <div class="education-item">${item.content}</div>\n`;
+          } else if (sectionKey.toLowerCase() === 'education') {
+            // Regular education items with bullet points
+            html += `        <div class="education-item">\n`;
+            html += `            <span class="bullet-point">•</span>\n`;
+            html += `            <span>${item.content}</span>\n`;
+            html += `        </div>\n`;
+          } else if (sectionKey.toLowerCase() === 'achievements') {
+            // Achievements with trophy icon
+            html += `        <div class="achievement-item">\n`;
+            html += `            <span class="achievement-icon">🏆</span>\n`;
+            html += `            <span>${item.content}</span>\n`;
+            html += `        </div>\n`;
+          } else if (sectionKey.toLowerCase() === 'certifications') {
+            // Certifications with checkmark icon
+            html += `        <div class="certification-item">\n`;
+            html += `            <span class="certification-icon">✓</span>\n`;
+            html += `            <span>${item.content}</span>\n`;
+            html += `        </div>\n`;
+          } else if (shouldHaveBulletPoints(sectionKey)) {
+            // Sections with bullet points
+            const bulletClass = sectionKey.toLowerCase().replace(/\s+/g, '-') + '-item';
+            const bulletIconClass = sectionKey.toLowerCase().replace(/\s+/g, '-') + '-bullet';
+
+            html += `        <div class="${bulletClass}">\n`;
+            html += `            <span class="${bulletIconClass}">•</span>\n`;
+            html += `            <span>${item.content}</span>\n`;
+            html += `        </div>\n`;
+          } else {
+            // Regular content without bullets
+            html += `        <div>${item.content}</div>\n`;
+          }
+        });
+
+        html += `    </div>\n`;
+        html += `</div>\n`;
+      }
+    });
+
+    html += `
+    <div class="footer">
+        Powered by iQua.ai
+    </div>
+</body>
+</html>`;
+
+    return html;
+  };
+
+  // Function to check if a section should have bullet points
+  const shouldHaveBulletPoints = (sectionKey) => {
+    const bulletPointSections = [
+      'top_skills', 'certifications', 'summary', 'work_experience',
+      'education', 'skills', 'projects', 'achievements'
+    ];
+    return bulletPointSections.includes(sectionKey.toLowerCase());
+  };
+
+  // Function to format content with bullet points
+  const formatContentWithBullets = (content, sectionKey) => {
+    if (!shouldHaveBulletPoints(sectionKey)) {
+      return content;
+    }
+
+    // If content already contains bullet points, return as is
+    if (content.includes('•') || content.includes('-')) {
+      return content;
+    }
+
+    // Add bullet point to the content
+    return `• ${content}`;
   };
 
   // Interactive Word Document Component with dynamic section rendering
@@ -316,9 +571,8 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
             className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
           />
           <div
-            className={`flex-1 cursor-pointer transition-all duration-200 rounded p-1 ${
-              isSelected ? 'bg-green-100 border-green-300 border' : 'hover:bg-blue-50 border border-transparent'
-            }`}
+            className={`flex-1 cursor-pointer transition-all duration-200 rounded p-1 ${isSelected ? 'bg-green-100 border-green-300 border' : 'hover:bg-blue-50 border border-transparent'
+              }`}
             onClick={() => handleSelection(key, !isSelected)}
           >
             {displayContent || (
@@ -411,24 +665,54 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                               <span className="font-semibold">{item.content.split(':')[0]}:</span>
                               <span className="ml-1">{item.content.split(':')[1]}</span>
                             </div>
+                          ) : sectionKey === 'Skills' ? (
+                            <div className="flex items-start">
+                              <span className="text-gray-600 mr-2 mt-0.5">•</span>
+                              <span>{item.content}</span>
+                            </div>
+                          ) : sectionKey === 'Summary' ? (
+                            <div className="flex items-start">
+                              <span className="text-gray-600 mr-2 mt-0.5">•</span>
+                              <span>{item.content}</span>
+                            </div>
+                          ) : sectionKey === 'Top Skills' ? (
+                            <div className="flex items-start">
+                              <span className="text-gray-600 mr-2 mt-0.5">•</span>
+                              <span>{item.content}</span>
+                            </div>
                           ) : sectionKey === 'Projects' && item.content.includes('|') ? (
                             <div>
                               <span className="font-semibold text-purple-700">{item.content.split('|')[0]}</span>
                               <span className="text-gray-600 text-sm ml-2">| {item.content.split('|')[1]}</span>
                             </div>
+                          ) : sectionKey === 'Projects' ? (
+                            <div className="flex items-start">
+                              <span className="text-gray-600 mr-2 mt-0.5">•</span>
+                              <span>{item.content}</span>
+                            </div>
                           ) : sectionKey === 'Education' && item.content.includes('CGPA') ? (
                             <div className="bg-blue-50 p-2 rounded border-l-4 border-blue-400">
-                              {item.content}
+                              {shouldHaveBulletPoints(sectionKey) ? formatContentWithBullets(item.content, sectionKey) : item.content}
                             </div>
                           ) : sectionKey === 'Achievements' ? (
                             <div className="flex items-center">
                               <span className="text-yellow-500 mr-2">🏆</span>
-                              {item.content}
+                              {formatContentWithBullets(item.content, sectionKey)}
                             </div>
                           ) : sectionKey === 'Certifications' ? (
                             <div className="flex items-center">
                               <span className="text-green-500 mr-2">✓</span>
-                              {item.content}
+                              {formatContentWithBullets(item.content, sectionKey)}
+                            </div>
+                          ) : sectionKey === 'Work Experience' ? (
+                            <div className="flex items-start">
+                              <span className="text-gray-600 mr-2 mt-0.5">•</span>
+                              <span>{item.content}</span>
+                            </div>
+                          ) : shouldHaveBulletPoints(sectionKey) ? (
+                            <div className="flex items-start">
+                              <span className="text-gray-600 mr-2 mt-0.5">•</span>
+                              <span>{item.content}</span>
                             </div>
                           ) : (
                             item.content
@@ -486,7 +770,25 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
         const sectionItems = data[sectionKey] || [];
         sectionItems.forEach(item => {
-          content += `- ${item.content} *(${item.source})*\n`;
+          if (sectionKey.toLowerCase() === 'contact information') {
+            // Contact information without bullets
+            content += `${item.content} *(${item.source})*\n`;
+          } else if (sectionKey.toLowerCase() === 'education' && item.content.includes('CGPA')) {
+            // Special education formatting
+            content += `> **${item.content}** *(${item.source})*\n`;
+          } else if (sectionKey.toLowerCase() === 'achievements') {
+            // Achievements with trophy icon
+            content += `🏆 ${item.content} *(${item.source})*\n`;
+          } else if (sectionKey.toLowerCase() === 'certifications') {
+            // Certifications with checkmark icon
+            content += `✓ ${item.content} *(${item.source})*\n`;
+          } else if (shouldHaveBulletPoints(sectionKey)) {
+            // Sections with bullet points
+            content += `• ${item.content} *(${item.source})*\n`;
+          } else {
+            // Regular content without bullets
+            content += `${item.content} *(${item.source})*\n`;
+          }
         });
         content += '\n';
       });
@@ -534,11 +836,10 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           <div className="ml-auto flex items-center space-x-2">
             <button
               onClick={toggleEditMode}
-              className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
-                isRichTextMode 
-                  ? 'bg-green-500 text-white hover:bg-green-600' 
-                  : 'bg-blue-500 text-white hover:bg-blue-600'
-              }`}
+              className={`px-3 py-1 rounded text-xs font-medium transition-colors ${isRichTextMode
+                ? 'bg-green-500 text-white hover:bg-green-600'
+                : 'bg-blue-500 text-white hover:bg-blue-600'
+                }`}
             >
               {isRichTextMode ? '💾 Save & Exit' : '✏️ Rich Edit'}
             </button>
@@ -570,8 +871,8 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           ) : (
             // Preview Mode with structured layout
             <div className="p-8 space-y-4" style={{ minHeight: '600px' }}>
-              <MDEditor.Markdown 
-                source={richTextContent} 
+              <MDEditor.Markdown
+                source={richTextContent}
                 style={{
                   fontFamily: 'Times New Roman, serif',
                   fontSize: '12pt',
@@ -603,7 +904,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
       onClick={handleOutsideClick}
     >
@@ -638,8 +939,8 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                   <span>{areAllSelectedForResumeType('original') ? 'Clear Selection' : 'Use All Original'}</span>
                 </button>
               </div>
-              <InteractiveWordDocument 
-                resumeData={originalResume} 
+              <InteractiveWordDocument
+                resumeData={originalResume}
                 title="Original_Resume.docx"
                 isOriginal={true}
                 prefix="original"
@@ -659,8 +960,8 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                   <span>{areAllSelectedForResumeType('enhanced') ? 'Clear Selection' : 'Use All Enhanced'}</span>
                 </button>
               </div>
-              <InteractiveWordDocument 
-                resumeData={dynamicEnhancedResume} 
+              <InteractiveWordDocument
+                resumeData={dynamicEnhancedResume}
                 title="Enhanced_Resume.docx"
                 isOriginal={false}
                 prefix="enhanced"

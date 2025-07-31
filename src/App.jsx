@@ -24,6 +24,7 @@ function App() {
     currentPage,
     setCurrentPage,
     hasAttendedInterview,
+    isCheckingInterviewStatus,
     showProfileModal,
     setShowProfileModal,
     userProfile,
@@ -42,7 +43,11 @@ function App() {
     showPreview,
     setShowPreview,
     showSuccessToast,
-    setShowSuccessToast
+    setShowSuccessToast,
+    successTitle,
+    setSuccessTitle,
+    successMessage,
+    setSuccessMessage
   } = useResumeLogic();
 
   // Check authentication status on component mount
@@ -78,7 +83,7 @@ function App() {
         <div className="flex-1">
           {currentPage === 'dashboard' && (
             <>
-              <Header 
+              <Header
                 showResumeChat={showResumeChat}
                 setShowResumeChat={setShowResumeChat}
                 currentPage={currentPage}
@@ -91,21 +96,21 @@ function App() {
 
           {currentPage === 'interview' && (
             <>
-              <Header 
+              <Header
                 showResumeChat={showResumeChat}
                 setShowResumeChat={setShowResumeChat}
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
                 onLogout={handleLogout}
               />
-              <InterviewPage 
+              <InterviewPage
                 setCurrentPage={setCurrentPage}
               />
             </>
           )}
 
           {currentPage === 'profile' && (
-            <Profile 
+            <Profile
               setCurrentPage={setCurrentPage}
               showResumeChat={showResumeChat}
               setShowResumeChat={setShowResumeChat}
@@ -115,10 +120,11 @@ function App() {
         </div>
 
         {/* Resume Enhancer Chat Overlay */}
-        <ResumeChat 
+        <ResumeChat
           showResumeChat={showResumeChat}
           setShowResumeChat={setShowResumeChat}
           hasAttendedInterview={hasAttendedInterview}
+          isCheckingInterviewStatus={isCheckingInterviewStatus}
           handleCreateResumeClick={handleCreateResumeClick}
           showRoleSelection={showRoleSelection}
           setShowRoleSelection={setShowRoleSelection}
@@ -140,7 +146,7 @@ function App() {
         />
 
         {/* Profile Completion Modal */}
-        <ProfileCompletionModal 
+        <ProfileCompletionModal
           showProfileModal={showProfileModal}
           setShowProfileModal={setShowProfileModal}
           userProfile={userProfile}
@@ -158,22 +164,24 @@ function App() {
         />
 
         {/* Interview Requirement Modal */}
-        <InterviewRequirementModal 
+        <InterviewRequirementModal
           showInterviewModal={showInterviewModal}
           setShowInterviewModal={setShowInterviewModal}
           navigateToInterview={navigateToInterview}
         />
 
         {/* Loading Modal */}
-        <LoadingModal 
+        <LoadingModal
           isVisible={isLoading}
           message="iQua AI is generating your resume. This may take a few moments while we tailor your resume to your most relevant job role and skills."
         />
 
         {/* Success Toast */}
-        <SuccessToast 
+        <SuccessToast
           showSuccessToast={showSuccessToast}
           setShowSuccessToast={setShowSuccessToast}
+          title={successTitle}
+          message={successMessage}
         />
       </div>
     </div>

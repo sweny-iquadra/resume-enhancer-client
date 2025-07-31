@@ -23,11 +23,12 @@ export const useResumeLogic = () => {
     const checkInterviewStatusFromAPI = async () => {
       try {
         setIsCheckingInterviewStatus(true);
-        const student_id = 1; // Using student_id = 1 as requested
-        const response = await checkInterviewStatus(student_id);
+        // const student_id = 1; // Using student_id = 1 as requested
+        // const response = await checkInterviewStatus(student_id);
 
         // Update hasAttendedInterview based on API response
-        setHasAttendedInterview(response.interview_attended || false);
+        // setHasAttendedInterview(response.interview_attended || false);
+        setHasAttendedInterview(true);
       } catch (error) {
         console.error('Error checking interview status:', error);
         // Fallback to false if API fails

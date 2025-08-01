@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { createUserProfile, checkProfileCompletion, getCompletedInterviewsCount, getUniqueJobRoles } from '../utils/userProfile';
 import { fetchAndStructureResumeData, checkInterviewStatus } from '../utils/api';
@@ -17,6 +16,7 @@ export const useResumeLogic = () => {
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [hasAttendedInterview, setHasAttendedInterview] = useState(false);
   const [isCheckingInterviewStatus, setIsCheckingInterviewStatus] = useState(true);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
   // Check interview status from API on component mount
   useEffect(() => {
@@ -119,6 +119,10 @@ export const useResumeLogic = () => {
     setShowResumeChat(false);
   };
 
+  const isProfileComplete = checkProfileCompletion(userProfile);
+  const completedInterviewsCount = getCompletedInterviewsCount(userProfile);
+  const uniqueJobRoles = getUniqueJobRoles(userProfile);
+
   return {
     showResumeChat,
     setShowResumeChat,
@@ -126,19 +130,14 @@ export const useResumeLogic = () => {
     setShowInterviewModal,
     currentPage,
     setCurrentPage,
-    hasAttendedInterview,
-    isCheckingInterviewStatus,
+    userProfile,
+    isLoadingProfile,
     showProfileModal,
     setShowProfileModal,
-    userProfile,
-    handleCreateResumeClick,
-    navigateToInterview,
     selectedRole,
     setSelectedRole,
     showRoleSelection,
     setShowRoleSelection,
-    handleRoleSelection,
-    uniqueRoles,
     isLoading,
     setIsLoading,
     enhancedResumeData,
@@ -146,6 +145,11 @@ export const useResumeLogic = () => {
     showPreview,
     setShowPreview,
     showSuccessToast,
-    setShowSuccessToast
+    setShowSuccessToast,
+    isProfileComplete,
+    completedInterviewsCount,
+    uniqueJobRoles,
+    hasAttendedInterview,
+    isCheckingInterviewStatus
   };
 };

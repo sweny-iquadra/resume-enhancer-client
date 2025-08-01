@@ -5,12 +5,12 @@ import SuccessToast from './modals/SuccessToast';
 import ErrorToast from './modals/ErrorToast';
 import DeleteConfirmationModal from './modals/DeleteConfirmationModal';
 
-const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }) => {
+const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout, userProfile }) => {
   const [activeTab, setActiveTab] = useState('Active Interview');
-  const [professionalSummary, setProfessionalSummary] = useState('');
+  const [professionalSummary, setProfessionalSummary] = useState(userProfile?.professionalSummary || '');
   const [isEditingProfessionalSummary, setIsEditingProfessionalSummary] = useState(false);
   const [tempProfessionalSummary, setTempProfessionalSummary] = useState('');
-  const [skills, setSkills] = useState(['Angular', '3D-Printing']);
+  const [skills, setSkills] = useState(userProfile?.skills || ['Angular', '3D-Printing']);
   const [isEditingSkills, setIsEditingSkills] = useState(false);
   const [isAddingSkill, setIsAddingSkill] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState('');
@@ -62,10 +62,10 @@ const Profile = ({ setCurrentPage, showResumeChat, setShowResumeChat, onLogout }
   const tabs = ['Active Interview', 'Education', 'Certificates'];
 
   const profileData = {
-    name: 'John Smith',
-    email: 'john.smith@email.com',
-    phone: '+1 (555) 123-4567',
-    linkedin: 'john-smith-developer'
+    name: userProfile?.name || 'John Smith',
+    email: userProfile?.email || 'john.smith@email.com',
+    phone: userProfile?.phone || '+1 (555) 123-4567',
+    linkedin: userProfile?.linkedin || 'john-smith-developer'
   };
 
   const handleSaveSkill = () => {

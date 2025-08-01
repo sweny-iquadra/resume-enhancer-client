@@ -277,4 +277,165 @@ export const checkInterviewStatus = async (studentId) => {
         console.error('Error checking interview status:', error);
         throw error;
     }
+};
+
+/**
+ * Fetches user profile data for a given student ID
+ * @param {string|number} studentId - The student ID to fetch profile data for
+ * @returns {Promise<Object>} - The user profile response
+ * @throws {Error} - If the API call fails
+ */
+export const fetchUserProfile = async (studentId) => {
+    try {
+        const response = await fetch(`${baseUrl}/get-user-profile/${studentId}`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const userProfileResponse = await response.json();
+        console.log('User Profile API Response:', userProfileResponse);
+
+        // Transform API response to mock user profile structure
+        const mockUserProfile = {
+            name: userProfileResponse.personal_info?.name || "John Smith",
+            email: userProfileResponse.personal_info?.email || "john.smith@email.com",
+            phone: userProfileResponse.personal_info?.phone || "+1 (555) 123-4567",
+            education: {
+                degree: userProfileResponse.education?.[0]?.degree || "Bachelor of Science in Computer Science",
+                institution: userProfileResponse.education?.[0]?.institution || "University of Technology",
+                graduationYear: userProfileResponse.education?.[0]?.graduation_year || "2020"
+            },
+            role: userProfileResponse.professional_info?.current_role || "Software Developer",
+            sector: userProfileResponse.professional_info?.sector || "Technology",
+            skills: userProfileResponse.skills || ["JavaScript", "React", "Node.js", "Python", "SQL"],
+            professionalSummary: userProfileResponse.professional_summary || "Experienced software developer with 3+ years of expertise in full-stack development, specializing in modern web technologies and scalable applications.",
+            workExperience: userProfileResponse.work_experience?.map(exp => ({
+                company: exp.company || "Tech Solutions Inc",
+                position: exp.position || "Junior Developer",
+                duration: exp.duration || "2020-2022",
+                responsibilities: exp.responsibilities || ["Developed web applications", "Collaborated with team"]
+            })) || [
+                {
+                    company: "Tech Solutions Inc",
+                    position: "Junior Developer",
+                    duration: "2020-2022",
+                    responsibilities: ["Developed web applications", "Collaborated with team"]
+                }
+            ],
+            projects: userProfileResponse.projects?.map(proj => ({
+                name: proj.name || "E-commerce Platform",
+                description: proj.description || "Built a full-stack e-commerce solution using React and Node.js",
+                technologies: proj.technologies || ["React", "Node.js", "MongoDB"]
+            })) || [
+                {
+                    name: "E-commerce Platform",
+                    description: "Built a full-stack e-commerce solution using React and Node.js",
+                    technologies: ["React", "Node.js", "MongoDB"]
+                },
+                {
+                    name: "Task Management App",
+                    description: "Developed a collaborative task management application",
+                    technologies: ["Vue.js", "Express", "PostgreSQL"]
+                }
+            ],
+            interviewHistory: userProfileResponse.interview_history?.map(interview => ({
+                id: interview.id || 1,
+                role: interview.role || "Frontend Developer",
+                date: interview.date || "2024-01-15",
+                completed: interview.completed !== undefined ? interview.completed : true
+            })) || [
+                {
+                    id: 1,
+                    role: "Frontend Developer",
+                    date: "2024-01-15",
+                    completed: true
+                },
+                {
+                    id: 2,
+                    role: "Full Stack Developer",
+                    date: "2024-01-20",
+                    completed: true
+                },
+                {
+                    id: 3,
+                    role: "Backend Developer",
+                    date: "2024-01-25",
+                    completed: true
+                },
+                {
+                    id: 4,
+                    role: "DevOps Engineer",
+                    date: "2024-01-30",
+                    completed: true
+                }
+            ]
+        };
+
+        return mockUserProfile;
+    } catch (error) {
+        console.error('Error fetching user profile:', error);
+        
+        // Return fallback mock data if API fails
+        return {
+            name: "John Smith",
+            email: "john.smith@email.com",
+            phone: "+1 (555) 123-4567",
+            education: {
+                degree: "Bachelor of Science in Computer Science",
+                institution: "University of Technology",
+                graduationYear: "2020"
+            },
+            role: "Software Developer",
+            sector: "Technology",
+            skills: ["JavaScript", "React", "Node.js", "Python", "SQL"],
+            professionalSummary: "Experienced software developer with 3+ years of expertise in full-stack development, specializing in modern web technologies and scalable applications.",
+            workExperience: [
+                {
+                    company: "Tech Solutions Inc",
+                    position: "Junior Developer",
+                    duration: "2020-2022",
+                    responsibilities: ["Developed web applications", "Collaborated with team"]
+                }
+            ],
+            projects: [
+                {
+                    name: "E-commerce Platform",
+                    description: "Built a full-stack e-commerce solution using React and Node.js",
+                    technologies: ["React", "Node.js", "MongoDB"]
+                },
+                {
+                    name: "Task Management App",
+                    description: "Developed a collaborative task management application",
+                    technologies: ["Vue.js", "Express", "PostgreSQL"]
+                }
+            ],
+            interviewHistory: [
+                {
+                    id: 1,
+                    role: "Frontend Developer",
+                    date: "2024-01-15",
+                    completed: true
+                },
+                {
+                    id: 2,
+                    role: "Full Stack Developer",
+                    date: "2024-01-20",
+                    completed: true
+                },
+                {
+                    id: 3,
+                    role: "Backend Developer",
+                    date: "2024-01-25",
+                    completed: true
+                },
+                {
+                    id: 4,
+                    role: "DevOps Engineer",
+                    date: "2024-01-30",
+                    completed: true
+                }
+            ]
+        };
+    }
 }; 

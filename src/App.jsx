@@ -44,7 +44,9 @@ function App() {
     uniqueJobRoles,
     hasAttendedInterview,
     isCheckingInterviewStatus,
-    handleCreateResumeClick
+    handleCreateResumeClick,
+    handleRoleSelection,
+    navigateToInterview
   } = useResumeLogic();
 
   // Check authentication status on component mount

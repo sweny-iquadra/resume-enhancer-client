@@ -151,6 +151,8 @@ export const useResumeLogic = () => {
     uniqueJobRoles,
     hasAttendedInterview,
     isCheckingInterviewStatus,
-    handleCreateResumeClick
+    handleCreateResumeClick,
+    handleRoleSelection,
+    navigateToInterview
   };
 };

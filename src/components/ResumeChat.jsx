@@ -118,13 +118,31 @@ const ResumeChat = ({
 
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent" ref={chatContentRef}>
-          <div className="p-6 space-y-6">
+          <div className="p-6 space-y-6 relative">
 
             {/* Welcome State */}
-            {!isLoading && !enhancedResumeData && !showRoleSelection && (
+            {!enhancedResumeData && !showRoleSelection && (
               <>
+                {/* Loading Overlay when generating */}
+                {isLoading && (
+                  <div className="absolute inset-0 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl flex items-center justify-center z-10">
+                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-8 text-center border border-indigo-100 shadow-lg">
+                      <div className="relative mb-6">
+                        <div className="animate-spin w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto"></div>
+                      </div>
+                      <h3 className="text-indigo-700 font-semibold text-lg mb-2">Creating Your Resume</h3>
+                      <p className="text-indigo-600 text-sm">Our AI is analyzing your profile and crafting the perfect resume...</p>
+                      <div className="flex justify-center space-x-1 mt-4">
+                        <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                        <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                        <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Status Overview */}
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100 relative">
                   <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
                     <span className="text-xl mr-2">📊</span>
                     Your Progress
@@ -178,7 +196,7 @@ const ResumeChat = ({
               </>
             )}
             {/* Loading State */}
-            {isLoading && (
+            {isLoading && !enhancedResumeData && !showRoleSelection && (
               <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-8 text-center border border-indigo-100">
                 <div className="relative mb-6">
                   <div className="animate-spin w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto"></div>
@@ -329,7 +347,7 @@ const ResumeChat = ({
         </div>
 
         {/* Action Footer */}
-        {!isLoading && !enhancedResumeData && !showRoleSelection && (
+        {!enhancedResumeData && !showRoleSelection && (
           <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
             {isCheckingInterviewStatus ? (
               <div className="flex items-center justify-center space-x-3 py-4">

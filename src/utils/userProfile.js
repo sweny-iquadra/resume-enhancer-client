@@ -12,7 +12,7 @@ export const createUserProfile = () => ({
   role: "Software Developer",
   sector: "Technology",
   skills: ["JavaScript", "React", "Node.js", "Python", "SQL"],
-  professionalSummary: "Experienced software developer with 3+ years of expertise in full-stack development, specializing in modern web technologies and scalable applications.",
+  professionalSummary: null, // Made null to test missing field
   workExperience: [
     {
       company: "Tech Solutions Inc",
@@ -21,18 +21,7 @@ export const createUserProfile = () => ({
       responsibilities: ["Developed web applications", "Collaborated with team"]
     }
   ],
-  projects: [
-    {
-      name: "E-commerce Platform",
-      description: "Built a full-stack e-commerce solution using React and Node.js",
-      technologies: ["React", "Node.js", "MongoDB"]
-    },
-    {
-      name: "Task Management App",
-      description: "Developed a collaborative task management application",
-      technologies: ["Vue.js", "Express", "PostgreSQL"]
-    }
-  ],
+  projects: null, // Made null to test missing field
   interviewHistory: [
     {
       id: 1,

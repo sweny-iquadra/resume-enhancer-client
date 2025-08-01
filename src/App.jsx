@@ -23,14 +23,19 @@ function App() {
     setShowInterviewModal,
     currentPage,
     setCurrentPage,
-    userProfile,
-    isLoadingProfile,
+    hasAttendedInterview,
+    isCheckingInterviewStatus,
     showProfileModal,
     setShowProfileModal,
+    userProfile,
+    handleCreateResumeClick,
+    navigateToInterview,
     selectedRole,
     setSelectedRole,
     showRoleSelection,
     setShowRoleSelection,
+    handleRoleSelection,
+    uniqueRoles,
     isLoading,
     setIsLoading,
     enhancedResumeData,
@@ -39,14 +44,10 @@ function App() {
     setShowPreview,
     showSuccessToast,
     setShowSuccessToast,
-    isProfileComplete,
-    completedInterviewsCount,
-    uniqueJobRoles,
-    hasAttendedInterview,
-    isCheckingInterviewStatus,
-    handleCreateResumeClick,
-    handleRoleSelection,
-    navigateToInterview
+    successTitle,
+    setSuccessTitle,
+    successMessage,
+    setSuccessMessage
   } = useResumeLogic();
 
   // Check authentication status on component mount
@@ -73,18 +74,6 @@ function App() {
   if (!isAuthenticated) {
     return <Login onLoginSuccess={handleLoginSuccess} />;
   }
-
-    // Show loading indicator while fetching user profile
-    if (isLoadingProfile) {
-      return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading user profile...</p>
-          </div>
-        </div>
-      );
-    }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -126,7 +115,6 @@ function App() {
               showResumeChat={showResumeChat}
               setShowResumeChat={setShowResumeChat}
               onLogout={handleLogout}
-              userProfile={userProfile}
             />
           )}
         </div>
@@ -140,7 +128,7 @@ function App() {
           handleCreateResumeClick={handleCreateResumeClick}
           showRoleSelection={showRoleSelection}
           setShowRoleSelection={setShowRoleSelection}
-          uniqueJobRoles={uniqueJobRoles}
+          uniqueRoles={uniqueRoles}
           handleRoleSelection={handleRoleSelection}
           isLoading={isLoading}
           enhancedResumeData={enhancedResumeData}
@@ -167,7 +155,7 @@ function App() {
           setEnhancedResumeData={setEnhancedResumeData}
           showRoleSelection={showRoleSelection}
           setShowRoleSelection={setShowRoleSelection}
-          uniqueJobRoles={uniqueJobRoles}
+          uniqueRoles={uniqueRoles}
           handleRoleSelection={handleRoleSelection}
           setShowSuccessToast={setShowSuccessToast}
           setShowPreview={setShowPreview}
@@ -192,8 +180,8 @@ function App() {
         <SuccessToast
           showSuccessToast={showSuccessToast}
           setShowSuccessToast={setShowSuccessToast}
-          title="Resume Enhanced Successfully! ✨"
-          message="Your resume has been enhanced with AI-powered improvements."
+          title={successTitle}
+          message={successMessage}
         />
       </div>
     </div>

@@ -39,20 +39,6 @@ const ResumeChat = ({
       }
     } else {
       console.log("⚠️ No Profile Summary data found in localStorage");
-      
-      // Add mock Profile Summary data for testing when enhanced resume data exists
-      if (enhancedResumeData) {
-        const mockProfileSummary = {
-          enhanced: [
-            "Experienced Software Developer with 3+ years of expertise in full-stack development, specializing in React, Node.js, and cloud technologies.",
-            "Proven track record of delivering scalable web applications and leading cross-functional teams to achieve project goals.",
-            "Strong problem-solving skills with experience in agile methodologies and modern development practices."
-          ]
-        };
-        console.log("🚀 Setting mock Profile Summary data:", mockProfileSummary);
-        localStorage.setItem("profileSummaryData", JSON.stringify(mockProfileSummary));
-        setProfileSummaryData(mockProfileSummary);
-      }
     }
   }, [enhancedResumeData]);
 

@@ -150,6 +150,7 @@ export const useResumeLogic = () => {
     completedInterviewsCount,
     uniqueJobRoles,
     hasAttendedInterview,
-    isCheckingInterviewStatus
+    isCheckingInterviewStatus,
+    handleCreateResumeClick
   };
 };

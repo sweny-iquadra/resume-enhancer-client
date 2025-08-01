@@ -43,7 +43,8 @@ function App() {
     completedInterviewsCount,
     uniqueJobRoles,
     hasAttendedInterview,
-    isCheckingInterviewStatus
+    isCheckingInterviewStatus,
+    handleCreateResumeClick
   } = useResumeLogic();
 
   // Check authentication status on component mount
@@ -189,8 +190,8 @@ function App() {
         <SuccessToast
           showSuccessToast={showSuccessToast}
           setShowSuccessToast={setShowSuccessToast}
-          title={successTitle}
-          message={successMessage}
+          title="Resume Enhanced Successfully! ✨"
+          message="Your resume has been enhanced with AI-powered improvements."
         />
       </div>
     </div>

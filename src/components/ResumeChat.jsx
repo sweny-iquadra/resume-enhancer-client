@@ -27,13 +27,18 @@ const ResumeChat = ({
   // Load Profile Summary data from localStorage
   useEffect(() => {
     const storedProfileSummary = localStorage.getItem("profileSummaryData");
+    console.log("🔍 Profile Summary from localStorage:", storedProfileSummary);
+    
     if (storedProfileSummary) {
       try {
         const parsed = JSON.parse(storedProfileSummary);
+        console.log("✅ Parsed Profile Summary data:", parsed);
         setProfileSummaryData(parsed);
       } catch (error) {
-        console.error("Error parsing stored profile summary data:", error);
+        console.error("❌ Error parsing stored profile summary data:", error);
       }
+    } else {
+      console.log("⚠️ No Profile Summary data found in localStorage");
     }
   }, [enhancedResumeData]);
 
@@ -265,6 +270,7 @@ const ResumeChat = ({
                 </div>
 
                 {/* Profile Summary - Before Preview Resume button */}
+                {console.log("🎯 Current profileSummaryData state:", profileSummaryData)}
                 {profileSummaryData &&
                   profileSummaryData.enhanced.length > 0 && (
                     <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-200 shadow-sm">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import MDEditor from '@uiw/react-md-editor';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, Footer, SectionType } from 'docx';
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -9,7 +9,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const [selections, setSelections] = useState({});
   const [finalResume, setFinalResume] = useState(null);
   const [parsedResumeData, setParsedResumeData] = useState(null);
-  const [latestEditedResume, setLatestEditedResume] = useState(null);
 
   // Define handleOutsideClick before any potential early returns
   const handleOutsideClick = (e) => {
@@ -115,6 +114,11 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
       // Process each section dynamically
       allSectionKeys.forEach(sectionKey => {
+        // Skip Profile Summary section - it will be handled separately
+        if (sectionKey === 'Profile Summary') {
+          return;
+        }
+
         const originalSection = originalResume?.[sectionKey] || [];
         const enhancedSection = dynamicEnhancedResume?.[sectionKey] || [];
         const selectedItems = [];
@@ -145,6 +149,12 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       });
 
       setFinalResume(final);
+
+      // Store Profile Summary data for ResumeChat
+      const profileSummaryData = {
+        enhanced: dynamicEnhancedResume?.['Profile Summary'] || dynamicEnhancedResume?.['Summary'] || []
+      };
+      localStorage.setItem('profileSummaryData', JSON.stringify(profileSummaryData));
     };
 
     // Only build if we have actual data and selections
@@ -156,6 +166,12 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     } else if (hasData && !hasSelections) {
       // Set empty final resume structure when no selections
       setFinalResume({});
+
+      // Still store Profile Summary data even when no selections
+      const profileSummaryData = {
+        enhanced: dynamicEnhancedResume?.['Profile Summary'] || dynamicEnhancedResume?.['Summary'] || []
+      };
+      localStorage.setItem('profileSummaryData', JSON.stringify(profileSummaryData));
     }
   }, [selections]);
 
@@ -273,14 +289,10 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     });
   };
 
-  // Callback function to handle resume updates from FinalResumePreview
-  const handleResumeUpdate = (updatedResumeData) => {
-    setLatestEditedResume(updatedResumeData);
-  };
-
   const downloadResume = async (format) => {
-    // Use the latest edited resume if available, otherwise use finalResume
-    const resumeToDownload = latestEditedResume || finalResume;
+    // Use finalResume for download
+    const resumeToDownload = finalResume;
+    console.log('Downloading resume with data:', resumeToDownload);
 
     if (!resumeToDownload) return;
 
@@ -311,9 +323,25 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       const contentWidth = pageWidth - (2 * margin);
       let yPosition = margin;
 
+      // Function to add watermark to each page
+      const addWatermark = () => {
+        pdf.setTextColor(200, 200, 200); // Light gray color
+        pdf.setFontSize(10);
+        pdf.setFont('times', 'italic');
+        const watermarkText = 'Powered by iQua.ai';
+        const watermarkWidth = pdf.getTextWidth(watermarkText);
+        const watermarkX = pageWidth - margin - watermarkWidth; // Bottom right
+        const watermarkY = pageHeight - margin;
+        pdf.text(watermarkText, watermarkX, watermarkY);
+        pdf.setTextColor(0, 0, 0); // Reset to black
+      };
+
       // Set default font
       pdf.setFont('times', 'normal');
       pdf.setFontSize(11);
+
+      // Add watermark to first page
+      addWatermark();
 
       // Function to add text with word wrapping
       const addTextWithWrap = (text, x, y, maxWidth, fontSize = 11, isBold = false, isTitle = false) => {
@@ -346,6 +374,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           // Check if we need a new page
           if (yPosition > pageHeight - 100) {
             pdf.addPage();
+            addWatermark(); // Add watermark to new page
             yPosition = margin;
           }
 
@@ -360,6 +389,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
               // Check if we need a new page
               if (yPosition > pageHeight - 50) {
                 pdf.addPage();
+                addWatermark(); // Add watermark to new page
                 yPosition = margin;
               }
 
@@ -374,14 +404,55 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
               // Check if we need a new page
               if (yPosition > pageHeight - 50) {
                 pdf.addPage();
+                addWatermark(); // Add watermark to new page
                 yPosition = margin;
               }
 
               let content = item.content;
               let xPos = margin;
 
-              // Add bullet points for appropriate sections
-              if (shouldHaveBulletPoints(sectionKey)) {
+              // Handle special formatting for different sections - exactly as shown in preview
+              const isTechnicalSkill = sectionKey === 'Technical Skills' && content.includes(':');
+              const isProject = sectionKey === 'Projects' && content.includes('|');
+              const isAchievement = sectionKey === 'Achievements';
+              const isCertification = sectionKey === 'Certifications';
+              const isSkills = sectionKey === 'Skills' || sectionKey === 'Summary' || sectionKey === 'Top Skills' || sectionKey === 'Work Experience';
+              const isProjectsWithoutPipe = sectionKey === 'Projects' && !content.includes('|');
+
+              if (isTechnicalSkill) {
+                // Technical Skills with bold labels - exactly as shown in preview
+                const [label, value] = content.split(':');
+                pdf.setFont('times', 'bold');
+                pdf.setFontSize(11);
+                const labelWidth = pdf.getTextWidth(`${label}:`);
+                pdf.text(`${label}:`, xPos, yPosition);
+                pdf.setFont('times', 'normal');
+                pdf.text(` ${value}`, xPos + labelWidth, yPosition);
+                yPosition += 15;
+              } else if (isProject) {
+                // Projects with bold titles - exactly as shown in preview
+                const [title, description] = content.split('|');
+                pdf.setFont('times', 'bold');
+                pdf.setFontSize(11);
+                const titleWidth = pdf.getTextWidth(title);
+                pdf.text(title, xPos, yPosition);
+                pdf.setFont('times', 'normal');
+                pdf.text(` | ${description}`, xPos + titleWidth, yPosition);
+                yPosition += 15;
+              } else if (isAchievement) {
+                // Achievements with trophy icon - exactly as shown in preview
+                pdf.setFontSize(11);
+                pdf.setFont('times', 'normal');
+                pdf.text('🏆 ', xPos, yPosition);
+                yPosition = addTextWithWrap(content, xPos + 15, yPosition, contentWidth - 15, 11);
+              } else if (isCertification) {
+                // Certifications with checkmark icon - exactly as shown in preview
+                pdf.setFontSize(11);
+                pdf.setFont('times', 'normal');
+                pdf.text('✓ ', xPos, yPosition);
+                yPosition = addTextWithWrap(content, xPos + 15, yPosition, contentWidth - 15, 11);
+              } else if (isSkills || isProjectsWithoutPipe || shouldHaveBulletPoints(sectionKey)) {
+                // Skills, Summary, Top Skills, Work Experience, and other sections with bullet points - exactly as shown in preview
                 pdf.setFontSize(11);
                 pdf.setFont('times', 'normal');
                 pdf.text('•', margin, yPosition);
@@ -391,34 +462,24 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                 if (sectionKey.toLowerCase() === 'education' && content.includes('CGPA')) {
                   pdf.setFont('times', 'bold');
                 }
-              }
 
-              // Add the content
-              yPosition = addTextWithWrap(content, xPos, yPosition, contentWidth - (xPos - margin), 11);
+                // Add the content
+                yPosition = addTextWithWrap(content, xPos, yPosition, contentWidth - (xPos - margin), 11);
 
-              // Reset font after education highlights
-              if (sectionKey.toLowerCase() === 'education' && content.includes('CGPA')) {
-                pdf.setFont('times', 'normal');
+                // Reset font after education highlights
+                if (sectionKey.toLowerCase() === 'education' && content.includes('CGPA')) {
+                  pdf.setFont('times', 'normal');
+                }
+              } else {
+                // Regular content without bullets - exactly as shown in preview
+                yPosition = addTextWithWrap(content, xPos, yPosition, contentWidth, 11);
               }
             });
           }
         }
       });
 
-      // Add footer
-      if (yPosition > pageHeight - 50) {
-        pdf.addPage();
-        yPosition = margin;
-      }
-
-      yPosition = Math.max(yPosition + 20, pageHeight - 50);
-      pdf.line(margin, yPosition - 15, pageWidth - margin, yPosition - 15);
-      pdf.setFontSize(9);
-      pdf.setFont('times', 'italic');
-      const footerText = 'Powered by iQua.ai';
-      const footerWidth = pdf.getTextWidth(footerText);
-      const footerX = (pageWidth - footerWidth) / 2;
-      pdf.text(footerText, footerX, yPosition);
+      // No footer needed - watermark is sufficient
 
       // Generate filename with timestamp
       const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
@@ -649,24 +710,118 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
               );
             });
           } else {
-            // Regular sections with bullets where appropriate
+            // Regular sections with enhanced formatting
             sectionItems.forEach((item, index) => {
               const shouldBullet = shouldHaveBulletPoints(sectionKey);
               const isEducationHighlight = sectionKey.toLowerCase() === 'education' && item.content.includes('CGPA');
+              const isTechnicalSkill = sectionKey === 'Technical Skills' && item.content.includes(':');
+              const isProject = sectionKey === 'Projects' && item.content.includes('|');
+              const isAchievement = sectionKey === 'Achievements';
+              const isCertification = sectionKey === 'Certifications';
+              const isSkills = sectionKey === 'Skills' || sectionKey === 'Summary' || sectionKey === 'Top Skills' || sectionKey === 'Work Experience';
+              const isProjectsWithoutPipe = sectionKey === 'Projects' && !item.content.includes('|');
+
+              let textContent = item.content;
+              let paragraphChildren = [];
+
+              if (isTechnicalSkill) {
+                // Technical Skills with bold labels - exactly as shown in preview
+                const [label, value] = item.content.split(':');
+                paragraphChildren = [
+                  new TextRun({
+                    text: `${label}:`,
+                    size: 22,
+                    font: "Times New Roman",
+                    color: "000000",
+                    bold: true
+                  }),
+                  new TextRun({
+                    text: ` ${value}`,
+                    size: 22,
+                    font: "Times New Roman",
+                    color: "000000"
+                  })
+                ];
+              } else if (isProject) {
+                // Projects with bold titles - exactly as shown in preview
+                const [title, description] = item.content.split('|');
+                paragraphChildren = [
+                  new TextRun({
+                    text: title,
+                    size: 22,
+                    font: "Times New Roman",
+                    color: "7C3AED", // Purple color
+                    bold: true
+                  }),
+                  new TextRun({
+                    text: ` | ${description}`,
+                    size: 22,
+                    font: "Times New Roman",
+                    color: "000000"
+                  })
+                ];
+              } else if (isAchievement) {
+                // Achievements with trophy icon - exactly as shown in preview
+                paragraphChildren = [
+                  new TextRun({
+                    text: "🏆 ",
+                    size: 22,
+                    font: "Times New Roman",
+                    color: "000000"
+                  }),
+                  new TextRun({
+                    text: item.content,
+                    size: 22,
+                    font: "Times New Roman",
+                    color: "000000"
+                  })
+                ];
+              } else if (isCertification) {
+                // Certifications with checkmark icon - exactly as shown in preview
+                paragraphChildren = [
+                  new TextRun({
+                    text: "✓ ",
+                    size: 22,
+                    font: "Times New Roman",
+                    color: "000000"
+                  }),
+                  new TextRun({
+                    text: item.content,
+                    size: 22,
+                    font: "Times New Roman",
+                    color: "000000"
+                  })
+                ];
+              } else if (isSkills || isProjectsWithoutPipe || shouldBullet) {
+                // Skills, Summary, Top Skills, Work Experience, and other sections with bullet points - exactly as shown in preview
+                textContent = `• ${item.content}`;
+                paragraphChildren = [
+                  new TextRun({
+                    text: textContent,
+                    size: 22, // 11pt
+                    font: "Times New Roman",
+                    color: "000000",
+                    bold: isEducationHighlight
+                  })
+                ];
+              } else {
+                // Regular content without bullets - exactly as shown in preview
+                paragraphChildren = [
+                  new TextRun({
+                    text: textContent,
+                    size: 22, // 11pt
+                    font: "Times New Roman",
+                    color: "000000",
+                    bold: isEducationHighlight
+                  })
+                ];
+              }
 
               children.push(
                 new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: shouldBullet ? `• ${item.content}` : item.content,
-                      size: 22, // 11pt
-                      font: "Times New Roman",
-                      color: "000000",
-                      bold: isEducationHighlight
-                    })
-                  ],
+                  children: paragraphChildren,
                   spacing: { after: 40, before: 0 }, // Reduced spacing between items
-                  indent: shouldBullet ? { left: 240 } : undefined, // Reduced indent for bullet points
+                  indent: (isSkills || isProjectsWithoutPipe || shouldBullet) && !isTechnicalSkill && !isProject ? { left: 240 } : undefined, // Reduced indent for bullet points
                   shading: isEducationHighlight ? {
                     type: "solid",
                     color: "F8F9FA"
@@ -677,31 +832,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           }
         }
       });
-
-      // Add footer with proper spacing
-      children.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: "Powered by iQua.ai",
-              size: 18, // 9pt
-              font: "Times New Roman",
-              color: "666666",
-              italics: true
-            })
-          ],
-          alignment: AlignmentType.CENTER,
-          spacing: { before: 400, after: 0 },
-          border: {
-            top: {
-              color: "CCCCCC",
-              space: 1,
-              style: BorderStyle.SINGLE,
-              size: 4
-            }
-          }
-        })
-      );
 
       // Create the document with proper metadata and structure
       const doc = new Document({
@@ -745,7 +875,26 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                 }
               }
             },
-            children: children
+            children: children,
+            footers: {
+              default: new Footer({
+                children: [
+                  new Paragraph({
+                    children: [
+                      new TextRun({
+                        text: "Powered by iQua.ai",
+                        size: 20, // 10pt
+                        font: "Times New Roman",
+                        color: "CCCCCC", // Light gray
+                        italics: true
+                      })
+                    ],
+                    alignment: AlignmentType.RIGHT,
+                    spacing: { after: 0, before: 0 }
+                  })
+                ]
+              })
+            }
           }
         ]
       });
@@ -785,7 +934,11 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       'top_skills', 'certifications', 'summary', 'work_experience',
       'education', 'skills', 'projects', 'achievements'
     ];
-    return bulletPointSections.includes(sectionKey.toLowerCase());
+    return bulletPointSections.includes(sectionKey.toLowerCase()) ||
+      sectionKey === 'Skills' ||
+      sectionKey === 'Summary' ||
+      sectionKey === 'Top Skills' ||
+      sectionKey === 'Work Experience';
   };
 
   // Function to parse and format contact information
@@ -1149,126 +1302,31 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     );
   };
 
-  // Final Resume Preview Component with Rich Text Editor
-  const FinalResumePreview = ({ resumeData, onResumeUpdate }) => {
-    const [isRichTextMode, setIsRichTextMode] = useState(false);
-    const [richTextContent, setRichTextContent] = useState('');
-    const [editedResumeData, setEditedResumeData] = useState(null);
-
-    // Initialize edited resume data and rich text content
-    useEffect(() => {
-      if (resumeData) {
-        setEditedResumeData({ ...resumeData });
-        // Convert resume data to HTML for rich text editor
-        const htmlContent = generateResumeHTML(resumeData);
-        setRichTextContent(htmlContent);
-      }
-    }, [resumeData]);
-
+  // Final Resume Preview Component (Read-only)
+  const FinalResumePreview = ({ resumeData }) => {
     if (!resumeData) return null;
 
-    const displayData = editedResumeData || resumeData;
-
-    // Generate markdown content from resume data
-    const generateResumeHTML = (data) => {
-      let content = '';
-
-      // Dynamically generate content from all sections
-      Object.keys(data).forEach(sectionKey => {
-        content += `## ${sectionKey.toUpperCase()}\n\n`;
-
-        const sectionItems = data[sectionKey] || [];
-        sectionItems.forEach(item => {
-          if (sectionKey.toLowerCase() === 'contact information') {
-            // Contact information without bullets
-            content += `${item.content} *(${item.source})*\n`;
-          } else if (sectionKey.toLowerCase() === 'education' && item.content.includes('CGPA')) {
-            // Special education formatting
-            content += `> **${item.content}** *(${item.source})*\n`;
-          } else if (sectionKey.toLowerCase() === 'achievements') {
-            // Achievements with trophy icon
-            content += `🏆 ${item.content} *(${item.source})*\n`;
-          } else if (sectionKey.toLowerCase() === 'certifications') {
-            // Certifications with checkmark icon
-            content += `✓ ${item.content} *(${item.source})*\n`;
-          } else if (shouldHaveBulletPoints(sectionKey)) {
-            // Sections with bullet points
-            content += `• ${item.content} *(${item.source})*\n`;
-          } else {
-            // Regular content without bullets
-            content += `${item.content} *(${item.source})*\n`;
-          }
-        });
-        content += '\n';
-      });
-
-      content += '\n---\n\n*Powered by iQua.ai*';
-      return content;
+    // Function to format section titles
+    const formatSectionTitle = (sectionKey) => {
+      return sectionKey
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/^./, str => str.toUpperCase())
+        .trim();
     };
 
-    // Parse HTML back to resume data
-    const parseHTMLToResumeData = (html) => {
-      const updatedResumeData = { ...displayData };
-
-      // Split content by sections (##)
-      const lines = html.split('\n');
-      let currentSection = null;
-      const parsedSections = {};
-
-      lines.forEach(line => {
-        const trimmedLine = line.trim();
-
-        // Check for section headers (## SECTION_NAME)
-        if (trimmedLine.startsWith('## ')) {
-          currentSection = trimmedLine.replace('## ', '').toLowerCase().replace(/\s+/g, '_');
-          parsedSections[currentSection] = [];
-        } else if (currentSection && trimmedLine && !trimmedLine.startsWith('---') && !trimmedLine.includes('*Powered by iQua.ai*')) {
-          // Clean up the line by removing markdown formatting and source info
-          let cleanedLine = trimmedLine
-            .replace(/^[•✓🏆\-\*]\s*/, '') // Remove bullet points and icons
-            .replace(/\*\([^)]*\)\s*$/, '') // Remove source info like *(enhanced)*
-            .replace(/^\*\*([^*]*)\*\*/, '$1') // Remove bold formatting
-            .replace(/^>\s*\*\*([^*]*)\*\*/, '$1') // Remove blockquote bold formatting
-            .trim();
-
-          if (cleanedLine) {
-            parsedSections[currentSection].push({
-              content: cleanedLine,
-              source: 'edited'
-            });
-          }
-        }
-      });
-
-      // Update the resume data with parsed sections
-      Object.keys(parsedSections).forEach(sectionKey => {
-        if (parsedSections[sectionKey].length > 0) {
-          updatedResumeData[sectionKey] = parsedSections[sectionKey];
-        }
-      });
-
-      return updatedResumeData;
-    };
-
-    const handleRichTextChange = (content) => {
-      setRichTextContent(content);
-      // Update the structured data as well
-      const updatedData = parseHTMLToResumeData(content);
-      setEditedResumeData(updatedData);
-    };
-
-    const toggleEditMode = () => {
-      if (isRichTextMode) {
-        // Save the rich text content and update parent component
-        const updatedData = parseHTMLToResumeData(richTextContent);
-        setEditedResumeData(updatedData);
-
-        // Notify parent component about the update
-        if (onResumeUpdate) {
-          onResumeUpdate(updatedData);
-        }
-      }
-      setIsRichTextMode(!isRichTextMode);
+    // Function to get appropriate emoji for section
+    const getSectionEmoji = (sectionKey) => {
+      const emojiMap = {
+        'Contact Information': '📞',
+        'Education': '🎓',
+        'Technical Skills': '🚀',
+        'Professional Experience': '💼',
+        'Projects': '🏗️',
+        'Achievements': '🏆',
+        'Certifications': '📜',
+        'Interests': '💡'
+      };
+      return emojiMap[sectionKey] || '📋';
     };
 
     return (
@@ -1282,70 +1340,139 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           </div>
           <span className="text-sm text-gray-600 font-medium">Final_Resume.docx</span>
           <div className="ml-auto flex items-center space-x-2">
-            <button
-              onClick={toggleEditMode}
-              className={`px-3 py-1 rounded text-xs font-medium transition-colors ${isRichTextMode
-                ? 'bg-green-500 text-white hover:bg-green-600'
-                : 'bg-blue-500 text-white hover:bg-blue-600'
-                }`}
-            >
-              {isRichTextMode ? '💾 Save & Exit' : '✏️ Rich Edit'}
-            </button>
             <span className="text-xs text-gray-500">📄</span>
             <span className="text-xs text-gray-500">100%</span>
           </div>
         </div>
 
         {/* Document Content */}
-        <div className="min-h-[600px]">
-          {isRichTextMode ? (
-            // Rich Text Editor Mode
-            <div className="h-full">
-              <div style={{ minHeight: '600px' }}>
-                <MDEditor
-                  value={richTextContent}
-                  onChange={handleRichTextChange}
-                  preview="edit"
-                  hideToolbar={false}
-                  data-color-mode="light"
-                  style={{
-                    minHeight: '600px',
-                    fontFamily: "'Times New Roman', serif"
-                  }}
-                />
-              </div>
-            </div>
-          ) : (
-            // Preview Mode with structured layout
-            <div className="p-8 space-y-4" style={{ minHeight: '600px' }}>
-              <MDEditor.Markdown
-                source={richTextContent}
-                style={{
-                  fontFamily: 'Times New Roman, serif',
-                  fontSize: '12pt',
-                  lineHeight: '1.15',
-                  background: 'white'
-                }}
-              />
-            </div>
-          )}
-        </div>
+        <div className="p-8 min-h-[600px] space-y-6" style={{
+          fontFamily: 'Times New Roman, serif',
+          fontSize: '12pt',
+          lineHeight: '1.15',
+          background: 'white'
+        }}>
+          {/* Dynamically render all sections */}
+          {resumeData && Object.keys(resumeData).map((sectionKey, sectionIndex) => {
+            const sectionItems = resumeData[sectionKey] || [];
 
-        {/* Formatting Tips */}
-        {isRichTextMode && (
-          <div className="border-t border-gray-200 p-4 bg-blue-50">
-            <div className="text-sm text-blue-700">
-              <strong>💡 Formatting Tips:</strong>
-              <ul className="mt-2 ml-4 space-y-1">
-                <li>• Use # for your name, ## for sections (EXPERIENCE, SKILLS, etc.)</li>
-                <li>• Use **text** for bold, *text* for italic</li>
-                <li>• Use - or * for bullet points</li>
-                <li>• Use --- for horizontal lines/dividers</li>
-                <li>• Keep formatting simple and professional</li>
-              </ul>
-            </div>
+            return (
+              <div key={sectionIndex} className="mb-6 space-y-2">
+                <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase flex items-center" style={{
+                  fontFamily: 'Times New Roman, serif',
+                  fontSize: '14pt',
+                  fontWeight: 'bold',
+                  borderBottom: '1px solid #333',
+                  paddingBottom: '2px'
+                }}>
+                  <span className="mr-2">{getSectionEmoji(sectionKey)}</span>
+                  {formatSectionTitle(sectionKey)}
+                </h2>
+
+                <div className="space-y-2">
+                  {sectionKey.toLowerCase().includes('contact') ? (
+                    // Special formatting for contact information - left aligned
+                    <div style={{ fontFamily: 'Times New Roman, serif', fontSize: '12pt', lineHeight: '1.15' }}>
+                      <div className="space-y-2">
+                        {sectionItems.map((item, itemIndex) => (
+                          <div key={itemIndex}>
+                            <div className="text-gray-800" style={{
+                              fontFamily: 'Times New Roman, serif',
+                              fontSize: '12pt',
+                              lineHeight: '1.15'
+                            }}>
+                              {item.content}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    // Regular formatting for other sections
+                    sectionItems.map((item, itemIndex) => (
+                      <div key={itemIndex}>
+                        <div className="text-gray-800" style={{
+                          fontFamily: 'Times New Roman, serif',
+                          fontSize: '12pt',
+                          lineHeight: '1.15'
+                        }}>
+                          {/* Handle special formatting for certain sections */}
+                          {sectionKey === 'Technical Skills' && item.content.includes(':') ? (
+                            <div>
+                              <span className="font-semibold">{item.content.split(':')[0]}:</span>
+                              <span className="ml-1">{item.content.split(':')[1]}</span>
+                            </div>
+                          ) : sectionKey === 'Skills' ? (
+                            <div className="flex items-start">
+                              <span className="text-gray-600 mr-2 mt-0.5">•</span>
+                              <span>{item.content}</span>
+                            </div>
+                          ) : sectionKey === 'Summary' ? (
+                            <div className="flex items-start">
+                              <span className="text-gray-600 mr-2 mt-0.5">•</span>
+                              <span>{item.content}</span>
+                            </div>
+                          ) : sectionKey === 'Top Skills' ? (
+                            <div className="flex items-start">
+                              <span className="text-gray-600 mr-2 mt-0.5">•</span>
+                              <span>{item.content}</span>
+                            </div>
+                          ) : sectionKey === 'Projects' && item.content.includes('|') ? (
+                            <div>
+                              <span className="font-semibold text-purple-700">{item.content.split('|')[0]}</span>
+                              <span className="text-gray-600 text-sm ml-2">| {item.content.split('|')[1]}</span>
+                            </div>
+                          ) : sectionKey === 'Projects' ? (
+                            <div className="flex items-start">
+                              <span className="text-gray-600 mr-2 mt-0.5">•</span>
+                              <span>{item.content}</span>
+                            </div>
+                          ) : sectionKey === 'Education' && item.content.includes('CGPA') ? (
+                            <div className="bg-blue-50 p-2 rounded border-l-4 border-blue-400">
+                              {shouldHaveBulletPoints(sectionKey) ? formatContentWithBullets(item.content, sectionKey) : item.content}
+                            </div>
+                          ) : sectionKey === 'Achievements' ? (
+                            <div className="flex items-center">
+                              <span className="text-yellow-500 mr-2">🏆</span>
+                              {formatContentWithBullets(item.content, sectionKey)}
+                            </div>
+                          ) : sectionKey === 'Certifications' ? (
+                            <div className="flex items-center">
+                              <span className="text-green-500 mr-2">✓</span>
+                              {formatContentWithBullets(item.content, sectionKey)}
+                            </div>
+                          ) : sectionKey === 'Work Experience' ? (
+                            <div className="flex items-start">
+                              <span className="text-gray-600 mr-2 mt-0.5">•</span>
+                              <span>{item.content}</span>
+                            </div>
+                          ) : shouldHaveBulletPoints(sectionKey) ? (
+                            <div className="flex items-start">
+                              <span className="text-gray-600 mr-2 mt-0.5">•</span>
+                              <span>{item.content}</span>
+                            </div>
+                          ) : (
+                            item.content
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Footer */}
+          <div className="mt-8 pt-4 border-t border-gray-200 text-right">
+            <p className="text-xs text-gray-400" style={{
+              fontFamily: 'Times New Roman, serif',
+              fontSize: '9pt'
+            }}>
+              Powered by iQua.ai
+            </p>
           </div>
-        )}
+        </div>
       </div>
     );
   };
@@ -1419,9 +1546,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
             <div className="overflow-y-auto p-4 bg-gray-50">
               <div className="text-center mb-4">
                 <h4 className="text-lg font-semibold text-gray-800 mb-2">Final Resume</h4>
-                <p className="text-sm text-gray-600">Live preview & edit</p>
+                <p className="text-sm text-gray-600">Live preview</p>
               </div>
-              {finalResume && Object.keys(finalResume).length > 0 && <FinalResumePreview resumeData={finalResume} onResumeUpdate={handleResumeUpdate} />}
+              {finalResume && Object.keys(finalResume).length > 0 && <FinalResumePreview resumeData={finalResume} />}
               {(!finalResume || Object.keys(finalResume).length === 0) && (
                 <div className="bg-white rounded-lg p-8 text-center text-gray-500">
                   <div className="mb-4">📄</div>
@@ -1436,11 +1563,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         <div className="border-t border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              {latestEditedResume ? (
-                <span className="text-green-600 font-medium">✓ Using edited resume content</span>
-              ) : (
-                <span>Pick individual lines or use "Use All" buttons for quick selection</span>
-              )}
+              <span>Pick individual lines or use "Use All" buttons for quick selection</span>
             </div>
             <div className="flex space-x-3">
               <button

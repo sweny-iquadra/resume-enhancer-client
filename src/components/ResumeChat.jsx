@@ -21,7 +21,21 @@ const ResumeChat = ({
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [selectedRoleForFeedback, setSelectedRoleForFeedback] = useState(null);
+  const [profileSummaryData, setProfileSummaryData] = useState(null);
   const chatContentRef = useRef(null);
+
+  // Load Profile Summary data from localStorage
+  useEffect(() => {
+    const storedProfileSummary = localStorage.getItem('profileSummaryData');
+    if (storedProfileSummary) {
+      try {
+        const parsed = JSON.parse(storedProfileSummary);
+        setProfileSummaryData(parsed);
+      } catch (error) {
+        console.error('Error parsing stored profile summary data:', error);
+      }
+    }
+  }, [enhancedResumeData]);
 
   // Auto-scroll to bottom when enhancedResumeData changes
   useEffect(() => {
@@ -163,51 +177,6 @@ const ResumeChat = ({
                 </div>
               </>
             )}
-
-            {/* Role Selection */}
-            {showRoleSelection && (
-              <div className="space-y-4">
-                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-5 border border-purple-100">
-                  <h3 className="font-semibold text-purple-700 mb-3 flex items-center">
-                    <span className="text-xl mr-2">🎯</span>
-                    Select Target Role
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-4">
-                    Choose the role you'd like to optimize this resume for:
-                  </p>
-
-                  <div className="space-y-2">
-                    {uniqueRoles.map((role, index) => (
-                      <button
-                        key={index}
-                        onClick={() => handleRoleSelectionWithFeedback(role)}
-                        disabled={selectedRoleForFeedback === role}
-                        className={`w-full text-left p-4 rounded-lg transition-all duration-200 border ${selectedRoleForFeedback === role
-                          ? 'bg-green-50 border-green-200 scale-[0.98]'
-                          : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-purple-200 hover:scale-[1.01]'
-                          }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className={`font-medium ${selectedRoleForFeedback === role
-                            ? 'text-green-700'
-                            : 'text-gray-800'
-                            }`}>
-                            {role}
-                          </span>
-                          <span className={`transition-all duration-200 ${selectedRoleForFeedback === role
-                            ? 'text-green-500'
-                            : 'text-purple-400 opacity-0 group-hover:opacity-100'
-                            }`}>
-                            {selectedRoleForFeedback === role ? '✓' : '→'}
-                          </span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Loading State */}
             {isLoading && (
               <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-8 text-center border border-indigo-100">
@@ -258,6 +227,25 @@ const ResumeChat = ({
                     </div>
                   </div>
                 </div>
+
+                {/* Profile Summary */}
+                {profileSummaryData && (profileSummaryData.enhanced.length > 0) && (
+                  <div className="bg-white rounded-xl p-5 border border-gray-200">
+                    <h4 className="font-semibold text-gray-800 mb-3">📝 Profile Summary</h4>
+                    <div className="space-y-2">
+                      {profileSummaryData.enhanced.length > 0 ? (
+                        profileSummaryData.enhanced.map((summary, index) => (
+                          <div key={index} className="flex items-start space-x-2">
+                            <span className="text-gray-400 mt-1">•</span>
+                            <p className="text-sm text-gray-700 leading-relaxed">{summary}</p>
+                          </div>
+                        ))
+                      ) : (
+                        <span className="text-gray-500 text-sm">No profile summary available</span>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Skills Preview */}
                 <div className="bg-white rounded-xl p-5 border border-gray-200">
@@ -324,6 +312,7 @@ const ResumeChat = ({
                         setShowRoleSelection(false);
                         setSelectedRole(null);
                         localStorage.removeItem('parsedResumeData');
+                        localStorage.removeItem('profileSummaryData');
                       }}
                       className="flex-1 bg-white text-gray-700 py-3 px-4 rounded-xl font-semibold border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-[1.02]"
                     >

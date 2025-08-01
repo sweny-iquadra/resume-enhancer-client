@@ -142,115 +142,109 @@ const ResumeChat = ({
           ref={chatContentRef}
         >
           <div className="p-6 space-y-6 relative">
-            {/* Welcome State and Loading State */}
-            {!enhancedResumeData && !showRoleSelection && (
-              <>
-                {/* Loading Overlay when generating */}
-                {isLoading && (
-                  <div className="absolute inset-0 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl flex items-center justify-center z-10">
-                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-8 text-center border border-indigo-100 shadow-lg">
-                      <div className="relative mb-6">
-                        <div className="animate-spin w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto"></div>
-                      </div>
-                      <h3 className="text-indigo-700 font-semibold text-lg mb-2">
-                        Creating Your Resume
-                      </h3>
-                      <p className="text-indigo-600 text-sm">
-                        Our AI is analyzing your profile and crafting the
-                        perfect resume...
-                      </p>
-                      <div className="flex justify-center space-x-1 mt-4">
-                        <div
-                          className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
-                          style={{ animationDelay: "0ms" }}
-                        ></div>
-                        <div
-                          className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
-                          style={{ animationDelay: "150ms" }}
-                        ></div>
-                        <div
-                          className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
-                          style={{ animationDelay: "300ms" }}
-                        ></div>
-                      </div>
-                    </div>
+            {/* Loading Overlay when generating */}
+            {isLoading && (
+              <div className="absolute inset-0 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl flex items-center justify-center z-10">
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-8 text-center border border-indigo-100 shadow-lg">
+                  <div className="relative mb-6">
+                    <div className="animate-spin w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto"></div>
                   </div>
-                )}
-
-                {/* Status Overview */}
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100 relative">
-                  <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
-                    <span className="text-xl mr-2">📊</span>
-                    Your Progress
-                  </h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">
-                        Interview Status
-                      </span>
-                      {isCheckingInterviewStatus ? (
-                        <div className="flex items-center space-x-2">
-                          <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                          <span className="text-xs text-blue-600">
-                            Checking...
-                          </span>
-                        </div>
-                      ) : (
-                        <span
-                          className={`text-xs px-3 py-1 rounded-full font-medium ${
-                            hasAttendedInterview
-                              ? "bg-green-100 text-green-700"
-                              : "bg-amber-100 text-amber-700"
-                          }`}
-                        >
-                          {hasAttendedInterview ? "✓ Completed" : "Pending"}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">
-                        Explored Roles
-                      </span>
-                      <span className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">
-                        {uniqueRoles.length} role{uniqueRoles.length !== 1 ? "s" : ""}
-                      </span>
-                    </div>
+                  <h3 className="text-indigo-700 font-semibold text-lg mb-2">
+                    Creating Your Resume
+                  </h3>
+                  <p className="text-indigo-600 text-sm">
+                    Our AI is analyzing your profile and crafting the
+                    perfect resume...
+                  </p>
+                  <div className="flex justify-center space-x-1 mt-4">
+                    <div
+                      className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0ms" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "150ms" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "300ms" }}
+                    ></div>
                   </div>
                 </div>
-
-                {/* Instructions */}
-                <div className="bg-white rounded-xl p-5 border border-gray-200">
-                  <h4 className="font-semibold text-gray-800 mb-3">
-                    How it works
-                  </h4>
-                  <div className="space-y-3 text-sm text-gray-600">
-                    <div className="flex items-start space-x-3">
-                      <span className="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-semibold">
-                        1
-                      </span>
-                      <p>Complete an interview to unlock the resume builder</p>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <span className="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-semibold">
-                        2
-                      </span>
-                      <p>AI analyzes your profile and interview responses</p>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <span className="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-semibold">
-                        3
-                      </span>
-                      <p>
-                        Get a tailored resume optimized for your target role
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </>
+              </div>
             )}
-            
 
-            {/* Success State */}
+            {/* Status Overview - Always visible */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100 relative">
+              <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
+                <span className="text-xl mr-2">📊</span>
+                Your Progress
+              </h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">
+                    Interview Status
+                  </span>
+                  {isCheckingInterviewStatus ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                      <span className="text-xs text-blue-600">
+                        Checking...
+                      </span>
+                    </div>
+                  ) : (
+                    <span
+                      className={`text-xs px-3 py-1 rounded-full font-medium ${
+                        hasAttendedInterview
+                          ? "bg-green-100 text-green-700"
+                          : "bg-amber-100 text-amber-700"
+                      }`}
+                    >
+                      {hasAttendedInterview ? "✓ Completed" : "Pending"}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">
+                    Explored Roles
+                  </span>
+                  <span className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">
+                    {uniqueRoles.length} role{uniqueRoles.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Instructions - Always visible */}
+            <div className="bg-white rounded-xl p-5 border border-gray-200">
+              <h4 className="font-semibold text-gray-800 mb-3">
+                How it works
+              </h4>
+              <div className="space-y-3 text-sm text-gray-600">
+                <div className="flex items-start space-x-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-semibold">
+                    1
+                  </span>
+                  <p>Complete an interview to unlock the resume builder</p>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-semibold">
+                    2
+                  </span>
+                  <p>AI analyzes your profile and interview responses</p>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-semibold">
+                    3
+                  </span>
+                  <p>
+                    Get a tailored resume optimized for your target role
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Success State - Additional content when resume is generated */}
             {enhancedResumeData && (
               <div className="space-y-6">
                 {/* Success Message */}
@@ -422,7 +416,7 @@ const ResumeChat = ({
         </div>
 
         {/* Action Footer */}
-        {!enhancedResumeData && !showRoleSelection && (
+        {!enhancedResumeData && (
           <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
             {isCheckingInterviewStatus ? (
               <div className="flex items-center justify-center space-x-3 py-4">

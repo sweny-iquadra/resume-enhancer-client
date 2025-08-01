@@ -142,7 +142,7 @@ const ResumeChat = ({
           ref={chatContentRef}
         >
           <div className="p-6 space-y-6 relative">
-            {/* Welcome State */}
+            {/* Welcome State and Loading State */}
             {!enhancedResumeData && !showRoleSelection && (
               <>
                 {/* Loading Overlay when generating */}
@@ -207,17 +207,14 @@ const ResumeChat = ({
                         </span>
                       )}
                     </div>
-                    {uniqueRoles.length > 0 && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">
-                          Explored Roles
-                        </span>
-                        <span className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">
-                          {uniqueRoles.length} role
-                          {uniqueRoles.length > 1 ? "s" : ""}
-                        </span>
-                      </div>
-                    )}
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">
+                        Explored Roles
+                      </span>
+                      <span className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">
+                        {uniqueRoles.length} role{uniqueRoles.length !== 1 ? "s" : ""}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -251,35 +248,7 @@ const ResumeChat = ({
                 </div>
               </>
             )}
-            {/* Loading State */}
-            {isLoading && !enhancedResumeData && !showRoleSelection && (
-              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-8 text-center border border-indigo-100">
-                <div className="relative mb-6">
-                  <div className="animate-spin w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto"></div>
-                </div>
-                <h3 className="text-indigo-700 font-semibold text-lg mb-2">
-                  Creating Your Resume
-                </h3>
-                <p className="text-indigo-600 text-sm">
-                  Our AI is analyzing your profile and crafting the perfect
-                  resume...
-                </p>
-                <div className="flex justify-center space-x-1 mt-4">
-                  <div
-                    className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0ms" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "150ms" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "300ms" }}
-                  ></div>
-                </div>
-              </div>
-            )}
+            
 
             {/* Success State */}
             {enhancedResumeData && (

@@ -1170,7 +1170,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           background: 'white'
         }}>
           {/* Dynamically render all sections */}
-          {resumeData && Object.keys(resumeData).map((sectionKey, sectionIndex) => {
+          {resumeData && Object.keys(resumeData).filter(sectionKey => 
+            sectionKey !== 'Profile Summary'
+          ).map((sectionKey, sectionIndex) => {
             const sectionItems = resumeData[sectionKey] || [];
 
             return (
@@ -1353,7 +1355,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           background: 'white'
         }}>
           {/* Dynamically render all sections */}
-          {resumeData && Object.keys(resumeData).map((sectionKey, sectionIndex) => {
+          {resumeData && Object.keys(resumeData).filter(sectionKey => 
+            sectionKey !== 'Profile Summary'
+          ).map((sectionKey, sectionIndex) => {
             const sectionItems = resumeData[sectionKey] || [];
 
             return (

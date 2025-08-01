@@ -32,7 +32,7 @@ export const createUserProfile = () => ({
       description: "Developed a collaborative task management application",
       technologies: ["Vue.js", "Express", "PostgreSQL"]
     }
-  ]
+  ],
   interviewHistory: [
     {
       id: 1,

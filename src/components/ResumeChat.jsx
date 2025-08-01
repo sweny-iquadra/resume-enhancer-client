@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { fetchParsedResumeData } from '../utils/api';
+import React, { useState, useRef, useEffect } from "react";
+import { fetchParsedResumeData } from "../utils/api";
 
 const ResumeChat = ({
   showResumeChat,
@@ -16,7 +16,7 @@ const ResumeChat = ({
   setShowPreview,
   setCurrentPage,
   setEnhancedResumeData,
-  setSelectedRole
+  setSelectedRole,
 }) => {
   const [isButtonLoading, setIsButtonLoading] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
@@ -26,14 +26,19 @@ const ResumeChat = ({
 
   // Load Profile Summary data from localStorage
   useEffect(() => {
-    const storedProfileSummary = localStorage.getItem('profileSummaryData');
+    const storedProfileSummary = localStorage.getItem("profileSummaryData");
+    console.log("🔍 Profile Summary from localStorage:", storedProfileSummary);
+    
     if (storedProfileSummary) {
       try {
         const parsed = JSON.parse(storedProfileSummary);
+        console.log("✅ Parsed Profile Summary data:", parsed);
         setProfileSummaryData(parsed);
       } catch (error) {
-        console.error('Error parsing stored profile summary data:', error);
+        console.error("❌ Error parsing stored profile summary data:", error);
       }
+    } else {
+      console.log("⚠️ No Profile Summary data found in localStorage");
     }
   }, [enhancedResumeData]);
 
@@ -47,26 +52,38 @@ const ResumeChat = ({
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (e.key === 'Enter' && hasAttendedInterview && !isLoading && !enhancedResumeData && !showRoleSelection) {
+      if (
+        e.key === "Enter" &&
+        hasAttendedInterview &&
+        !isLoading &&
+        !enhancedResumeData &&
+        !showRoleSelection
+      ) {
         e.preventDefault();
         handleCreateResumeWithFeedback();
       }
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         setShowResumeChat(false);
       }
     };
 
     if (showResumeChat) {
-      document.addEventListener('keydown', handleKeyPress);
-      return () => document.removeEventListener('keydown', handleKeyPress);
+      document.addEventListener("keydown", handleKeyPress);
+      return () => document.removeEventListener("keydown", handleKeyPress);
     }
-  }, [showResumeChat, hasAttendedInterview, isLoading, enhancedResumeData, showRoleSelection]);
+  }, [
+    showResumeChat,
+    hasAttendedInterview,
+    isLoading,
+    enhancedResumeData,
+    showRoleSelection,
+  ]);
 
   if (!showResumeChat) return null;
 
   const handleEditProfile = () => {
     setShowResumeChat(false);
-    setCurrentPage('profile');
+    setCurrentPage("profile");
   };
 
   const handleCreateResumeWithFeedback = async () => {
@@ -74,8 +91,10 @@ const ResumeChat = ({
     try {
       await handleCreateResumeClick();
     } catch (error) {
-      console.error('Error in resume creation:', error);
-      alert('⚠️ Something went wrong while creating your resume. Please try again.');
+      console.error("Error in resume creation:", error);
+      alert(
+        "⚠️ Something went wrong while creating your resume. Please try again.",
+      );
     } finally {
       setIsButtonLoading(false);
     }
@@ -91,12 +110,14 @@ const ResumeChat = ({
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl w-[420px] h-[580px] flex flex-col transition-all duration-300 ease-out transform hover:scale-[1.01] border border-gray-100"
+      <div
+        className="bg-white rounded-2xl shadow-2xl w-[420px] h-[580px] flex flex-col transition-all duration-300 ease-out transform hover:scale-[1.01] border border-gray-100"
         style={{
-          animation: 'slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.05)'
-        }}>
-
+          animation: "slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+          boxShadow:
+            "0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.05)",
+        }}
+      >
         {/* Clean Header */}
         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 rounded-t-2xl flex justify-between items-center">
           <div className="flex items-center space-x-3">
@@ -104,8 +125,12 @@ const ResumeChat = ({
               <span className="text-white text-lg">📄</span>
             </div>
             <div>
-              <h3 className="text-white font-semibold text-lg">Resume Assistant</h3>
-              <p className="text-indigo-100 text-xs">AI-powered resume enhancement</p>
+              <h3 className="text-white font-semibold text-lg">
+                Resume Assistant
+              </h3>
+              <p className="text-indigo-100 text-xs">
+                AI-powered resume enhancement
+              </p>
             </div>
           </div>
           <button
@@ -117,83 +142,114 @@ const ResumeChat = ({
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent" ref={chatContentRef}>
-          <div className="p-6 space-y-6">
-
-            {/* Welcome State */}
-            {!isLoading && !enhancedResumeData && !showRoleSelection && (
-              <>
-                {/* Status Overview */}
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
-                  <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
-                    <span className="text-xl mr-2">📊</span>
-                    Your Progress
-                  </h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Interview Status</span>
-                      {isCheckingInterviewStatus ? (
-                        <div className="flex items-center space-x-2">
-                          <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-                          <span className="text-xs text-blue-600">Checking...</span>
-                        </div>
-                      ) : (
-                        <span className={`text-xs px-3 py-1 rounded-full font-medium ${hasAttendedInterview
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-amber-100 text-amber-700'
-                          }`}>
-                          {hasAttendedInterview ? '✓ Completed' : 'Pending'}
-                        </span>
-                      )}
-                    </div>
-                    {uniqueRoles.length > 0 && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Explored Roles</span>
-                        <span className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">
-                          {uniqueRoles.length} role{uniqueRoles.length > 1 ? 's' : ''}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Instructions */}
-                <div className="bg-white rounded-xl p-5 border border-gray-200">
-                  <h4 className="font-semibold text-gray-800 mb-3">How it works</h4>
-                  <div className="space-y-3 text-sm text-gray-600">
-                    <div className="flex items-start space-x-3">
-                      <span className="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-semibold">1</span>
-                      <p>Complete an interview to unlock the resume builder</p>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <span className="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-semibold">2</span>
-                      <p>AI analyzes your profile and interview responses</p>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <span className="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-semibold">3</span>
-                      <p>Get a tailored resume optimized for your target role</p>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-            {/* Loading State */}
+        <div
+          className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
+          ref={chatContentRef}
+        >
+          <div className="p-6 space-y-6 relative">
+            {/* Loading Overlay when generating */}
             {isLoading && (
-              <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-8 text-center border border-indigo-100">
-                <div className="relative mb-6">
-                  <div className="animate-spin w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto"></div>
-                </div>
-                <h3 className="text-indigo-700 font-semibold text-lg mb-2">Creating Your Resume</h3>
-                <p className="text-indigo-600 text-sm">Our AI is analyzing your profile and crafting the perfect resume...</p>
-                <div className="flex justify-center space-x-1 mt-4">
-                  <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              <div className="absolute inset-0 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl flex items-center justify-center z-10">
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-8 text-center border border-indigo-100 shadow-lg">
+                  <div className="relative mb-6">
+                    <div className="animate-spin w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full mx-auto"></div>
+                  </div>
+                  <h3 className="text-indigo-700 font-semibold text-lg mb-2">
+                    Creating Your Resume
+                  </h3>
+                  <p className="text-indigo-600 text-sm">
+                    Our AI is analyzing your profile and crafting the
+                    perfect resume...
+                  </p>
+                  <div className="flex justify-center space-x-1 mt-4">
+                    <div
+                      className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0ms" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "150ms" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "300ms" }}
+                    ></div>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Success State */}
+            {/* Status Overview - Always visible */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100 relative">
+              <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
+                <span className="text-xl mr-2">📊</span>
+                Your Progress
+              </h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">
+                    Interview Status
+                  </span>
+                  {isCheckingInterviewStatus ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                      <span className="text-xs text-blue-600">
+                        Checking...
+                      </span>
+                    </div>
+                  ) : (
+                    <span
+                      className={`text-xs px-3 py-1 rounded-full font-medium ${
+                        hasAttendedInterview
+                          ? "bg-green-100 text-green-700"
+                          : "bg-amber-100 text-amber-700"
+                      }`}
+                    >
+                      {hasAttendedInterview ? "✓ Completed" : "Pending"}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">
+                    Explored Roles
+                  </span>
+                  <span className="text-xs px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">
+                    {uniqueRoles.length} role{uniqueRoles.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Instructions - Always visible */}
+            <div className="bg-white rounded-xl p-5 border border-gray-200">
+              <h4 className="font-semibold text-gray-800 mb-3">
+                How it works
+              </h4>
+              <div className="space-y-3 text-sm text-gray-600">
+                <div className="flex items-start space-x-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-semibold">
+                    1
+                  </span>
+                  <p>Complete an interview to unlock the resume builder</p>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-semibold">
+                    2
+                  </span>
+                  <p>AI analyzes your profile and interview responses</p>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <span className="flex-shrink-0 w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-semibold">
+                    3
+                  </span>
+                  <p>
+                    Get a tailored resume optimized for your target role
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Success State - Additional content when resume is generated */}
             {enhancedResumeData && (
               <div className="space-y-6">
                 {/* Success Message */}
@@ -203,72 +259,48 @@ const ResumeChat = ({
                       <span className="text-white text-sm">✓</span>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-green-700">Resume Ready!</h3>
-                      <p className="text-green-600 text-sm">Your AI-enhanced resume has been generated successfully</p>
+                      <h3 className="font-semibold text-green-700">
+                        Resume Ready!
+                      </h3>
+                      <p className="text-green-600 text-sm">
+                        Your AI-enhanced resume has been generated successfully
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Resume Summary */}
-                <div className="bg-white rounded-xl p-5 border border-gray-200">
-                  <h4 className="font-semibold text-gray-800 mb-4">📋 Resume Overview</h4>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Name:</span>
-                      <span className="font-medium text-gray-800">{enhancedResumeData.basicDetails?.name || "Not available"}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Email:</span>
-                      <span className="font-medium text-gray-800">{enhancedResumeData.basicDetails?.email || "Not available"}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Location:</span>
-                      <span className="font-medium text-gray-800">{enhancedResumeData.basicDetails?.location || "Not available"}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Profile Summary */}
-                {profileSummaryData && (profileSummaryData.enhanced.length > 0) && (
-                  <div className="bg-white rounded-xl p-5 border border-gray-200">
-                    <h4 className="font-semibold text-gray-800 mb-3">📝 Profile Summary</h4>
-                    <div className="space-y-2">
-                      {profileSummaryData.enhanced.length > 0 ? (
-                        profileSummaryData.enhanced.map((summary, index) => (
-                          <div key={index} className="flex items-start space-x-2">
-                            <span className="text-gray-400 mt-1">•</span>
-                            <p className="text-sm text-gray-700 leading-relaxed">{summary}</p>
+                {/* Profile Summary - Before Preview Resume button */}
+                {console.log("🎯 Current profileSummaryData state:", profileSummaryData)}
+                {profileSummaryData &&
+                  profileSummaryData.enhanced.length > 0 && (
+                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-200 shadow-sm">
+                      <div className="flex items-center mb-4">
+                        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
+                          <span className="text-white text-sm">📝</span>
+                        </div>
+                        <h4 className="font-semibold text-indigo-900 text-lg">
+                          Profile Summary
+                        </h4>
+                      </div>
+                      <div className="space-y-3">
+                        {profileSummaryData.enhanced.map((summary, index) => (
+                          <div
+                            key={index}
+                            className="bg-white rounded-lg p-4 border border-indigo-100 shadow-sm"
+                          >
+                            <p className="text-gray-800 leading-relaxed text-sm font-medium">
+                              {summary}
+                            </p>
                           </div>
-                        ))
-                      ) : (
-                        <span className="text-gray-500 text-sm">No profile summary available</span>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Skills Preview */}
-                <div className="bg-white rounded-xl p-5 border border-gray-200">
-                  <h4 className="font-semibold text-gray-800 mb-3">🚀 Key Skills</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {enhancedResumeData.skills && enhancedResumeData.skills.length > 0 ? (
-                      <>
-                        {enhancedResumeData.skills.slice(0, 6).map((skill, index) => (
-                          <span key={index} className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">
-                            {skill}
-                          </span>
                         ))}
-                        {enhancedResumeData.skills.length > 6 && (
-                          <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
-                            +{enhancedResumeData.skills.length - 6} more
-                          </span>
-                        )}
-                      </>
-                    ) : (
-                      <span className="text-gray-500 text-sm">No skills data available</span>
-                    )}
-                  </div>
-                </div>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-indigo-200">
+                        <p className="text-xs text-indigo-600 italic">
+                          ✨ AI-generated professional summary tailored for your target role
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                 {/* Action Buttons */}
                 <div className="space-y-3">
@@ -278,10 +310,11 @@ const ResumeChat = ({
                       setShowPreview(true);
                     }}
                     disabled={isPreviewLoading}
-                    className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-200 shadow-lg transform ${isPreviewLoading
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl hover:scale-[1.02]'
-                      }`}
+                    className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-200 shadow-lg transform ${
+                      isPreviewLoading
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl hover:scale-[1.02]"
+                    }`}
                   >
                     {isPreviewLoading ? (
                       <span className="flex items-center justify-center space-x-2">
@@ -311,8 +344,8 @@ const ResumeChat = ({
                         setEnhancedResumeData(null);
                         setShowRoleSelection(false);
                         setSelectedRole(null);
-                        localStorage.removeItem('parsedResumeData');
-                        localStorage.removeItem('profileSummaryData');
+                        localStorage.removeItem("parsedResumeData");
+                        localStorage.removeItem("profileSummaryData");
                       }}
                       className="flex-1 bg-white text-gray-700 py-3 px-4 rounded-xl font-semibold border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-[1.02]"
                     >
@@ -329,12 +362,14 @@ const ResumeChat = ({
         </div>
 
         {/* Action Footer */}
-        {!isLoading && !enhancedResumeData && !showRoleSelection && (
+        {!enhancedResumeData && (
           <div className="p-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
             {isCheckingInterviewStatus ? (
               <div className="flex items-center justify-center space-x-3 py-4">
                 <div className="animate-spin w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full"></div>
-                <span className="text-gray-600 font-medium">Checking interview status...</span>
+                <span className="text-gray-600 font-medium">
+                  Checking interview status...
+                </span>
               </div>
             ) : (
               <>
@@ -342,10 +377,11 @@ const ResumeChat = ({
                   <button
                     onClick={handleCreateResumeWithFeedback}
                     disabled={!hasAttendedInterview || isButtonLoading}
-                    className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${hasAttendedInterview && !isButtonLoading
-                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
-                      : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                      }`}
+                    className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${
+                      hasAttendedInterview && !isButtonLoading
+                        ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                        : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    }`}
                   >
                     {isButtonLoading ? (
                       <div className="flex items-center justify-center space-x-2">
@@ -363,7 +399,7 @@ const ResumeChat = ({
                   {!hasAttendedInterview && (
                     <button
                       onClick={() => {
-                        setCurrentPage('dashboard');
+                        setCurrentPage("dashboard");
                         setShowResumeChat(false);
                       }}
                       className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-blue-700 transition-colors"

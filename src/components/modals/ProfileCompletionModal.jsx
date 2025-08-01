@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { enhanceResumeAPI } from "../../utils/userProfile";
 import ErrorToast from "./ErrorToast";
+import { fetchAndStructureResumeData } from "../../utils/api";
 
 const ProfileCompletionModal = ({
   showProfileModal,
@@ -25,6 +25,8 @@ const ProfileCompletionModal = ({
   // Error toast state
   const [showErrorToast, setShowErrorToast] = useState(false);
   const [errorToastMessage, setErrorToastMessage] = useState("");
+  const [successTitle, setSuccessTitle] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   if (!showProfileModal) return null;
 
@@ -46,52 +48,43 @@ const ProfileCompletionModal = ({
       await proceedWithGeneration(roleToUse);
       setIsGenerating(false);
     }
+
   };
 
   const proceedWithGeneration = async (roleToUse) => {
     try {
       setIsLoading(true);
 
-      // Call the enhance resume API
-      const response = await enhanceResumeAPI(roleToUse, userProfile);
+      // Use the reusable API function
+      const studentId = 1;
+      const { structuredData } = await fetchAndStructureResumeData(studentId, userProfile);
 
-      if (response.success) {
-        // Store in localStorage
-        localStorage.setItem(
-          "enhancedResumeData",
-          JSON.stringify(response.data),
-        );
+      // Update state with the structured data
+      setEnhancedResumeData(structuredData);
 
-        // Update state
-        setEnhancedResumeData(response.data.enhancedResume);
+      // IMMEDIATELY close the modal FIRST - this must happen before any other state updates
+      setShowProfileModal(false);
 
-        // IMMEDIATELY close the modal FIRST - this must happen before any other state updates
-        setShowProfileModal(false);
+      // Clean up all internal modal states immediately
+      setShowRoleSelection(false);
+      setShowSuccessContent(false);
+      setIsGenerating(false);
+      setShowSuccessToast(true);
+      setSuccessMessage("Resume Enhanced Successfully! ✨");
+      // Ensure ResumeChat is visible to show the Preview Resume button
+      setShowResumeChat(true);
 
-        // Clean up all internal modal states immediately
-        setShowRoleSelection(false);
-        setShowSuccessContent(false);
-        setIsGenerating(false);
-        setShowSuccessToast(true);
-        // Set loading to false after modal closes
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 0);
+      // Set loading to false after modal closes
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 0);
 
-        return; // Exit early on success
-      } else {
-        // Only reopen modal on actual failure
-        setShowProfileModal(true);
-        setErrorToastMessage(
-          "Failed to enhance resume. Please try again or complete your profile for better results.",
-        );
-        setShowErrorToast(true);
-      }
+      return; // Exit early on success    
     } catch (error) {
       console.error("Error calling enhance resume API:", error);
       setShowProfileModal(true);
       setErrorToastMessage(
-        "An error occurred while enhancing your resume. Please check your connection and try again.",
+        "An error occurred while enhancing your resume. Please try again.",
       );
       setShowErrorToast(true);
     } finally {
@@ -335,11 +328,10 @@ const ProfileCompletionModal = ({
                   <button
                     onClick={handleGenerateAnyway}
                     disabled={isGenerating}
-                    className={`border-2 px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold flex-1 max-w-[180px] flex items-center justify-center space-x-2 ${
-                      isGenerating
-                        ? "text-gray-500 border-gray-200 bg-gray-50 cursor-not-allowed"
-                        : "text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
-                    }`}
+                    className={`border-2 px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold flex-1 max-w-[180px] flex items-center justify-center space-x-2 ${isGenerating
+                      ? "text-gray-500 border-gray-200 bg-gray-50 cursor-not-allowed"
+                      : "text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                      }`}
                   >
                     {isGenerating ? (
                       <>

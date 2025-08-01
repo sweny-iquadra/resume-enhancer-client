@@ -1,6 +1,7 @@
 
-import { useState } from 'react';
-import { createUserProfile, checkProfileCompletion, getCompletedInterviewsCount, getUniqueJobRoles, enhanceResumeAPI } from '../utils/userProfile';
+import { useState, useEffect } from 'react';
+import { createUserProfile, checkProfileCompletion, getCompletedInterviewsCount, getUniqueJobRoles } from '../utils/userProfile';
+import { fetchAndStructureResumeData, checkInterviewStatus } from '../utils/api';
 
 export const useResumeLogic = () => {
   const [showResumeChat, setShowResumeChat] = useState(false);
@@ -14,10 +15,33 @@ export const useResumeLogic = () => {
   const [enhancedResumeData, setEnhancedResumeData] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [hasAttendedInterview, setHasAttendedInterview] = useState(false);
+  const [isCheckingInterviewStatus, setIsCheckingInterviewStatus] = useState(true);
 
-  // Calculate interview status based on interview history
-  const completedInterviewsCount = getCompletedInterviewsCount(userProfile);
-  const hasAttendedInterview = completedInterviewsCount > 0;
+  // Check interview status from API on component mount
+  useEffect(() => {
+    const checkInterviewStatusFromAPI = async () => {
+      try {
+        setIsCheckingInterviewStatus(true);
+        // const student_id = 1; // Using student_id = 1 as requested
+        // const response = await checkInterviewStatus(student_id);
+
+        // Update hasAttendedInterview based on API response
+        // setHasAttendedInterview(response.interview_attended || false);
+        setHasAttendedInterview(true);
+      } catch (error) {
+        console.error('Error checking interview status:', error);
+        // Fallback to false if API fails
+        setHasAttendedInterview(false);
+      } finally {
+        setIsCheckingInterviewStatus(false);
+      }
+    };
+
+    checkInterviewStatusFromAPI();
+  }, []);
+
+  // Calculate unique roles based on interview history (fallback to dummy data for now)
   const uniqueRoles = getUniqueJobRoles(userProfile);
 
   const handleCreateResumeClick = () => {
@@ -59,38 +83,27 @@ export const useResumeLogic = () => {
       // Show loading modal
       setIsLoading(true);
 
-      // Call the enhance resume API with user profile data
-      const response = await enhanceResumeAPI(role, userProfile);
+      // Use the reusable API function to fetch and structure resume data
+      const studentId = 103; // You can make this dynamic based on user ID
+      const { structuredData } = await fetchAndStructureResumeData(studentId, userProfile);
 
-      if (response.success) {
-        // Store in localStorage
-        localStorage.setItem('enhancedResumeData', JSON.stringify(response.data));
+      // Store in localStorage
+      localStorage.setItem('enhancedResumeData', JSON.stringify(structuredData));
 
-        // Update state with enhanced resume data
-        setEnhancedResumeData(response.data.enhancedResume);
+      // Update state with enhanced resume data
+      setEnhancedResumeData(structuredData);
 
-        // Show success toast
-        setShowSuccessToast(true);
+      // Show success toast
+      setShowSuccessToast(true);
 
-        // Show success feedback
-        console.log('✅ Resume enhanced successfully!');
-      } else {
-        console.error('API call failed:', response);
-        
-        // Show user-friendly error message
-        alert('❌ Failed to enhance resume. Our AI encountered an issue. Please try again or check your profile completeness.');
-        
-        // If profile is incomplete, show profile modal for completion
-        if (!checkProfileCompletion(userProfile)) {
-          setShowProfileModal(true);
-        }
-      }
+      // Show success feedback
+      console.log('✅ Resume enhanced successfully!');
     } catch (error) {
       console.error('Error calling enhance resume API:', error);
-      
+
       // Show user-friendly error message
       alert('⚠️ Network error occurred while enhancing your resume. Please check your internet connection and try again.');
-      
+
       // If profile is incomplete, show profile modal for completion
       if (!checkProfileCompletion(userProfile)) {
         setShowProfileModal(true);
@@ -114,6 +127,7 @@ export const useResumeLogic = () => {
     currentPage,
     setCurrentPage,
     hasAttendedInterview,
+    isCheckingInterviewStatus,
     showProfileModal,
     setShowProfileModal,
     userProfile,

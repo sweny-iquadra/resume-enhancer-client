@@ -10,6 +10,7 @@
     transform: translateY(100px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -17,10 +18,13 @@
 }
 
 @keyframes gentlePulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 4px 20px rgba(57, 53, 205, 0.3);
   }
+
   50% {
     transform: scale(1.05);
     box-shadow: 0 6px 25px rgba(57, 53, 205, 0.4);
@@ -32,6 +36,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -59,37 +64,72 @@
 /* Rich Text Editor Styles */
 .w-md-editor {
   background: white !important;
+  border: 1px solid #e5e7eb !important;
 }
 
-.w-md-editor-text-pre, .w-md-editor-text-input, .w-md-editor-text {
+.w-md-editor-text-pre,
+.w-md-editor-text-input,
+.w-md-editor-text {
   font-family: 'Times New Roman', serif !important;
   font-size: 12pt !important;
-  line-height: 1.15 !important;
+  line-height: 1.4 !important;
   color: #1f2937 !important;
+  padding: 16px !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+}
+
+.w-md-editor-text-input {
+  resize: none !important;
+  outline: none !important;
+  border: none !important;
+  background: transparent !important;
 }
 
 .w-md-editor-preview {
   font-family: 'Times New Roman', serif !important;
   font-size: 12pt !important;
-  line-height: 1.15 !important;
+  line-height: 1.4 !important;
+  padding: 16px !important;
+}
+
+.w-md-editor-text-container {
+  position: relative !important;
+}
+
+/* Fix cursor and selection issues */
+.w-md-editor-text-input:focus {
+  caret-color: #1f2937 !important;
+}
+
+/* Ensure proper text rendering */
+.w-md-editor-text-pre {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  pointer-events: none !important;
+  white-space: pre-wrap !important;
+  overflow: hidden !important;
 }
 
 .w-md-editor-preview h1 {
-  font-size: 18pt !important;
+  font-size: 14pt !important;
   font-weight: bold !important;
   color: #1f2937 !important;
-  text-align: center !important;
-  margin-bottom: 8px !important;
+  text-transform: uppercase !important;
+  border-bottom: 2px solid #1f2937 !important;
+  padding-bottom: 4px !important;
+  margin: 16px 0 12px 0 !important;
+  text-align: left !important;
 }
 
 .w-md-editor-preview h2 {
-  font-size: 14pt !important;
+  font-size: 13pt !important;
   font-weight: bold !important;
-  text-transform: uppercase !important;
   color: #1f2937 !important;
-  border-bottom: 1px solid #333 !important;
-  padding-bottom: 2px !important;
-  margin: 16px 0 8px 0 !important;
+  margin: 12px 0 6px 0 !important;
 }
 
 .w-md-editor-preview h3 {
@@ -100,18 +140,28 @@
 }
 
 .w-md-editor-preview p {
-  margin: 4px 0 !important;
+  margin: 4px 0 8px 0 !important;
   color: #374151 !important;
+  line-height: 1.4 !important;
 }
 
-.w-md-editor-preview ul, .w-md-editor-preview ol {
+.w-md-editor-preview ul,
+.w-md-editor-preview ol {
   margin: 8px 0 !important;
-  padding-left: 16px !important;
+  padding-left: 20px !important;
 }
 
 .w-md-editor-preview li {
-  margin: 2px 0 !important;
+  margin: 3px 0 !important;
   color: #374151 !important;
+  line-height: 1.4 !important;
+}
+
+.w-md-editor-preview blockquote {
+  margin: 8px 0 !important;
+  padding: 8px 16px !important;
+  border-left: 4px solid #e5e7eb !important;
+  background-color: #f9fafb !important;
 }
 
 /* Custom button styles for markdown editor toolbar */
@@ -159,6 +209,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -170,6 +221,7 @@
     opacity: 0;
     transform: translateY(30px) scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -211,7 +263,7 @@
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
     margin: 0;
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -230,8 +282,15 @@ code {
 
 /* Custom animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .fade-in {
@@ -239,19 +298,41 @@ code {
 }
 
 @keyframes progress {
-  0% { width: 0%; }
-  50% { width: 70%; }
-  100% { width: 100%; }
+  0% {
+    width: 0%;
+  }
+
+  50% {
+    width: 70%;
+  }
+
+  100% {
+    width: 100%;
+  }
 }
 
 @keyframes progressPulse {
-  0%, 100% { opacity: 1; transform: scaleX(1); }
-  50% { opacity: 0.8; transform: scaleX(1.02); }
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scaleX(1.02);
+  }
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .animate-shimmer {
@@ -259,11 +340,14 @@ code {
 }
 
 @keyframes gentlePulse {
-  0%, 100% { 
+
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 4px 20px rgba(57, 53, 205, 0.3);
   }
-  50% { 
+
+  50% {
     transform: scale(1.05);
     box-shadow: 0 6px 25px rgba(57, 53, 205, 0.4);
   }
@@ -275,6 +359,7 @@ code {
     transform: translateX(100%);
     opacity: 0;
   }
+
   100% {
     transform: translateX(0);
     opacity: 1;
@@ -285,6 +370,7 @@ code {
   0% {
     width: 100%;
   }
+
   100% {
     width: 0%;
   }

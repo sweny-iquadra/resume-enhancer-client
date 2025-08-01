@@ -59,7 +59,10 @@ const ProfileCompletionModal = ({
 
       // Use the reusable API function
       const studentId = 1;
-      const { structuredData } = await fetchAndStructureResumeData(studentId, userProfile);
+      const { structuredData } = await fetchAndStructureResumeData(
+        studentId,
+        userProfile,
+      );
 
       // Update state with the structured data
       setEnhancedResumeData(structuredData);
@@ -71,7 +74,7 @@ const ProfileCompletionModal = ({
       setShowSuccessToast(true);
       setSuccessMessage("Resume Enhanced Successfully! ✨");
 
-      return; // Exit early on success    
+      return; // Exit early on success
     } catch (error) {
       console.error("Error calling enhance resume API:", error);
       setShowProfileModal(true);
@@ -292,7 +295,7 @@ const ProfileCompletionModal = ({
                       setShowProfileModal(false);
                       setShowResumeChat(false);
                       // Redirect to profile page
-                      setCurrentPage('profile');
+                      setCurrentPage("profile");
                     }}
                     className="text-white px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex-1 max-w-[180px]"
                     style={{
@@ -320,10 +323,11 @@ const ProfileCompletionModal = ({
                   <button
                     onClick={handleGenerateAnyway}
                     disabled={isGenerating}
-                    className={`border-2 px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold flex-1 max-w-[180px] flex items-center justify-center space-x-2 ${isGenerating
-                      ? "text-gray-500 border-gray-200 bg-gray-50 cursor-not-allowed"
-                      : "text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
-                      }`}
+                    className={`border-2 px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold flex-1 max-w-[180px] flex items-center justify-center space-x-2 ${
+                      isGenerating
+                        ? "text-gray-500 border-gray-200 bg-gray-50 cursor-not-allowed"
+                        : "text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+                    }`}
                   >
                     {isGenerating ? (
                       <>

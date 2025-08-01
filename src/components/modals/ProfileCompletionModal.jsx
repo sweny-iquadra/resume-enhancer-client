@@ -46,14 +46,16 @@ const ProfileCompletionModal = ({
       const roleToUse =
         currentSelectedRole || uniqueRoles[0] || userProfile.role;
       await proceedWithGeneration(roleToUse);
-      setIsGenerating(false);
+      // Don't set isGenerating to false here - let proceedWithGeneration handle it
     }
-
   };
 
   const proceedWithGeneration = async (roleToUse) => {
     try {
+      // Set loading state first, then close modal to show ResumeChat loading state
       setIsLoading(true);
+      setShowProfileModal(false);
+      setShowResumeChat(true);
 
       // Use the reusable API function
       const studentId = 1;
@@ -62,22 +64,12 @@ const ProfileCompletionModal = ({
       // Update state with the structured data
       setEnhancedResumeData(structuredData);
 
-      // IMMEDIATELY close the modal FIRST - this must happen before any other state updates
-      setShowProfileModal(false);
-
-      // Clean up all internal modal states immediately
+      // Clean up all internal modal states
       setShowRoleSelection(false);
       setShowSuccessContent(false);
       setIsGenerating(false);
       setShowSuccessToast(true);
       setSuccessMessage("Resume Enhanced Successfully! ✨");
-      // Ensure ResumeChat is visible to show the Preview Resume button
-      setShowResumeChat(true);
-
-      // Set loading to false after modal closes
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 0);
 
       return; // Exit early on success    
     } catch (error) {

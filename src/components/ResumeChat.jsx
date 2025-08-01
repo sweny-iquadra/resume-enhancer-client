@@ -264,97 +264,37 @@ const ResumeChat = ({
                   </div>
                 </div>
 
-                {/* Resume Summary */}
-                <div className="bg-white rounded-xl p-5 border border-gray-200">
-                  <h4 className="font-semibold text-gray-800 mb-4">
-                    📋 Resume Overview
-                  </h4>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Name:</span>
-                      <span className="font-medium text-gray-800">
-                        {enhancedResumeData.basicDetails?.name ||
-                          "Not available"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Email:</span>
-                      <span className="font-medium text-gray-800">
-                        {enhancedResumeData.basicDetails?.email ||
-                          "Not available"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Location:</span>
-                      <span className="font-medium text-gray-800">
-                        {enhancedResumeData.basicDetails?.location ||
-                          "Not available"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Profile Summary */}
+                {/* Profile Summary - Before Preview Resume button */}
                 {profileSummaryData &&
                   profileSummaryData.enhanced.length > 0 && (
-                    <div className="bg-white rounded-xl p-5 border border-gray-200">
-                      <h4 className="font-semibold text-gray-800 mb-3">
-                        📝 Profile Summary
-                      </h4>
-                      <div className="space-y-2">
-                        {profileSummaryData.enhanced.length > 0 ? (
-                          profileSummaryData.enhanced.map((summary, index) => (
-                            <div
-                              key={index}
-                              className="flex items-start space-x-2"
-                            >
-                              <span className="text-gray-400 mt-1">•</span>
-                              <p className="text-sm text-gray-700 leading-relaxed">
-                                {summary}
-                              </p>
-                            </div>
-                          ))
-                        ) : (
-                          <span className="text-gray-500 text-sm">
-                            No profile summary available
-                          </span>
-                        )}
+                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-200 shadow-sm">
+                      <div className="flex items-center mb-4">
+                        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
+                          <span className="text-white text-sm">📝</span>
+                        </div>
+                        <h4 className="font-semibold text-indigo-900 text-lg">
+                          Profile Summary
+                        </h4>
+                      </div>
+                      <div className="space-y-3">
+                        {profileSummaryData.enhanced.map((summary, index) => (
+                          <div
+                            key={index}
+                            className="bg-white rounded-lg p-4 border border-indigo-100 shadow-sm"
+                          >
+                            <p className="text-gray-800 leading-relaxed text-sm font-medium">
+                              {summary}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-indigo-200">
+                        <p className="text-xs text-indigo-600 italic">
+                          ✨ AI-generated professional summary tailored for your target role
+                        </p>
                       </div>
                     </div>
                   )}
-
-                {/* Skills Preview */}
-                <div className="bg-white rounded-xl p-5 border border-gray-200">
-                  <h4 className="font-semibold text-gray-800 mb-3">
-                    🚀 Key Skills
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {enhancedResumeData.skills &&
-                    enhancedResumeData.skills.length > 0 ? (
-                      <>
-                        {enhancedResumeData.skills
-                          .slice(0, 6)
-                          .map((skill, index) => (
-                            <span
-                              key={index}
-                              className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium"
-                            >
-                              {skill}
-                            </span>
-                          ))}
-                        {enhancedResumeData.skills.length > 6 && (
-                          <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">
-                            +{enhancedResumeData.skills.length - 6} more
-                          </span>
-                        )}
-                      </>
-                    ) : (
-                      <span className="text-gray-500 text-sm">
-                        No skills data available
-                      </span>
-                    )}
-                  </div>
-                </div>
 
                 {/* Action Buttons */}
                 <div className="space-y-3">

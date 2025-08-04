@@ -17,7 +17,8 @@ export const useResumeLogic = () => {
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [hasAttendedInterview, setHasAttendedInterview] = useState(false);
   const [isCheckingInterviewStatus, setIsCheckingInterviewStatus] = useState(true);
-
+  const [profileSummaryData, setProfileSummaryData] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   // Check interview status from API on component mount
   useEffect(() => {
     const checkInterviewStatusFromAPI = async () => {
@@ -92,12 +93,12 @@ export const useResumeLogic = () => {
 
       // Update state with enhanced resume data
       setEnhancedResumeData(structuredData);
-
+      setProfileSummaryData(structuredData.professionalSummary);
       // Show success toast
       setShowSuccessToast(true);
+      setSuccessMessage("Resume Enhanced Successfully! ✨");
 
-      // Show success feedback
-      console.log('✅ Resume enhanced successfully!');
+
     } catch (error) {
       console.error('Error calling enhance resume API:', error);
 
@@ -146,6 +147,8 @@ export const useResumeLogic = () => {
     showPreview,
     setShowPreview,
     showSuccessToast,
-    setShowSuccessToast
+    setShowSuccessToast,
+    handleResumeEnhancement,
+    profileSummaryData
   };
 };

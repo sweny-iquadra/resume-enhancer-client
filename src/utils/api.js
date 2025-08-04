@@ -37,7 +37,8 @@ export const fetchParsedResumeData = async (studentId, limit = AppConfig.DEFAULT
  */
 export const fetchAndStructureResumeData = async (studentId, userProfile = {}, limit = AppConfig.DEFAULT_RESUME_LIMIT) => {
     try {
-        //const parsedResumeResponse = await fetchParsedResumeData(studentId, limit);
+        // const parsedResumeResponse = await fetchParsedResumeData(studentId, limit);
+
         const parsedResumeResponse = {
             "student_id": "1",
             "limit": 3,
@@ -217,8 +218,6 @@ export const fetchAndStructureResumeData = async (studentId, userProfile = {}, l
                 }
             }
         }
-
-
         // Store the raw response in localStorage
         localStorage.setItem('parsedResumeData', JSON.stringify(parsedResumeResponse));
 
@@ -245,6 +244,13 @@ export const fetchAndStructureResumeData = async (studentId, userProfile = {}, l
             projects: enhancedResume?.projects || currentResumes?.projects || []
         };
 
+        structuredResumeData.professionalSummary = [
+            "Promoted to Software Engineer at Microsoft within 2 years",
+            "Recipient of 'Employee of the Month' award at Google in June 2019",
+            "Earned Google Spot Bonus for exceptional performance in Q1 2020",
+            "Named Microsoft Intern of the Year in 2018"
+        ];
+        // localStorage.setItem('profileSummaryData', JSON.stringify(structuredResumeData.professionalSummary));
         return {
             rawResponse: parsedResumeResponse,
             structuredData: structuredResumeData

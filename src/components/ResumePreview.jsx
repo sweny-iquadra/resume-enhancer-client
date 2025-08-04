@@ -150,11 +150,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
       setFinalResume(final);
 
-      // Store Profile Summary data for ResumeChat
-      const profileSummaryData = {
-        enhanced: dynamicEnhancedResume?.['Profile Summary'] || dynamicEnhancedResume?.['Summary'] || []
-      };
-      localStorage.setItem('profileSummaryData', JSON.stringify(profileSummaryData));
     };
 
     // Only build if we have actual data and selections
@@ -1170,7 +1165,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           background: 'white'
         }}>
           {/* Dynamically render all sections */}
-          {resumeData && Object.keys(resumeData).filter(sectionKey => 
+          {resumeData && Object.keys(resumeData).filter(sectionKey =>
             sectionKey !== 'Profile Summary'
           ).map((sectionKey, sectionIndex) => {
             const sectionItems = resumeData[sectionKey] || [];
@@ -1355,7 +1350,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           background: 'white'
         }}>
           {/* Dynamically render all sections */}
-          {resumeData && Object.keys(resumeData).filter(sectionKey => 
+          {resumeData && Object.keys(resumeData).filter(sectionKey =>
             sectionKey !== 'Profile Summary'
           ).map((sectionKey, sectionIndex) => {
             const sectionItems = resumeData[sectionKey] || [];

@@ -47,7 +47,10 @@ function App() {
     successTitle,
     setSuccessTitle,
     successMessage,
-    setSuccessMessage
+    setSuccessMessage,
+    profileSummaryData,
+    setProfileSummaryData,
+    handleResumeEnhancement
   } = useResumeLogic();
 
   // Check authentication status on component mount
@@ -136,6 +139,7 @@ function App() {
           setCurrentPage={setCurrentPage}
           setEnhancedResumeData={setEnhancedResumeData}
           setSelectedRole={setSelectedRole}
+          profileSummaryData={profileSummaryData}
         />
 
         {/* Resume Preview Modal */}
@@ -161,6 +165,7 @@ function App() {
           setShowPreview={setShowPreview}
           setCurrentPage={setCurrentPage}
           setShowResumeChat={setShowResumeChat}
+          handleResumeEnhancement={handleResumeEnhancement}
         />
 
         {/* Interview Requirement Modal */}

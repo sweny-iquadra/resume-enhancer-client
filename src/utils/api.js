@@ -283,4 +283,14 @@ export const checkInterviewStatus = async (studentId) => {
         console.error('Error checking interview status:', error);
         throw error;
     }
-}; 
+};
+
+export const getAuthHeader = () => {
+    const token = localStorage.getItem("access_token");
+    const type = localStorage.getItem("token_type") || "Bearer";
+
+    if (token) {
+        return { Authorization: `${type} ${token}` };
+    }
+    return {};
+};

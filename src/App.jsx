@@ -13,6 +13,7 @@ import InterviewRequirementModal from './components/modals/InterviewRequirementM
 import LoadingModal from './components/modals/LoadingModal';
 import SuccessToast from './components/modals/SuccessToast';
 import { useResumeLogic } from './hooks/useResumeLogic';
+import { AuthProvider } from './utils/AuthContext';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -60,17 +61,22 @@ function App() {
   }, []);
 
   // Handle successful login
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (user, token, type) => {
     setIsAuthenticated(true);
+    localStorage.setItem('isAuthenticated', 'true');
+    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('access_token', token);
+    localStorage.setItem('token_type', type);
     setCurrentPage('dashboard');
   };
 
   // Handle logout
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userEmail');
+    localStorage.removeItem('user');
+    localStorage.removeItem('access_token');
     setIsAuthenticated(false);
-    setCurrentPage('dashboard');
+    setCurrentPage('login');
   };
 
   // If not authenticated, show login component
@@ -79,118 +85,121 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Main Content Area */}
-      <div className="flex-1 flex">
-        {/* Dashboard */}
-        <div className="flex-1">
-          {currentPage === 'dashboard' && (
-            <>
-              <Header
+    <AuthProvider>
+      <div className="min-h-screen bg-gray-50">
+        {/* Main Content Area */}
+        <div className="flex-1 flex">
+          {/* Dashboard */}
+          <div className="flex-1">
+            {currentPage === 'dashboard' && (
+              <>
+                <Header
+                  showResumeChat={showResumeChat}
+                  setShowResumeChat={setShowResumeChat}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  onLogout={handleLogout}
+                />
+                <Dashboard setCurrentPage={setCurrentPage} />
+              </>
+            )}
+
+            {currentPage === 'interview' && (
+              <>
+                <Header
+                  showResumeChat={showResumeChat}
+                  setShowResumeChat={setShowResumeChat}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  onLogout={handleLogout}
+                />
+                <InterviewPage
+                  setCurrentPage={setCurrentPage}
+                />
+              </>
+            )}
+
+            {currentPage === 'profile' && (
+              <Profile
+                setCurrentPage={setCurrentPage}
                 showResumeChat={showResumeChat}
                 setShowResumeChat={setShowResumeChat}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
                 onLogout={handleLogout}
               />
-              <Dashboard setCurrentPage={setCurrentPage} />
-            </>
-          )}
+            )}
+          </div>
 
-          {currentPage === 'interview' && (
-            <>
-              <Header
-                showResumeChat={showResumeChat}
-                setShowResumeChat={setShowResumeChat}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                onLogout={handleLogout}
-              />
-              <InterviewPage
-                setCurrentPage={setCurrentPage}
-              />
-            </>
-          )}
+          {/* Resume Enhancer Chat Overlay */}
+          <ResumeChat
+            showResumeChat={showResumeChat}
+            setShowResumeChat={setShowResumeChat}
+            hasAttendedInterview={hasAttendedInterview}
+            isCheckingInterviewStatus={isCheckingInterviewStatus}
+            handleCreateResumeClick={handleCreateResumeClick}
+            showRoleSelection={showRoleSelection}
+            setShowRoleSelection={setShowRoleSelection}
+            uniqueRoles={uniqueRoles}
+            handleRoleSelection={handleRoleSelection}
+            isLoading={isLoading}
+            enhancedResumeData={enhancedResumeData}
+            setShowPreview={setShowPreview}
+            setCurrentPage={setCurrentPage}
+            setEnhancedResumeData={setEnhancedResumeData}
+            setSelectedRole={setSelectedRole}
+            profileSummaryData={profileSummaryData}
+          />
 
-          {currentPage === 'profile' && (
-            <Profile
-              setCurrentPage={setCurrentPage}
-              showResumeChat={showResumeChat}
-              setShowResumeChat={setShowResumeChat}
-              onLogout={handleLogout}
-            />
-          )}
+          {/* Resume Preview Modal */}
+          <ResumePreview
+            showPreview={showPreview}
+            setShowPreview={setShowPreview}
+            enhancedResumeData={enhancedResumeData}
+          />
+
+          {/* Profile Completion Modal */}
+          <ProfileCompletionModal
+            showProfileModal={showProfileModal}
+            setShowProfileModal={setShowProfileModal}
+            userProfile={userProfile}
+            selectedRole={selectedRole}
+            setIsLoading={setIsLoading}
+            setEnhancedResumeData={setEnhancedResumeData}
+            showRoleSelection={showRoleSelection}
+            setShowRoleSelection={setShowRoleSelection}
+            uniqueRoles={uniqueRoles}
+            handleRoleSelection={handleRoleSelection}
+            setShowSuccessToast={setShowSuccessToast}
+            setShowPreview={setShowPreview}
+            setCurrentPage={setCurrentPage}
+            setShowResumeChat={setShowResumeChat}
+            handleResumeEnhancement={handleResumeEnhancement}
+          />
+
+          {/* Interview Requirement Modal */}
+          <InterviewRequirementModal
+            showInterviewModal={showInterviewModal}
+            setShowInterviewModal={setShowInterviewModal}
+            navigateToInterview={navigateToInterview}
+          />
+
+          {/* Loading Modal */}
+          <LoadingModal
+            isVisible={isLoading}
+            message="iQua AI is generating your resume. This may take a few moments while we tailor your resume to your most relevant job role and skills."
+          />
+
+          {/* Success Toast */}
+          <SuccessToast
+            showSuccessToast={showSuccessToast}
+            setShowSuccessToast={setShowSuccessToast}
+            title={successTitle}
+            message={successMessage}
+          />
         </div>
-
-        {/* Resume Enhancer Chat Overlay */}
-        <ResumeChat
-          showResumeChat={showResumeChat}
-          setShowResumeChat={setShowResumeChat}
-          hasAttendedInterview={hasAttendedInterview}
-          isCheckingInterviewStatus={isCheckingInterviewStatus}
-          handleCreateResumeClick={handleCreateResumeClick}
-          showRoleSelection={showRoleSelection}
-          setShowRoleSelection={setShowRoleSelection}
-          uniqueRoles={uniqueRoles}
-          handleRoleSelection={handleRoleSelection}
-          isLoading={isLoading}
-          enhancedResumeData={enhancedResumeData}
-          setShowPreview={setShowPreview}
-          setCurrentPage={setCurrentPage}
-          setEnhancedResumeData={setEnhancedResumeData}
-          setSelectedRole={setSelectedRole}
-          profileSummaryData={profileSummaryData}
-        />
-
-        {/* Resume Preview Modal */}
-        <ResumePreview
-          showPreview={showPreview}
-          setShowPreview={setShowPreview}
-          enhancedResumeData={enhancedResumeData}
-        />
-
-        {/* Profile Completion Modal */}
-        <ProfileCompletionModal
-          showProfileModal={showProfileModal}
-          setShowProfileModal={setShowProfileModal}
-          userProfile={userProfile}
-          selectedRole={selectedRole}
-          setIsLoading={setIsLoading}
-          setEnhancedResumeData={setEnhancedResumeData}
-          showRoleSelection={showRoleSelection}
-          setShowRoleSelection={setShowRoleSelection}
-          uniqueRoles={uniqueRoles}
-          handleRoleSelection={handleRoleSelection}
-          setShowSuccessToast={setShowSuccessToast}
-          setShowPreview={setShowPreview}
-          setCurrentPage={setCurrentPage}
-          setShowResumeChat={setShowResumeChat}
-          handleResumeEnhancement={handleResumeEnhancement}
-        />
-
-        {/* Interview Requirement Modal */}
-        <InterviewRequirementModal
-          showInterviewModal={showInterviewModal}
-          setShowInterviewModal={setShowInterviewModal}
-          navigateToInterview={navigateToInterview}
-        />
-
-        {/* Loading Modal */}
-        <LoadingModal
-          isVisible={isLoading}
-          message="iQua AI is generating your resume. This may take a few moments while we tailor your resume to your most relevant job role and skills."
-        />
-
-        {/* Success Toast */}
-        <SuccessToast
-          showSuccessToast={showSuccessToast}
-          setShowSuccessToast={setShowSuccessToast}
-          title={successTitle}
-          message={successMessage}
-        />
       </div>
-    </div>
+    </AuthProvider>
   );
+
 }
 
 export default App;

@@ -1,25 +1,44 @@
 
 import React, { useState } from 'react';
+import AppConfig from '../config';
+import ErrorToast from "../components/modals/ErrorToast";
 
 const Login = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const baseUrl = AppConfig.REACT_APP_API_URL;
+  // Toast states
+  const [showErrorToast, setShowErrorToast] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
-    // Simulate login process
-    setTimeout(() => {
-      // Store user authentication state
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('userEmail', email);
-      
+    try {
+      const response = await fetch(`${baseUrl}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(data.detail || "Login failed");
+        setShowErrorToast(true);
+        throw new Error(data.detail || "Login failed");
+      }
+      onLoginSuccess(data.user, data.access_token, data.token_type);
+    } catch (err) {
+      setError(err.message);
+    } finally {
       setIsLoading(false);
-      onLoginSuccess();
-    }, 1000);
+    }
   };
 
   return (
@@ -45,7 +64,7 @@ const Login = ({ onLoginSuccess }) => {
               <div className="w-64 h-32 relative">
                 {/* Bean bag */}
                 <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-24 h-16 bg-teal-400 rounded-full"></div>
-                
+
                 {/* Person */}
                 <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
                   {/* Head */}
@@ -61,7 +80,7 @@ const Login = ({ onLoginSuccess }) => {
 
                 {/* Plant */}
                 <div className="absolute bottom-8 right-8 w-4 h-6 bg-green-400 rounded-t-full"></div>
-                
+
                 {/* Background elements */}
                 <div className="absolute top-4 left-8 w-6 h-4 bg-white bg-opacity-20 rounded"></div>
                 <div className="absolute top-2 right-12 w-4 h-3 bg-white bg-opacity-20 rounded"></div>
@@ -177,6 +196,13 @@ const Login = ({ onLoginSuccess }) => {
           </div>
         </div>
       </div>
+
+      {/* Error Toast */}
+      <ErrorToast
+        showErrorToast={showErrorToast}
+        setShowErrorToast={setShowErrorToast}
+        errorMessage={errorMessage}
+      />
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, Bord
 import { saveAs } from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { saveResumeToS3 } from '../utils/api';
 
 const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const [selections, setSelections] = useState({});
@@ -291,15 +292,38 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
     if (!resumeToDownload) return;
 
-    if (format === 'PDF') {
-      // Generate actual PDF file
-      await generateAndDownloadPDF(resumeToDownload);
-    } else {
-      // Generate proper DOCX file
-      await generateAndDownloadDocx(resumeToDownload);
-    }
+    try {
+      let fileInfo;
 
-    console.log(`Downloading resume as ${format}`);
+      if (format === 'PDF') {
+        // Generate actual PDF file
+        fileInfo = await generateAndDownloadPDF(resumeToDownload);
+      } else {
+        // Generate proper DOCX file
+        fileInfo = await generateAndDownloadDocx(resumeToDownload);
+      }
+
+      // Get userId from localStorage or user profile
+      const studentId = JSON.parse(localStorage.getItem('user') || '{}')?.id || null;
+      //const studentId = '1';
+      // Save to S3 after successful download
+      if (fileInfo && fileInfo.file && fileInfo.filename) {
+        console.log('Saving file to S3:', fileInfo.filename);
+
+        try {
+          const s3Response = await saveResumeToS3(studentId, fileInfo.file, fileInfo.filename);
+          console.log('File successfully saved to S3:', s3Response);
+        } catch (s3Error) {
+          console.error('Error saving to S3:', s3Error);
+          // Don't prevent download if S3 save fails, just log the error
+        }
+      }
+
+      console.log(`Successfully downloaded resume as ${format}`);
+    } catch (error) {
+      console.error(`Error downloading resume as ${format}:`, error);
+      alert(`Error downloading resume. Please try again.`);
+    }
   };
 
   // Function to generate actual PDF file
@@ -480,12 +504,22 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
       const filename = `Resume_${timestamp}.pdf`;
 
-      // Download the PDF
+      // Generate PDF blob
+      const pdfBlob = pdf.output('blob');
+
+      // Create a File object from the blob for S3 upload
+      const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
+
+      // Download the PDF (existing functionality)
       pdf.save(filename);
+
+      // Return the file and filename for S3 upload
+      return { file: pdfFile, filename };
 
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Error generating PDF. Please try again.');
+      throw error;
     }
   };
 
@@ -906,11 +940,21 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       });
 
+      // Create a File object from the blob for S3 upload
+      const docxFile = new File([properBlob], filename, {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      });
+
+      // Download the DOCX (existing functionality)
       saveAs(properBlob, filename);
+
+      // Return the file and filename for S3 upload
+      return { file: docxFile, filename };
 
     } catch (error) {
       console.error('Error generating DOCX:', error);
       alert('Error generating Word document. Please try again.');
+      throw error;
     }
   };
 
@@ -1165,9 +1209,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           background: 'white'
         }}>
           {/* Dynamically render all sections */}
-          {resumeData && Object.keys(resumeData).filter(sectionKey =>
-            sectionKey !== 'Profile Summary'
-          ).map((sectionKey, sectionIndex) => {
+          {resumeData && Object.keys(resumeData).map((sectionKey, sectionIndex) => {
             const sectionItems = resumeData[sectionKey] || [];
 
             return (
@@ -1350,9 +1392,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           background: 'white'
         }}>
           {/* Dynamically render all sections */}
-          {resumeData && Object.keys(resumeData).filter(sectionKey =>
-            sectionKey !== 'Profile Summary'
-          ).map((sectionKey, sectionIndex) => {
+          {resumeData && Object.keys(resumeData).map((sectionKey, sectionIndex) => {
             const sectionItems = resumeData[sectionKey] || [];
 
             return (

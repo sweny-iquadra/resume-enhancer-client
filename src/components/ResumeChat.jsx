@@ -252,39 +252,6 @@ const ResumeChat = ({
                   </div>
                 </div>
 
-                {/* Profile Summary - Before Preview Resume button */}
-
-                {profileSummaryData &&
-                  profileSummaryData.length > 0 && (
-                    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-200 shadow-sm">
-                      <div className="flex items-center mb-4">
-                        <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
-                          <span className="text-white text-sm">📝</span>
-                        </div>
-                        <h4 className="font-semibold text-indigo-900 text-lg">
-                          Profile Summary
-                        </h4>
-                      </div>
-                      <div className="space-y-3">
-                        {profileSummaryData.map((summary, index) => (
-                          <div
-                            key={index}
-                            className="bg-white rounded-lg p-4 border border-indigo-100 shadow-sm"
-                          >
-                            <p className="text-gray-800 leading-relaxed text-sm font-medium">
-                              {summary}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                      <div className="mt-4 pt-3 border-t border-indigo-200">
-                        <p className="text-xs text-indigo-600 italic">
-                          ✨ AI-generated professional summary tailored for your target role
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
                 {/* Action Buttons */}
                 <div className="space-y-3">
                   <button

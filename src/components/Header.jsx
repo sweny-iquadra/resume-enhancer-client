@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth } from "../utils/AuthContext";
+import { useAuth } from '../utils/AuthContext';
 
 const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage, onLogout }) => {
   const { user } = useAuth();

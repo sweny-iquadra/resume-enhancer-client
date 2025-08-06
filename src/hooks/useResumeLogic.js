@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { createUserProfile, checkProfileCompletion, getCompletedInterviewsCount, getUniqueJobRoles } from '../utils/userProfile';
 import { fetchAndStructureResumeData, checkInterviewStatus } from '../utils/api';
+import { useAuth } from '../utils/AuthContext';
 
 export const useResumeLogic = () => {
   const [showResumeChat, setShowResumeChat] = useState(false);
@@ -19,27 +20,26 @@ export const useResumeLogic = () => {
   const [isCheckingInterviewStatus, setIsCheckingInterviewStatus] = useState(true);
   const [profileSummaryData, setProfileSummaryData] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const { user } = useAuth();
   // Check interview status from API on component mount
+  const checkInterviewStatusFromAPI = async (student_id) => {
+    try {
+      setIsCheckingInterviewStatus(true);
+      const response = await checkInterviewStatus(student_id);
+      setHasAttendedInterview(response.interview_attended || false);
+    } catch (error) {
+      console.error('Error checking interview status:', error);
+      setHasAttendedInterview(false);
+    } finally {
+      setIsCheckingInterviewStatus(false);
+    }
+  };
+
   useEffect(() => {
-    const checkInterviewStatusFromAPI = async () => {
-      try {
-        setIsCheckingInterviewStatus(true);
-        // const student_id = 1; // Using student_id = 1 as requested
-        // const response = await checkInterviewStatus(student_id);
-
-        // Update hasAttendedInterview based on API response
-        // setHasAttendedInterview(response.interview_attended || false);
-        setHasAttendedInterview(true);
-      } catch (error) {
-        console.error('Error checking interview status:', error);
-        // Fallback to false if API fails
-        setHasAttendedInterview(false);
-      } finally {
-        setIsCheckingInterviewStatus(false);
-      }
-    };
-
-    checkInterviewStatusFromAPI();
+    const studentId = JSON.parse(localStorage.getItem('user') || '{}')?.id || null;
+    if (studentId) {
+      checkInterviewStatusFromAPI(studentId);
+    }
   }, []);
 
   // Calculate unique roles based on interview history (fallback to dummy data for now)
@@ -84,13 +84,11 @@ export const useResumeLogic = () => {
       // Show loading modal
       setIsLoading(true);
 
-      // Use the reusable API function to fetch and structure resume data
-      const studentId = 103; // You can make this dynamic based on user ID
+      const studentId = JSON.parse(localStorage.getItem('user') || '{}')?.id || null;
       const { structuredData } = await fetchAndStructureResumeData(studentId, userProfile);
-
       // Store in localStorage
       localStorage.setItem('enhancedResumeData', JSON.stringify(structuredData));
-
+      localStorage.setItem('profileSummaryData', JSON.stringify(structuredData.professionalSummary));
       // Update state with enhanced resume data
       setEnhancedResumeData(structuredData);
       setProfileSummaryData(structuredData.professionalSummary);
@@ -149,6 +147,7 @@ export const useResumeLogic = () => {
     showSuccessToast,
     setShowSuccessToast,
     handleResumeEnhancement,
-    profileSummaryData
+    profileSummaryData,
+    checkInterviewStatusFromAPI
   };
 };

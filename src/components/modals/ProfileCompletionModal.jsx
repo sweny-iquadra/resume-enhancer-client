@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import ErrorToast from "./ErrorToast";
-import { fetchAndStructureResumeData } from "../../utils/api";
 
 const ProfileCompletionModal = ({
   showProfileModal,

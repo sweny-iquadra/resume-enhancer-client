@@ -51,7 +51,8 @@ function App() {
     setSuccessMessage,
     profileSummaryData,
     setProfileSummaryData,
-    handleResumeEnhancement
+    handleResumeEnhancement,
+    checkInterviewStatusFromAPI
   } = useResumeLogic();
 
   // Check authentication status on component mount
@@ -61,13 +62,14 @@ function App() {
   }, []);
 
   // Handle successful login
-  const handleLoginSuccess = (user, token, type) => {
+  const handleLoginSuccess = async (user, token, type) => {
     setIsAuthenticated(true);
     localStorage.setItem('isAuthenticated', 'true');
     localStorage.setItem('user', JSON.stringify(user));
     localStorage.setItem('access_token', token);
     localStorage.setItem('token_type', type);
     setCurrentPage('dashboard');
+    await checkInterviewStatusFromAPI(user?.id);
   };
 
   // Handle logout
@@ -75,6 +77,10 @@ function App() {
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('user');
     localStorage.removeItem('access_token');
+    localStorage.removeItem('token_type');
+    localStorage.removeItem('hasAttendedInterview');
+    localStorage.removeItem('enhancedResumeData');
+    localStorage.removeItem('parsedResumeData');
     setIsAuthenticated(false);
     setCurrentPage('login');
   };

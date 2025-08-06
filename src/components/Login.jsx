@@ -24,23 +24,22 @@ const Login = ({ onLoginSuccess }) => {
       //  headers: { "Content-Type": "application/json" },
       //   body: JSON.stringify({ email, password }),
       //  });
-      const response = {
-        access_token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqaW1teUBnbWFpbC5jb20iLCJ1c2VyX2lkIjoxMCwiZXhwIjoxNzU0NTAwODc5fQ.pXiOoY-ZteyxDiY3P4kqxxdsvSkw9OLObvw6h6jd9UM",
-        token_type: "bearer",
-        user: {
-          id: 10,
-          username: "jimmy",
-          email: "jimmy@gmail.com",
-        },
-      };
-      const data = await response.json();
 
-      if (!response.ok) {
-        setErrorMessage(data.detail || "Login failed");
-        setShowErrorToast(true);
-        throw new Error(data.detail || "Login failed");
+      const data = {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqaW1teUBnbWFpbC5jb20iLCJ1c2VyX2lkIjoxMCwiZXhwIjoxNzU0NTAwODc5fQ.pXiOoY-ZteyxDiY3P4kqxxdsvSkw9OLObvw6h6jd9UM",
+        "token_type": "bearer",
+        "user": {
+          "id": 10,
+          "username": "jimmy",
+          "email": "jimmy@gmail.com"
+        }
       }
+
+      //  if (!response.ok) {
+      //  setErrorMessage(data.detail || "Login failed");
+      //   setShowErrorToast(true);
+      //    throw new Error(data.detail || "Login failed");
+      //   }
       onLoginSuccess(data.user, data.access_token, data.token_type);
     } catch (err) {
       setError(err.message);

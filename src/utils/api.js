@@ -169,3 +169,74 @@ export const saveResumeToS3 = async (studentId, file, filename) => {
         throw error;
     }
 };
+
+/**
+ * Fetches downloaded resumes for a given student ID
+ * @param {string|number} studentId - The student ID to fetch downloaded resumes for
+ * @returns {Promise<Object>} - The downloaded resumes response
+ * @throws {Error} - If the API call fails
+ */
+// ✅ 4. FETCH DOWNLOADED RESUMES
+export const fetchDownloadedResumes = async (studentId) => {
+    try {
+        const token = localStorage.getItem("access_token");
+        const tokenType = localStorage.getItem("token_type") || "Bearer";
+
+        if (!token) {
+            throw new Error("User not authenticated. Missing token.");
+        }
+        const response = await fetch(
+            `${baseUrl}/enhanced-resumes/${studentId}`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `${tokenType} ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData?.detail || 'Failed to fetch enhanced resumes');
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Error fetching enhanced resumes:", error);
+        throw error;
+    }
+};
+
+// utils/api.js
+
+export const fetchPreviewUrlAPI = async (s3Key) => {
+    const token = localStorage.getItem("access_token");
+    if (!token) throw new Error("Access token missing");
+
+    const url = `${baseUrl}/resume-preview-url?s3_key=${encodeURIComponent(s3Key)}`;
+    console.log("Fetching preview URL for s3_key:", s3Key);
+    console.log("Request URL:", url);
+
+    const response = await fetch(url, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        }
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Preview URL API error:", response.status, errorText);
+        throw new Error(`Failed to fetch preview URL: ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log("Preview URL API response:", data);
+
+    if (!data.url) throw new Error("No preview URL returned from API");
+
+    return data; // { url: "https://..." }
+};

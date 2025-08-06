@@ -18,8 +18,8 @@ const Dashboard = ({ setCurrentPage }) => {
     },
     {
       id: 3,
-      title: 'Book SME',
-      icon: '📊',
+      title: 'Enhanced Resumes',
+      icon: '📄',
       bgColor: 'bg-white',
       borderColor: 'border-blue-200'
     },
@@ -34,10 +34,10 @@ const Dashboard = ({ setCurrentPage }) => {
 
   const handleFeatureClick = (id) => {
     if (id === 1) {
-      // Navigate to Profile component
       setCurrentPage('profile');
+    } else if (id === 3) {
+      setCurrentPage('downloadedResumes');
     } else {
-      // Handle click events for other features
       console.log(`Clicked feature with ID: ${id}`);
     }
   };

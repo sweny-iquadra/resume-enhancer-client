@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import InterviewPage from './components/InterviewPage';
 import ResumeChat from './components/ResumeChat';
 import ResumePreview from './components/ResumePreview';
+import DownloadedResumes from './components/DownloadedResumes';
 import Login from './components/Login';
 import Profile from './components/Profile';
 import ProfileCompletionModal from './components/modals/ProfileCompletionModal';
@@ -132,6 +133,19 @@ function App() {
                 setShowResumeChat={setShowResumeChat}
                 onLogout={handleLogout}
               />
+            )}
+
+            {currentPage === 'downloadedResumes' && (
+              <>
+                <Header
+                  showResumeChat={showResumeChat}
+                  setShowResumeChat={setShowResumeChat}
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  onLogout={handleLogout}
+                />
+                <DownloadedResumes setCurrentPage={setCurrentPage} />
+              </>
             )}
           </div>
 

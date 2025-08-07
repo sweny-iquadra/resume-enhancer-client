@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { fetchDownloadedResumes, fetchPreviewUrlAPI } from "../utils/api";
+import { fetchDownloadedResumes } from "../utils/api";
 import { useAuth } from "../utils/AuthContext";
 
 const DownloadedResumes = ({ setCurrentPage }) => {
@@ -16,10 +16,7 @@ const DownloadedResumes = ({ setCurrentPage }) => {
         const loadDownloadedResumes = async () => {
             try {
                 setIsLoading(true);
-                const studentId =
-                    user?.id ||
-                    JSON.parse(localStorage.getItem("user") || "{}")?.id ||
-                    10;
+                const studentId = JSON.parse(localStorage.getItem("user") || "{}")?.id;
                 const response = await fetchDownloadedResumes(studentId);
 
                 // Map API response to component expected format
@@ -29,7 +26,8 @@ const DownloadedResumes = ({ setCurrentPage }) => {
                     file_type: file.extension,
                     file_size: formatFileSize(file.size_bytes),
                     download_date: file.uploaded_at,
-                    s3_key: file.s3_key
+                    s3_key: file.s3_key,
+                    download_url: file.download_url
                 }));
 
                 setDownloadedResumes(resumes);
@@ -83,11 +81,9 @@ const DownloadedResumes = ({ setCurrentPage }) => {
 
     const handleDownload = async (resume) => {
         try {
-            // Get the presigned URL for download
-            const data = await fetchPreviewUrlAPI(resume.s3_key);
-            if (data.url) {
+            if (resume.download_url) {
                 const link = document.createElement("a");
-                link.href = data.url;
+                link.href = resume.download_url;
                 link.download = resume.filename;
                 link.target = '_blank';
                 document.body.appendChild(link);
@@ -123,89 +119,6 @@ const DownloadedResumes = ({ setCurrentPage }) => {
         }
     };
 
-    //const ResumePreviewModal = ({ resume, onClose }) => {
-    //    const [previewUrl, setPreviewUrl] = useState(null);
-    //    const [loading, setLoading] = useState(true);
-    //    const [previewError, setPreviewError] = useState("");
-
-    //    useEffect(() => {
-    //        const fetchPreviewUrl = async () => {
-    //            if (!resume?.s3_key) return;
-
-    //            try {
-    //                setLoading(true);
-    //                setPreviewError("");
-
-    // const response = await fetchPreviewUrlAPI(resume.s3_key);
-
-    //  if (!response.ok) {
-    //      throw new Error("Failed to fetch preview URL");
-    //  }
-
-    //const data = await response.json();
-    //                const data = {
-    //                   "url": "https://iqua-resume-building-mvp.s3.amazonaws.com/students/1.0.0/10/enhanced_resume/Resume_2025-08-06T15-58-43.docx?AWSAccessKeyId=ASIAVRUVSV4V34ODVHR5&Signature=DSxvDnuucfIbwDUp5sNzqBgn87A%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEEYaCXVzLXdlc3QtMiJHMEUCIQD3lr6s9sf8fixA0Y4u5TY9kiOUXU4GDMs%2BBTvc10RVYQIgVw9WgM%2FbhgMWSboOTC6bdV99SFSdY0v4OQacjv7qstYq7AIIfxAAGgwzODE0OTIwNDc2NTkiDEnzHZP4kBX4afFArirJAl5HMN99zMSLsqcBAciCqFB%2Bt%2F6Pf1Fs0gupgGcZCU52RqknBsfyWuJestN%2BIGuQ%2BSmWkcA4rDCVbIlxyMBY4kyLAjsAml5iG9h2ARnioFa2k87%2FxgZgYU8AMD5Lz%2BqBTHI3pTV5Tizzrt92WbeCrDBgzVTGreHgT0aN8UZsSMGxWessD29%2BCYSs32KyXzSwzV0Xt06%2BlfBsFc%2FRXNLJP%2Bqbedh7uqBfPMa0uHWeAx8tZEGDzoL3luBjW6dI9gIV4B8RBugoG3btjjmdYzkHqn5wEZA71YsD9GAu0ELkfYai%2FS89ybsUNqEd%2BB1p16%2B4tMcEDlhGdmRFtxoYt4uipqBEkgLb%2F8PGnluZgV5zHoqdtcrpfrVhiFrVWM7IJWpS80jlQ07BASiMfaq0lyBwL5SY%2Fzpi7%2Fj%2BQMbe4PS6nHxe7Wa1fjYYcX9vMIOmz8QGOqcBSVIgXpCnjxOYHdbvUDaeqf4oPmOjFDqlYmV%2BC1qTdFnQtu%2BKz8VuxlX%2Fstu0L73qYSufxpIIpikrBODWJPfOWIgqO1a10uQNpAMwRlRxRQ7X288XuuW6xNTtZs15OeudlOLSrs4iPDYhRiCxplJbbrWEv3xJb1wBtByjQACkqyj5%2FK5NaTp8wWWILkpet8nPulHOHA0l0vTPx9fGb%2F58cm6KXrMcEUs%3D&Expires=1754521636"
-    //               }
-    // setPreviewUrl(data.url);
-
-    //            } catch (err) {
-    //               console.error("Error loading preview:", err);
-    //               setPreviewError("Failed to load preview. Please try again.");
-    //           } finally {
-    //               setLoading(false);
-    //           }
-    //        };
-
-    //fetchPreviewUrl();
-    //    }, [resume]);
-
-    //    if (!resume) return null;
-
-    //    return (
-    //        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-    //            <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full h-[90vh] flex flex-col overflow-hidden">
-    //                {/* Header */}
-    //                <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6 rounded-t-2xl flex justify-between items-center">
-    //                <div>
-    //                    <h3 className="text-xl font-semibold">{resume.filename}</h3>
-    //                    <p className="text-sm opacity-90 mt-1">
-    //                        Downloaded on {formatDate(resume.download_date)} • {resume.file_size}
-    //                    </p>
-    //                </div>
-    //                <button
-    //                    onClick={onClose}
-    //                        className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors"
-    //                    >
-    //                        <span className="text-lg">✕</span>
-    //                    </button>
-    //                </div>
-
-    //                {/* Inline Preview Area */}
-    //                <div className="flex-1 bg-gray-100">
-    //                {loading ? (
-    //                    <div className="h-full flex flex-col items-center justify-center">
-    //                        <div className="animate-spin w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full"></div>
-    //                        <p className="mt-4 text-gray-600">Loading preview...</p>
-    //                    </div>
-    //                ) : previewError ? (
-    //                    <div className="h-full flex flex-col items-center justify-center text-center px-6">
-    //                        <p className="text-red-600 text-lg font-semibold mb-2">⚠️ {previewError}</p>
-    //                            <p className="text-sm text-gray-500">Ensure the file exists and try again.</p>
-    //                        </div>
-    //                    ) : (
-    //                        <iframe
-    //                            src={previewUrl}
-    //                            title="Resume Preview"
-    //                            className="w-full h-full border-none"
-    //                            sandbox=""
-    //                            ></iframe>
-    //                        )}
-    //                    </div>
-    //                </div>
-    //        </div>
-    //    );
-    //};
-
     const ResumePreviewModal = ({ resume, onClose }) => {
         const [previewUrl, setPreviewUrl] = useState(null);
         const [loading, setLoading] = useState(true);
@@ -214,7 +127,7 @@ const DownloadedResumes = ({ setCurrentPage }) => {
 
         useEffect(() => {
             const loadPreview = async () => {
-                if (!resume?.s3_key) {
+                if (!resume?.download_url) {
                     setPreviewError("No file key available for preview.");
                     setLoading(false);
                     return;
@@ -224,14 +137,7 @@ const DownloadedResumes = ({ setCurrentPage }) => {
                     setLoading(true);
                     setPreviewError("");
                     setIframeError(false);
-
-                    const data = await fetchPreviewUrlAPI(resume.s3_key);
-
-                    if (!data.url) {
-                        throw new Error("No preview URL received from server");
-                    }
-
-                    setPreviewUrl(data.url);
+                    setPreviewUrl(resume.download_url);
                 } catch (err) {
                     console.error("Preview loading error:", err);
                     setPreviewError(err.message || "Failed to load preview. Please try again.");
@@ -275,15 +181,6 @@ const DownloadedResumes = ({ setCurrentPage }) => {
                             </p>
                         </div>
                         <div className="flex items-center space-x-2">
-                            {previewUrl && !loading && !previewError && (
-                                <button
-                                    onClick={handleDownload}
-                                    className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                                    style={{ background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)' }}
-                                >
-                                    ⬇️ Download
-                                </button>
-                            )}
                             <button
                                 onClick={onClose}
                                 className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors"

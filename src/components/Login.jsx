@@ -1,7 +1,8 @@
 
 import React, { useState } from 'react';
 import AppConfig from '../config';
-import ErrorToast from "../components/modals/ErrorToast";
+import ErrorToast from './modals/ErrorToast';
+import { loginUser } from '../utils/api';
 
 const Login = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState('');
@@ -20,22 +21,11 @@ const Login = ({ onLoginSuccess }) => {
     setError("");
 
     try {
-      const response = await fetch(`${baseUrl}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setErrorMessage(data.detail || "Login failed");
-        setShowErrorToast(true);
-        throw new Error(data.detail || "Login failed");
-      }
+      const data = await loginUser(email, password);
       onLoginSuccess(data.user, data.access_token, data.token_type);
     } catch (err) {
-      setError(err.message);
+      setErrorMessage(err.message || "Something went wrong");
+      setShowErrorToast(true);
     } finally {
       setIsLoading(false);
     }

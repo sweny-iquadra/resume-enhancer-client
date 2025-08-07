@@ -2,6 +2,29 @@ import AppConfig from '../config';
 
 const baseUrl = AppConfig.REACT_APP_API_URL;
 
+
+/**
+ * Sends login request to backend
+ * @param {string} email
+ * @param {string} password
+ * @returns {Promise<object>} Response data or throws an error
+ */
+export const loginUser = async (email, password) => {
+    const res = await fetch(`${baseUrl}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+        throw { message: "Login failed", status: res.status };
+    }
+
+    return data;
+};
+
 /**
  * Fetches parsed resume data for a given student ID
  * @param {string|number} studentId - The student ID to fetch resume data for
@@ -19,7 +42,7 @@ export const fetchParsedResumeData = async (studentId, limit = AppConfig.DEFAULT
             throw new Error("User not authenticated. Missing token.");
         }
 
-        const response = await fetch(`${baseUrl}/get-parsed-resume/${studentId}?limit=${limit}`, {
+        const response = await fetch(`${baseUrl}/get_parsed_resume/${studentId}?limit=${limit}`, {
             method: 'GET',
             headers: {
                 Authorization: `${tokenType} ${token}`,
@@ -148,7 +171,7 @@ export const saveResumeToS3 = async (studentId, file, filename) => {
         formData.append('file', file);
         formData.append('file_name', filename);
 
-        const response = await fetch(`${baseUrl}/upload-enhanced-resume`, {
+        const response = await fetch(`${baseUrl}/upload_enhanced_resume`, {
             method: 'POST',
             headers: {
                 ...getAuthHeader()  // ✅ only auth header — don't set Content-Type for FormData!
@@ -186,7 +209,7 @@ export const fetchDownloadedResumes = async (studentId) => {
             throw new Error("User not authenticated. Missing token.");
         }
         const response = await fetch(
-            `${baseUrl}/enhanced-resumes/${studentId}`,
+            `${baseUrl}/enhanced_resume_list/${studentId}`,
             {
                 method: 'GET',
                 headers: {
@@ -215,7 +238,7 @@ export const fetchPreviewUrlAPI = async (s3Key) => {
     const token = localStorage.getItem("access_token");
     if (!token) throw new Error("Access token missing");
 
-    const url = `${baseUrl}/resume-preview-url?s3_key=${encodeURIComponent(s3Key)}`;
+    const url = `${baseUrl}/resume_preview_url?s3_key=${encodeURIComponent(s3Key)}`;
     console.log("Fetching preview URL for s3_key:", s3Key);
     console.log("Request URL:", url);
 
@@ -239,4 +262,45 @@ export const fetchPreviewUrlAPI = async (s3Key) => {
     if (!data.url) throw new Error("No preview URL returned from API");
 
     return data; // { url: "https://..." }
+};
+
+
+/**
+ * Checks if user is eligible for daily enhanced resume download
+ * @param {string|number} studentId - The student ID to check eligibility for
+ * @returns {Promise<Object>} - The eligibility response with is_eligible boolean and message
+ * @throws {Error} - If the API call fails
+ */
+// ✅ 2. CHECK DOWNLOAD ELIGIBILITY
+export const checkDownloadEligibility = async (studentId) => {
+    try {
+        const token = localStorage.getItem("access_token");
+
+        if (!token) {
+            throw new Error("User not authenticated. Missing token.");
+        }
+
+        const response = await fetch(
+            `${baseUrl}/check_daily_enhanced_resume_eligibility/${studentId}`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            },
+        );
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || `Error ${response.status}`);
+        }
+
+        const eligibilityResponse = await response.json();
+        console.log("Download Eligibility Response:", eligibilityResponse);
+        return eligibilityResponse;
+    } catch (error) {
+        console.error("Failed to check download eligibility:", error.message);
+        throw error;
+    }
 };

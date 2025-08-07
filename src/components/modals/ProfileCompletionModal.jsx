@@ -100,7 +100,7 @@ const ProfileCompletionModal = ({
           {/* Modal Header */}
           <div
             className="text-white p-6 rounded-t-2xl text-center relative"
-            style={{ backgroundColor: "#3935cd" }}
+            style={{ background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)' }}
           >
             {/* Close X Button */}
             <button
@@ -297,15 +297,15 @@ const ProfileCompletionModal = ({
                     }}
                     className="text-white px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex-1 max-w-[180px]"
                     style={{
-                      backgroundColor: "#3935cd",
+                      background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)',
                       boxShadow: "0 8px 25px rgba(57, 53, 205, 0.3)",
                     }}
                     onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = "#2d28b8";
+                      e.target.style.backgroundColor = "linear-gradient(135deg, #6d7df7 0%, #5856eb 100%)";
                       e.target.style.transform = "scale(1.05) translateY(-2px)";
                     }}
                     onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = "#3935cd";
+                      e.target.style.backgroundColor = "linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)";
                       e.target.style.transform = "scale(1)";
                     }}
                   >

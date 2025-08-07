@@ -57,7 +57,7 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
             onClick={() => setShowResumeChat(!showResumeChat)}
             className="w-10 h-10 rounded-lg flex items-center justify-center hover:shadow-xl transition-all duration-300 cursor-pointer shadow-lg transform hover:scale-110 hover:-translate-y-1 active:scale-95"
             style={{
-              background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 100%)',
+              background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)',
               animation: showResumeChat ? 'none' : 'gentlePulse 2s ease-in-out infinite',
               boxShadow: '0 4px 20px rgba(57, 53, 205, 0.3)'
             }}

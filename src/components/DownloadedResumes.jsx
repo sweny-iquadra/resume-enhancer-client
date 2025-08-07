@@ -265,7 +265,9 @@ const DownloadedResumes = ({ setCurrentPage }) => {
             <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
                 <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full h-[90vh] flex flex-col overflow-hidden">
                     {/* Modal Header */}
-                    <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6 rounded-t-2xl flex justify-between items-center">
+                    <div className="text-white p-6 rounded-t-2xl flex justify-between items-center"
+                        style={{ background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)' }}
+                    >
                         <div>
                             <h3 className="text-xl font-semibold">{resume.filename}</h3>
                             <p className="text-sm opacity-90 mt-1">
@@ -277,6 +279,7 @@ const DownloadedResumes = ({ setCurrentPage }) => {
                                 <button
                                     onClick={handleDownload}
                                     className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                                    style={{ background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)' }}
                                 >
                                     ⬇️ Download
                                 </button>
@@ -423,7 +426,16 @@ const DownloadedResumes = ({ setCurrentPage }) => {
                             </div>
                             <button
                                 onClick={() => setCurrentPage("dashboard")}
-                                className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-3 rounded-lg font-medium hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
+                                className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
+                                style={{
+                                    background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.target.style.background = 'linear-gradient(135deg, #6d7ff5 0%, #5b5ff0 100%)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.target.style.background = 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)';
+                                }}
                             >
                                 <span>←</span>
                                 <span>Back To Dashboard</span>

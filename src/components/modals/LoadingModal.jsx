@@ -7,10 +7,10 @@ const LoadingModal = ({ isVisible, message }) => {
     <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-fade-in">
         {/* Modal Header */}
-        <div 
+        <div
           className="text-white p-6 rounded-t-2xl text-center relative"
           style={{
-            background: 'linear-gradient(135deg, #3935cd 0%, #5b4de8 50%, #7c69ef 100%)'
+            background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)'
           }}
         >
           <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -27,10 +27,10 @@ const LoadingModal = ({ isVisible, message }) => {
           <div className="mb-6">
             {/* Enhanced Progress Animation */}
             <div className="w-full bg-gray-200 rounded-full h-3 mb-6 shadow-inner">
-              <div 
+              <div
                 className="h-3 rounded-full relative overflow-hidden"
                 style={{
-                  background: 'linear-gradient(90deg, #3935cd, #5b4de8, #7c69ef)',
+                  background: 'linear-gradient(90deg, #7f90fa, #6366f1, #7c69ef)',
                   width: '70%',
                   animation: 'progressPulse 2.5s ease-in-out infinite'
                 }}
@@ -42,25 +42,25 @@ const LoadingModal = ({ isVisible, message }) => {
             {/* AI Processing Animation */}
             <div className="flex justify-center items-center space-x-3 mb-6">
               <div className="flex space-x-2">
-                <div 
+                <div
                   className="w-3 h-3 rounded-full animate-bounce shadow-lg"
-                  style={{ 
+                  style={{
                     backgroundColor: '#3935cd',
                     animationDelay: '0ms',
                     boxShadow: '0 0 10px rgba(57, 53, 205, 0.5)'
                   }}
                 ></div>
-                <div 
+                <div
                   className="w-3 h-3 rounded-full animate-bounce shadow-lg"
-                  style={{ 
+                  style={{
                     backgroundColor: '#5b4de8',
                     animationDelay: '200ms',
                     boxShadow: '0 0 10px rgba(91, 77, 232, 0.5)'
                   }}
                 ></div>
-                <div 
+                <div
                   className="w-3 h-3 rounded-full animate-bounce shadow-lg"
-                  style={{ 
+                  style={{
                     backgroundColor: '#7c69ef',
                     animationDelay: '400ms',
                     boxShadow: '0 0 10px rgba(124, 105, 239, 0.5)'

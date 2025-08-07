@@ -101,7 +101,7 @@ const ResumeChat = ({
         }}
       >
         {/* Clean Header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-5 rounded-t-2xl flex justify-between items-center">
+        <div className="p-5 rounded-t-2xl flex justify-between items-center" style={{ background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)' }}>
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
               <span className="text-white text-lg">📄</span>
@@ -262,8 +262,21 @@ const ResumeChat = ({
                     disabled={isPreviewLoading}
                     className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-200 shadow-lg transform ${isPreviewLoading
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 hover:shadow-xl hover:scale-[1.02]"
+                      : "text-white hover:shadow-xl hover:scale-[1.02]"
                       }`}
+                    style={!isPreviewLoading ? {
+                      background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)'
+                    } : {}}
+                    onMouseEnter={(e) => {
+                      if (!isPreviewLoading) {
+                        e.target.style.background = 'linear-gradient(135deg, #6d7df7 0%, #5856eb 100%)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isPreviewLoading) {
+                        e.target.style.background = 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)';
+                      }
+                    }}
                   >
                     {isPreviewLoading ? (
                       <span className="flex items-center justify-center space-x-2">
@@ -271,7 +284,7 @@ const ResumeChat = ({
                         <span>Loading...</span>
                       </span>
                     ) : (
-                      <span className="flex items-center justify-center space-x-2">
+                      <span className="flex items-center justify-center space-x-2" style={{ color: 'white' }}>
                         <span>👁️</span>
                         <span>Preview Resume</span>
                       </span>
@@ -296,7 +309,16 @@ const ResumeChat = ({
                         localStorage.removeItem("parsedResumeData");
                         localStorage.removeItem("profileSummaryData");
                       }}
-                      className="flex-1 bg-white text-gray-700 py-3 px-4 rounded-xl font-semibold border border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-[1.02]"
+                      className="flex-1 text-white py-3 px-4 rounded-xl font-semibold transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-[1.02]"
+                      style={{
+                        background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = 'linear-gradient(135deg, #6d7df7 0%, #5856eb 100%)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)';
+                      }}
                     >
                       <span className="flex items-center justify-center space-x-2">
                         <span>✨</span>
@@ -327,9 +349,22 @@ const ResumeChat = ({
                     onClick={handleCreateResumeWithFeedback}
                     disabled={!hasAttendedInterview || isButtonLoading}
                     className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${hasAttendedInterview && !isButtonLoading
-                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                      ? "text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                       : "bg-gray-200 text-gray-500 cursor-not-allowed"
                       }`}
+                    style={hasAttendedInterview && !isButtonLoading ? {
+                      background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)'
+                    } : {}}
+                    onMouseEnter={(e) => {
+                      if (hasAttendedInterview && !isButtonLoading) {
+                        e.target.style.background = 'linear-gradient(135deg, #6d7df7 0%, #5856eb 100%)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (hasAttendedInterview && !isButtonLoading) {
+                        e.target.style.background = 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)';
+                      }
+                    }}
                   >
                     {isButtonLoading ? (
                       <div className="flex items-center justify-center space-x-2">
@@ -351,6 +386,9 @@ const ResumeChat = ({
                         setShowResumeChat(false);
                       }}
                       className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-xl font-semibold hover:bg-blue-700 transition-colors"
+                      style={{
+                        background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)'
+                      }}
                     >
                       <span className="flex items-center justify-center space-x-2">
                         <span>🎤</span>

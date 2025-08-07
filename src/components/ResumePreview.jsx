@@ -1523,7 +1523,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     >
       <div className="bg-white rounded-2xl shadow-2xl max-w-7xl w-full h-[95vh] animate-fade-in flex flex-col">
         {/* Modal Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-purple-700 text-white p-6 rounded-t-2xl flex justify-between items-center">
+        <div className="text-white p-6 rounded-t-2xl flex justify-between items-center"
+          style={{ background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)' }}
+        >
           <div>
             <h3 className="text-xl font-semibold">Resume Builder</h3>
             <p className="text-sm opacity-90 mt-1">Choose content from both versions</p>

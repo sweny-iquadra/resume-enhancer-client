@@ -14,13 +14,15 @@ import {
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import { saveResumeToS3 } from "../utils/api";
+import { saveResumeToS3, checkDownloadEligibility } from "../utils/api";
+import AlertModal from "./modals/AlertModal";
 
 const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const [selections, setSelections] = useState({});
   const [finalResume, setFinalResume] = useState(null);
   const [parsedResumeData, setParsedResumeData] = useState(null);
-
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({});
   // Define handleOutsideClick before any potential early returns
   const handleOutsideClick = (e) => {
     if (e.target === e.currentTarget) {
@@ -329,6 +331,19 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     if (!resumeToDownload) return;
 
     try {
+      const studentId = JSON.parse(localStorage.getItem("user") || "{}")?.id;
+
+      const eligibilityResponse = await checkDownloadEligibility(studentId);
+
+      if (!eligibilityResponse.is_eligible) {
+        setAlertConfig({
+          message: eligibilityResponse.message || "Download not allowed at this time.",
+          type: "warning"
+        });
+        setShowAlert(true);
+        return;
+      }
+
       let fileInfo;
 
       if (format === "PDF") {
@@ -339,10 +354,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         fileInfo = await generateAndDownloadDocx(resumeToDownload);
       }
 
-      // Get userId from localStorage or user profile
-      const studentId =
-        JSON.parse(localStorage.getItem("user") || "{}")?.id || null;
-      //const studentId = '1';
       // Save to S3 after successful download
       if (fileInfo && fileInfo.file && fileInfo.filename) {
         console.log("Saving file to S3:", fileInfo.filename);
@@ -362,8 +373,12 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
       console.log(`Successfully downloaded resume as ${format}`);
     } catch (error) {
-      console.error(`Error downloading resume as ${format}:`, error);
-      alert(`Error downloading resume. Please try again.`);
+      setAlertConfig({
+        title: "Error",
+        message: "Unable to check download eligibility. Please try again.",
+        type: "error"
+      });
+      setShowAlert(true);
     }
   };
 
@@ -418,26 +433,26 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           // Section titles - exactly like preview
           pdf.setFontSize(12);
           pdf.setFont("arial", "bold");
-          
+
           // Convert to uppercase like preview
           const titleText = text.toUpperCase();
           pdf.text(titleText, x, y);
-          
+
           // Add underline exactly like preview
           const textWidth = pdf.getTextWidth(titleText);
           pdf.setLineWidth(1);
           pdf.line(x, y + 3, x + textWidth, y + 3);
-          
+
           return y + 24; // Same spacing as preview (24pt after section titles)
         } else {
           // Regular text
           const lines = pdf.splitTextToSize(text, maxWidth);
           pdf.text(lines, x, y);
-          
+
           // Calculate line spacing exactly like preview
           const lineSpacing = fontSize * lineHeight;
           const totalHeight = lines.length * lineSpacing;
-          
+
           return y + totalHeight + 6; // 6pt paragraph spacing like preview
         }
       };
@@ -727,11 +742,10 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
             className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
           />
           <div
-            className={`flex-1 cursor-pointer transition-all duration-200 rounded p-1 ${
-              isSelected
-                ? "bg-green-100 border-green-300 border"
-                : "hover:bg-blue-50 border border-transparent"
-            }`}
+            className={`flex-1 cursor-pointer transition-all duration-200 rounded p-1 ${isSelected
+              ? "bg-green-100 border-green-300 border"
+              : "hover:bg-blue-50 border border-transparent"
+              }`}
             onClick={() => handleSelection(key, !isSelected)}
           >
             {displayContent || (
@@ -976,6 +990,14 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           </div>
         </div>
       </div>
+      <AlertModal
+        showAlert={showAlert}
+        setShowAlert={setShowAlert}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        confirmText="OK"
+      />
     </div>
   );
 };

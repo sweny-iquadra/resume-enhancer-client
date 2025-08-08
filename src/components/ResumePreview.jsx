@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import MDEditor from "@uiw/react-md-editor";
 import {
   Document,
@@ -19,16 +19,16 @@ import AlertModal from "./modals/AlertModal";
 
 const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const [selections, setSelections] = useState({});
-  const [finalResume, setFinalResume] = useState(null);
   const [parsedResumeData, setParsedResumeData] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
   const [alertConfig, setAlertConfig] = useState({});
+
   // Define handleOutsideClick before any potential early returns
-  const handleOutsideClick = (e) => {
+  const handleOutsideClick = useCallback((e) => {
     if (e.target === e.currentTarget) {
       setShowPreview(false);
     }
-  };
+  }, [setShowPreview]);
 
   // Load parsed resume data from localStorage when component mounts
   useEffect(() => {
@@ -43,8 +43,8 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     }
   }, [showPreview]);
 
-  // Convert parsed resume data to a normalized format for original resume
-  const getOriginalResumeFromParsed = () => {
+  // Memoize the normalized resume data to prevent unnecessary recalculations
+  const originalResume = useMemo(() => {
     if (!parsedResumeData?.parsed_resumes?.current_resumes) {
       return null;
     }
@@ -78,10 +78,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     });
 
     return normalizedData;
-  };
+  }, [parsedResumeData]);
 
-  // Convert parsed resume data to a normalized format for enhanced resume
-  const getEnhancedResumeFromParsed = () => {
+  const dynamicEnhancedResume = useMemo(() => {
     if (!parsedResumeData?.parsed_resumes?.enhanced_resume) {
       return null;
     }
@@ -115,76 +114,23 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     });
 
     return normalizedData;
-  };
+  }, [parsedResumeData]);
 
-  const originalResume = getOriginalResumeFromParsed();
-  const dynamicEnhancedResume = getEnhancedResumeFromParsed();
+  // Get the section order from enhanced resume
+  const enhancedSectionOrder = useMemo(() => {
+    if (!dynamicEnhancedResume) return [];
+    return Object.keys(dynamicEnhancedResume);
+  }, [dynamicEnhancedResume]);
 
-  // Build final resume based on selections
-  useEffect(() => {
-    const buildFinalResume = () => {
-      if (!dynamicEnhancedResume && !originalResume) return;
+  // Memoize final resume to prevent infinite re-renders
+  const finalResume = useMemo(() => {
+    if (!dynamicEnhancedResume && !originalResume) return {};
 
-      const final = {};
+    const final = {};
+    const hasSelections = Object.keys(selections).some(key => selections[key]);
 
-      // Combine all section keys from both resumes
-      const allSectionKeys = new Set([
-        ...(originalResume ? Object.keys(originalResume) : []),
-        ...(dynamicEnhancedResume ? Object.keys(dynamicEnhancedResume) : []),
-      ]);
-
-      // Process each section dynamically
-      allSectionKeys.forEach((sectionKey) => {
-        // Skip Profile Summary section - it will be handled separately
-        if (sectionKey === "Profile Summary") {
-          return;
-        }
-
-        const originalSection = originalResume?.[sectionKey] || [];
-        const enhancedSection = dynamicEnhancedResume?.[sectionKey] || [];
-        const selectedItems = [];
-
-        // Check original section items
-        originalSection.forEach((item) => {
-          if (selections[item.key]) {
-            selectedItems.push({
-              content: item.content,
-              source: "original",
-            });
-          }
-        });
-
-        // Check enhanced section items
-        enhancedSection.forEach((item) => {
-          if (selections[item.key]) {
-            selectedItems.push({
-              content: item.content,
-              source: "enhanced",
-            });
-          }
-        });
-
-        if (selectedItems.length > 0) {
-          final[sectionKey] = selectedItems;
-        }
-      });
-
-      setFinalResume(final);
-    };
-
-    // Only build if we have actual data and selections
-    const hasSelections = Object.keys(selections).some(
-      (key) => selections[key],
-    );
-    const hasData = dynamicEnhancedResume || originalResume;
-
-    if (hasData && hasSelections) {
-      buildFinalResume();
-    } else if (hasData && !hasSelections) {
-      // Set empty final resume structure when no selections
-      setFinalResume({});
-
-      // Still store Profile Summary data even when no selections
+    if (!hasSelections) {
+      // Store Profile Summary data even when no selections
       const profileSummaryData = {
         enhanced:
           dynamicEnhancedResume?.["Profile Summary"] ||
@@ -195,8 +141,47 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         "profileSummaryData",
         JSON.stringify(profileSummaryData),
       );
+      return {};
     }
-  }, [selections]);
+
+    // Use enhanced resume section order for final resume
+    enhancedSectionOrder.forEach((sectionKey) => {
+      // Skip Profile Summary section - it will be handled separately
+      if (sectionKey === "Profile Summary") {
+        return;
+      }
+
+      const originalSection = originalResume?.[sectionKey] || [];
+      const enhancedSection = dynamicEnhancedResume?.[sectionKey] || [];
+      const selectedItems = [];
+
+      // Check original section items
+      originalSection.forEach((item) => {
+        if (selections[item.key]) {
+          selectedItems.push({
+            content: item.content,
+            source: "original",
+          });
+        }
+      });
+
+      // Check enhanced section items
+      enhancedSection.forEach((item) => {
+        if (selections[item.key]) {
+          selectedItems.push({
+            content: item.content,
+            source: "enhanced",
+          });
+        }
+      });
+
+      if (selectedItems.length > 0) {
+        final[sectionKey] = selectedItems;
+      }
+    });
+
+    return final;
+  }, [selections, originalResume, dynamicEnhancedResume, enhancedSectionOrder]);
 
   // Early return after all hooks have been called
   if (!showPreview) return null;
@@ -457,8 +442,8 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         }
       };
 
-      // Process each section with EXACT same formatting as preview
-      Object.keys(resumeData).forEach((sectionKey, sectionIndex) => {
+      // Process each section with EXACT same formatting as preview following enhanced order
+      enhancedSectionOrder.forEach((sectionKey, sectionIndex) => {
         const sectionItems = resumeData[sectionKey] || [];
 
         if (sectionItems.length > 0) {
@@ -539,8 +524,8 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     try {
       const children = [];
 
-      // Process each section with exact same formatting as preview
-      Object.keys(resumeData).forEach((sectionKey, sectionIndex) => {
+      // Process each section with exact same formatting as preview following enhanced order
+      enhancedSectionOrder.forEach((sectionKey, sectionIndex) => {
         const sectionItems = resumeData[sectionKey] || [];
 
         if (sectionItems.length > 0) {
@@ -756,6 +741,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       );
     };
 
+    // Use enhanced section order for consistent display
+    const sectionOrder = isOriginal ? enhancedSectionOrder : Object.keys(resumeData || {});
+
     return (
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
         {/* Document Header */}
@@ -774,7 +762,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
         {/* Document Content - EXACT same formatting as downloads */}
         <div className="p-8 min-h-[600px] space-y-6" style={{ fontFamily: "Arial, sans-serif", fontSize: "11pt", lineHeight: "1.15", background: "white" }}>
-          {resumeData && Object.keys(resumeData).map((sectionKey, sectionIndex) => {
+          {resumeData && sectionOrder.map((sectionKey, sectionIndex) => {
             const sectionItems = resumeData[sectionKey] || [];
 
             if (!sectionItems || sectionItems.length === 0) {
@@ -859,9 +847,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           </div>
         </div>
 
-        {/* Document Content - EXACT same formatting as downloads */}
+        {/* Document Content - EXACT same formatting as downloads following enhanced order */}
         <div className="p-8 min-h-[600px] space-y-6" style={{ fontFamily: "Arial, sans-serif", fontSize: "11pt", lineHeight: "1.15", background: "white" }}>
-          {resumeData && Object.keys(resumeData).map((sectionKey, sectionIndex) => {
+          {enhancedSectionOrder.map((sectionKey, sectionIndex) => {
             const sectionItems = resumeData[sectionKey] || [];
 
             if (!sectionItems || sectionItems.length === 0) {
@@ -923,8 +911,8 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           style={{ background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)' }}
         >
           <div>
-            <h3 className="text-xl font-semibold">Resume Builder</h3>
-            <p className="text-sm opacity-90 mt-1">Choose content from both versions</p>
+            <h3 className="text-xl font-semibold">Customize Your Resume</h3>
+            <p className="text-sm opacity-90 mt-1">Select the best content from original and AI-enhanced versions</p>
           </div>
           <button onClick={() => setShowPreview(false)} className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
             <span className="text-lg">✕</span>

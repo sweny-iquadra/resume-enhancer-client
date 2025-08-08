@@ -9,9 +9,8 @@ import ResumePreview from './components/ResumePreview';
 import DownloadedResumes from './components/DownloadedResumes';
 import Login from './components/Login';
 import Profile from './components/Profile';
-import ProfileCompletionModal from './components/modals/ProfileCompletionModal';
 import InterviewRequirementModal from './components/modals/InterviewRequirementModal';
-import LoadingModal from './components/modals/LoadingModal';
+
 import SuccessToast from './components/modals/SuccessToast';
 import { useResumeLogic } from './hooks/useResumeLogic';
 import { AuthProvider } from './utils/AuthContext';
@@ -27,17 +26,9 @@ function App() {
     setCurrentPage,
     hasAttendedInterview,
     isCheckingInterviewStatus,
-    showProfileModal,
-    setShowProfileModal,
     userProfile,
     handleCreateResumeClick,
     navigateToInterview,
-    selectedRole,
-    setSelectedRole,
-    showRoleSelection,
-    setShowRoleSelection,
-    handleRoleSelection,
-    uniqueRoles,
     isLoading,
     setIsLoading,
     enhancedResumeData,
@@ -156,17 +147,14 @@ function App() {
             hasAttendedInterview={hasAttendedInterview}
             isCheckingInterviewStatus={isCheckingInterviewStatus}
             handleCreateResumeClick={handleCreateResumeClick}
-            showRoleSelection={showRoleSelection}
-            setShowRoleSelection={setShowRoleSelection}
-            uniqueRoles={uniqueRoles}
-            handleRoleSelection={handleRoleSelection}
             isLoading={isLoading}
             enhancedResumeData={enhancedResumeData}
             setShowPreview={setShowPreview}
             setCurrentPage={setCurrentPage}
             setEnhancedResumeData={setEnhancedResumeData}
-            setSelectedRole={setSelectedRole}
             profileSummaryData={profileSummaryData}
+            userProfile={userProfile}
+            handleResumeEnhancement={handleResumeEnhancement}
           />
 
           {/* Resume Preview Modal */}
@@ -176,25 +164,6 @@ function App() {
             enhancedResumeData={enhancedResumeData}
           />
 
-          {/* Profile Completion Modal */}
-          <ProfileCompletionModal
-            showProfileModal={showProfileModal}
-            setShowProfileModal={setShowProfileModal}
-            userProfile={userProfile}
-            selectedRole={selectedRole}
-            setIsLoading={setIsLoading}
-            setEnhancedResumeData={setEnhancedResumeData}
-            showRoleSelection={showRoleSelection}
-            setShowRoleSelection={setShowRoleSelection}
-            uniqueRoles={uniqueRoles}
-            handleRoleSelection={handleRoleSelection}
-            setShowSuccessToast={setShowSuccessToast}
-            setShowPreview={setShowPreview}
-            setCurrentPage={setCurrentPage}
-            setShowResumeChat={setShowResumeChat}
-            handleResumeEnhancement={handleResumeEnhancement}
-          />
-
           {/* Interview Requirement Modal */}
           <InterviewRequirementModal
             showInterviewModal={showInterviewModal}
@@ -202,11 +171,7 @@ function App() {
             navigateToInterview={navigateToInterview}
           />
 
-          {/* Loading Modal */}
-          <LoadingModal
-            isVisible={isLoading}
-            message="iQua AI is generating your resume. This may take a few moments while we tailor your resume to your most relevant job role and skills."
-          />
+
 
           {/* Success Toast */}
           <SuccessToast

@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { createUserProfile, checkProfileCompletion, getCompletedInterviewsCount, getUniqueJobRoles } from '../utils/userProfile';
+import { createUserProfile, checkProfileCompletion } from '../utils/userProfile';
 import { fetchAndStructureResumeData, checkInterviewStatus } from '../utils/api';
 import { useAuth } from '../utils/AuthContext';
 
@@ -9,9 +8,6 @@ export const useResumeLogic = () => {
   const [showInterviewModal, setShowInterviewModal] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [userProfile] = useState(createUserProfile());
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [selectedRole, setSelectedRole] = useState(null);
-  const [showRoleSelection, setShowRoleSelection] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [enhancedResumeData, setEnhancedResumeData] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -21,6 +17,7 @@ export const useResumeLogic = () => {
   const [profileSummaryData, setProfileSummaryData] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const { user } = useAuth();
+
   // Check interview status from API on component mount
   const checkInterviewStatusFromAPI = async (student_id) => {
     try {
@@ -42,44 +39,16 @@ export const useResumeLogic = () => {
     }
   }, []);
 
-  // Calculate unique roles based on interview history (fallback to dummy data for now)
-  const uniqueRoles = getUniqueJobRoles(userProfile);
-
   const handleCreateResumeClick = () => {
     if (!hasAttendedInterview) {
       setShowInterviewModal(true);
     } else {
-      // Proceed with single role or default role
-      const defaultRole = uniqueRoles[0] || userProfile.role;
-      setSelectedRole(defaultRole);
-
-      // Check if profile is complete first
-      if (!checkProfileCompletion(userProfile)) {
-        setShowProfileModal(true);
-      } else {
-        // Profile is complete - check for multiple roles
-        if (uniqueRoles.length >= 3) {
-          // Show role selection for users with 3+ different roles
-          setShowRoleSelection(true);
-        } else {
-          // Proceed with resume enhancement for single role or less than 3 roles
-          handleResumeEnhancement(defaultRole);
-        }
-      }
+      // Always proceed with resume enhancement - profile check is now handled in ResumeChat
+      handleResumeEnhancement();
     }
   };
 
-  const handleRoleSelection = (role) => {
-    // Format role to industry-standard format (lowercase, hyphenated)
-    const formattedRole = role.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-    setSelectedRole(formattedRole);
-    setShowRoleSelection(false);
-
-    // Profile is already confirmed complete at this point - proceed with resume enhancement
-    handleResumeEnhancement(role); // Use original role for display purposes
-  };
-
-  const handleResumeEnhancement = async (role) => {
+  const handleResumeEnhancement = async () => {
     try {
       // Show loading modal
       setIsLoading(true);
@@ -102,11 +71,6 @@ export const useResumeLogic = () => {
 
       // Show user-friendly error message
       alert('⚠️ Network error occurred while enhancing your resume. Please check your internet connection and try again.');
-
-      // If profile is incomplete, show profile modal for completion
-      if (!checkProfileCompletion(userProfile)) {
-        setShowProfileModal(true);
-      }
     } finally {
       setIsLoading(false);
     }
@@ -127,17 +91,9 @@ export const useResumeLogic = () => {
     setCurrentPage,
     hasAttendedInterview,
     isCheckingInterviewStatus,
-    showProfileModal,
-    setShowProfileModal,
     userProfile,
     handleCreateResumeClick,
     navigateToInterview,
-    selectedRole,
-    setSelectedRole,
-    showRoleSelection,
-    setShowRoleSelection,
-    handleRoleSelection,
-    uniqueRoles,
     isLoading,
     setIsLoading,
     enhancedResumeData,
@@ -146,8 +102,11 @@ export const useResumeLogic = () => {
     setShowPreview,
     showSuccessToast,
     setShowSuccessToast,
-    handleResumeEnhancement,
+    successMessage,
+    setSuccessMessage,
     profileSummaryData,
+    setProfileSummaryData,
+    handleResumeEnhancement,
     checkInterviewStatusFromAPI
   };
 };

@@ -74,6 +74,7 @@ function App() {
     localStorage.removeItem('enhancedResumeData');
     localStorage.removeItem('parsedResumeData');
     setIsAuthenticated(false);
+    setEnhancedResumeData(null);
     setCurrentPage('login');
   };
 

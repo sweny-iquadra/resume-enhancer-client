@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import MDEditor from "@uiw/react-md-editor";
 import {
   Document,
@@ -8,7 +8,6 @@ import {
   AlignmentType,
   BorderStyle,
   Footer,
-  SectionType,
 } from "docx";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
@@ -21,20 +20,22 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const [parsedResumeData, setParsedResumeData] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
   const [alertConfig, setAlertConfig] = useState({});
-  const [isSaved, setIsSaved] = useState(false);
-  const [previewContent, setPreviewContent] = useState({});
-  const [showAddSectionModal, setShowAddSectionModal] = useState(false);
-  const [newSectionName, setNewSectionName] = useState("");
-  const [newSectionItems, setNewSectionItems] = useState([""]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [savedFinalResume, setSavedFinalResume] = useState(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const previewScrollRef = useRef(null);
 
-  // Define handleOutsideClick before any potential early returns
-  const handleOutsideClick = useCallback((e) => {
-    if (e.target === e.currentTarget) {
-      setShowPreview(false);
-    }
-  }, [setShowPreview]);
+  // Close on backdrop
+  const handleOutsideClick = useCallback(
+    (e) => {
+      if (e.target === e.currentTarget) {
+        setShowPreview(false);
+      }
+    },
+    [setShowPreview],
+  );
 
-  // Load parsed resume data from localStorage when component mounts
+  // Load parsed resume data
   useEffect(() => {
     const storedData = localStorage.getItem("parsedResumeData");
     if (storedData) {
@@ -47,105 +48,156 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     }
   }, [showPreview]);
 
-  // Reset states when modal opens
+  // Reset when new enhanced data arrives
   useEffect(() => {
-    if (showPreview) {
-      setIsSaved(false);
-      setPreviewContent({});
+    if (enhancedResumeData) {
       setSelections({});
-    }
-  }, [showPreview]);
+      setIsEditing(false);
+      setSavedFinalResume(null);
+      setHasUnsavedChanges(false);
 
-  // Memoize the normalized resume data to prevent unnecessary recalculations
+      const storedData = localStorage.getItem("parsedResumeData");
+      if (storedData) {
+        try {
+          const parsed = JSON.parse(storedData);
+          setParsedResumeData(parsed);
+        } catch (error) {
+          console.error("Error parsing stored resume data:", error);
+        }
+      }
+    }
+  }, [enhancedResumeData]);
+
+  // Original resume normalized
   const originalResume = useMemo(() => {
-    if (!parsedResumeData?.parsed_resumes?.current_resumes) {
-      return null;
-    }
-
+    if (!parsedResumeData?.parsed_resumes?.current_resumes) return null;
     const currentResumes = parsedResumeData.parsed_resumes.current_resumes;
-    const normalizedData = {};
-
-    // Dynamically process all sections in current_resumes with deduplication
+    const normalized = {};
     Object.keys(currentResumes).forEach((sectionKey) => {
       const sectionData = currentResumes[sectionKey];
       if (Array.isArray(sectionData)) {
-        // Remove duplicates using Set and filter out empty strings
-        const deduplicatedData = Array.from(
-          new Set(sectionData.filter((item) => item && item.trim())),
+        const dedup = Array.from(
+          new Set(sectionData.filter((i) => i && i.trim())),
         );
-        normalizedData[sectionKey] = deduplicatedData.map((item, index) => ({
+        normalized[sectionKey] = dedup.map((item, index) => ({
           content: item,
           key: `original.${sectionKey}.${index}`,
         }));
-      } else {
-        // Handle non-array data
-        if (sectionData && sectionData.trim()) {
-          normalizedData[sectionKey] = [
-            {
-              content: sectionData,
-              key: `original.${sectionKey}.0`,
-            },
-          ];
-        }
+      } else if (sectionData && sectionData.trim()) {
+        normalized[sectionKey] = [
+          { content: sectionData, key: `original.${sectionKey}.0` },
+        ];
       }
     });
-
-    return normalizedData;
+    return normalized;
   }, [parsedResumeData]);
 
+  // Enhanced resume normalized
   const dynamicEnhancedResume = useMemo(() => {
-    if (!parsedResumeData?.parsed_resumes?.enhanced_resume) {
-      return null;
-    }
-
+    if (!parsedResumeData?.parsed_resumes?.enhanced_resume) return null;
     const enhancedResumes = parsedResumeData.parsed_resumes.enhanced_resume;
-    const normalizedData = {};
-
-    // Dynamically process all sections in enhanced_resume with deduplication
+    const normalized = {};
     Object.keys(enhancedResumes).forEach((sectionKey) => {
       const sectionData = enhancedResumes[sectionKey];
       if (Array.isArray(sectionData)) {
-        // Remove duplicates using Set and filter out empty strings
-        const deduplicatedData = Array.from(
-          new Set(sectionData.filter((item) => item && item.trim())),
+        const dedup = Array.from(
+          new Set(sectionData.filter((i) => i && i.trim())),
         );
-        normalizedData[sectionKey] = deduplicatedData.map((item, index) => ({
+        normalized[sectionKey] = dedup.map((item, index) => ({
           content: item,
           key: `enhanced.${sectionKey}.${index}`,
         }));
-      } else {
-        // Handle non-array data
-        if (sectionData && sectionData.trim()) {
-          normalizedData[sectionKey] = [
-            {
-              content: sectionData,
-              key: `enhanced.${sectionKey}.0`,
-            },
-          ];
-        }
+      } else if (sectionData && sectionData.trim()) {
+        normalized[sectionKey] = [
+          { content: sectionData, key: `enhanced.${sectionKey}.0` },
+        ];
       }
     });
-
-    return normalizedData;
+    return normalized;
   }, [parsedResumeData]);
 
-  // Get the section order from enhanced resume
   const enhancedSectionOrder = useMemo(() => {
     if (!dynamicEnhancedResume) return [];
     return Object.keys(dynamicEnhancedResume);
   }, [dynamicEnhancedResume]);
 
-  // Early return after all hooks have been called
+  // Build final resume (when nothing saved)
+  const finalResume = useMemo(() => {
+    if (savedFinalResume && Object.keys(savedFinalResume).length > 0) {
+      return savedFinalResume;
+    }
+    if (!dynamicEnhancedResume && !originalResume) return {};
+
+    const final = {};
+    const hasSel = Object.keys(selections).some((k) => selections[k]);
+    if (!hasSel) {
+      const profileSummaryData = {
+        enhanced:
+          dynamicEnhancedResume?.["Profile Summary"] ||
+          dynamicEnhancedResume?.["Summary"] ||
+          [],
+      };
+      localStorage.setItem(
+        "profileSummaryData",
+        JSON.stringify(profileSummaryData),
+      );
+      return {};
+    }
+
+    enhancedSectionOrder.forEach((sectionKey) => {
+      const orig = originalResume?.[sectionKey] || [];
+      const enh = dynamicEnhancedResume?.[sectionKey] || [];
+      const selectedItems = [];
+
+      orig.forEach((item) => {
+        if (selections[item.key])
+          selectedItems.push({ content: item.content, source: "original" });
+      });
+      enh.forEach((item) => {
+        if (selections[item.key])
+          selectedItems.push({ content: item.content, source: "enhanced" });
+      });
+
+      if (selectedItems.length) final[sectionKey] = selectedItems;
+    });
+
+    return final;
+  }, [
+    selections,
+    originalResume,
+    dynamicEnhancedResume,
+    enhancedSectionOrder,
+    savedFinalResume,
+  ]);
+
+  // Edit/save handlers
+  const handleEditClick = useCallback(() => setIsEditing(true), []);
+  const handleSaveEdit = useCallback((editedData) => {
+    setSavedFinalResume(editedData);
+    setIsEditing(false);
+    setHasUnsavedChanges(false);
+    setAlertConfig({
+      title: "Success",
+      message:
+        "Resume saved successfully!",
+      type: "success",
+    });
+    setShowAlert(true);
+  }, []);
+  const handleCancelEdit = useCallback(() => {
+    setIsEditing(false);
+    setHasUnsavedChanges(false);
+  }, []);
+
   if (!showPreview) return null;
 
-  // If no parsed data is available, show error state
   if (!originalResume && !dynamicEnhancedResume) {
     return (
       <div
         className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
         onClick={handleOutsideClick}
       >
-        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w/full p-6 text-center">
           <div className="text-6xl mb-4">📄</div>
           <h3 className="text-xl font-semibold text-gray-800 mb-2">
             No Resume Data Available
@@ -164,322 +216,205 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       </div>
     );
   }
-
   if (!dynamicEnhancedResume) return null;
 
+  // Individual line selection
   const handleSelection = (key, isSelected) => {
-    setSelections((prev) => {
-      const newSelections = { ...prev };
+    const [resumeType, sectionKey, indexStr] = key.split(".");
+    const itemIndex = parseInt(indexStr, 10);
 
-      if (isSelected) {
-        // When selecting a line, we need to deselect the corresponding line from the other resume
-        const keyParts = key.split(".");
-        const resumeType = keyParts[0]; // 'original' or 'enhanced'
-        const otherResumeType =
-          resumeType === "original" ? "enhanced" : "original";
+    const sourceData =
+      resumeType === "original" ? originalResume : dynamicEnhancedResume;
+    const itemContent = sourceData?.[sectionKey]?.[itemIndex]?.content;
 
-        // Create the corresponding key for the other resume
-        const correspondingKey = key.replace(
-          `${resumeType}.`,
-          `${otherResumeType}.`,
-        );
+    if (isSelected) {
+      // Select + unselect corresponding
+      setSelections((prev) => {
+        const next = { ...prev };
+        const other = resumeType === "original" ? "enhanced" : "original";
+        const mirrorKey = key.replace(`${resumeType}.`, `${other}.`);
+        next[key] = true;
+        next[mirrorKey] = false;
+        return next;
+      });
 
-        // Set the selected line and deselect the corresponding line from the other resume
-        newSelections[key] = true;
-        newSelections[correspondingKey] = false;
-      } else {
-        // Simply deselect the line
-        newSelections[key] = false;
-      }
-
-      return newSelections;
-    });
-    setIsSaved(false); // Mark as unsaved when selections change
-  };
-
-  // Function to add content to preview
-  const addToPreview = (sectionKey, content, source) => {
-    setPreviewContent(prev => {
-      const newContent = { ...prev };
-      if (!newContent[sectionKey]) {
-        newContent[sectionKey] = [];
-      }
-      
-      // Check if content already exists to avoid duplicates
-      const exists = newContent[sectionKey].some(item => item.content === content);
-      if (!exists) {
-        newContent[sectionKey].push({ content, source });
-      }
-      
-      return newContent;
-    });
-    setIsSaved(false);
-  };
-
-  // Function to remove content from preview
-  const removeFromPreview = (sectionKey, contentIndex) => {
-    setPreviewContent(prev => {
-      const newContent = { ...prev };
-      if (newContent[sectionKey]) {
-        const removedItem = newContent[sectionKey][contentIndex];
-        newContent[sectionKey].splice(contentIndex, 1);
-        
-        // If section is empty, remove it
-        if (newContent[sectionKey].length === 0) {
-          delete newContent[sectionKey];
-        }
-        
-        // Update selections to deselect the removed item
-        if (removedItem) {
-          const resumeData = removedItem.source === 'original' ? originalResume : dynamicEnhancedResume;
-          if (resumeData && resumeData[sectionKey]) {
-            const matchingItem = resumeData[sectionKey].find(item => item.content === removedItem.content);
-            if (matchingItem) {
-              setSelections(prevSelections => ({
-                ...prevSelections,
-                [matchingItem.key]: false
-              }));
-            }
+      // Mirror into saved resume if it exists
+      if (savedFinalResume && itemContent) {
+        setSavedFinalResume((prev) => {
+          const updated = { ...prev };
+          if (!updated[sectionKey]) updated[sectionKey] = [];
+          const exists = updated[sectionKey].some(
+            (i) => i.content === itemContent,
+          );
+          if (!exists) {
+            updated[sectionKey].push({
+              content: itemContent,
+              source: resumeType,
+            });
           }
-        }
-      }
-      return newContent;
-    });
-    setIsSaved(false);
-  };
-
-  // Function to remove entire section from preview
-  const removeSectionFromPreview = (sectionKey) => {
-    setPreviewContent(prev => {
-      const newContent = { ...prev };
-      
-      // Deselect all items in this section
-      if (newContent[sectionKey]) {
-        newContent[sectionKey].forEach(item => {
-          const resumeData = item.source === 'original' ? originalResume : dynamicEnhancedResume;
-          if (resumeData && resumeData[sectionKey]) {
-            const matchingItem = resumeData[sectionKey].find(resumeItem => resumeItem.content === item.content);
-            if (matchingItem) {
-              setSelections(prevSelections => ({
-                ...prevSelections,
-                [matchingItem.key]: false
-              }));
-            }
-          }
+          return updated;
         });
       }
-      
-      delete newContent[sectionKey];
-      return newContent;
-    });
-    setIsSaved(false);
+    } else {
+      // Deselect
+      setSelections((prev) => ({ ...prev, [key]: false }));
+      if (savedFinalResume && itemContent) {
+        setSavedFinalResume((prev) => {
+          if (!prev) return prev;
+          const updated = { ...prev };
+          if (updated[sectionKey]) {
+            updated[sectionKey] = updated[sectionKey].filter(
+              (i) => i.content !== itemContent,
+            );
+            if (updated[sectionKey].length === 0) delete updated[sectionKey];
+          }
+          return updated;
+        });
+      }
+    }
   };
 
-  // Function to get all possible keys for a resume
-  const getAllKeysForResume = (resumeData, prefix) => {
+  // Utility to get all keys
+  const getAllKeysForResume = (resumeData) => {
     const keys = [];
-
     if (!resumeData) return keys;
-
-    // Dynamically get all keys from all sections
     Object.keys(resumeData).forEach((sectionKey) => {
-      const sectionItems = resumeData[sectionKey] || [];
-      sectionItems.forEach((item) => {
-        keys.push(item.key);
+      (resumeData[sectionKey] || []).forEach((item) => {
+        if (item.key) keys.push(item.key);
       });
     });
-
     return keys;
   };
 
-  // Function to check if all items from a resume type are selected
+  // Are all selected for a type?
   const areAllSelectedForResumeType = (resumeType) => {
     const resumeData =
       resumeType === "original" ? originalResume : dynamicEnhancedResume;
-    const keys = getAllKeysForResume(resumeData, resumeType);
-    return keys.length > 0 && keys.every((key) => selections[key] === true);
+    const keys = getAllKeysForResume(resumeData);
+    return keys.length > 0 && keys.every((k) => selections[k] === true);
+    // NOTE: only `selections` controls the checkboxes now
   };
 
-  // Function to toggle select all from one resume
+  // Use All toggle (mutually exclusive)
   const handleSelectAllToggle = (resumeType) => {
+    const other = resumeType === "original" ? "enhanced" : "original";
+    const allSelected = areAllSelectedForResumeType(resumeType);
+
+    const selectedResumeData =
+      resumeType === "original" ? originalResume : dynamicEnhancedResume;
+    const otherResumeData =
+      resumeType === "original" ? dynamicEnhancedResume : originalResume;
+
+    const selectedKeys = getAllKeysForResume(selectedResumeData);
+    const otherKeys = getAllKeysForResume(otherResumeData);
+
+    // Update only by selections (the sole source of truth for checkbox UI)
     setSelections((prev) => {
-      const newSelections = { ...prev };
-      const otherResumeType =
-        resumeType === "original" ? "enhanced" : "original";
-      const allCurrentlySelected = areAllSelectedForResumeType(resumeType);
-
-      // Get all keys for both resumes
-      const selectedResumeData =
-        resumeType === "original" ? originalResume : dynamicEnhancedResume;
-      const otherResumeData =
-        resumeType === "original" ? dynamicEnhancedResume : originalResume;
-
-      const selectedKeys = getAllKeysForResume(selectedResumeData, resumeType);
-      const otherKeys = getAllKeysForResume(otherResumeData, otherResumeType);
-
-      if (allCurrentlySelected) {
-        // If all are selected, clear all selections from both resumes
-        selectedKeys.forEach((key) => {
-          newSelections[key] = false;
-        });
-        otherKeys.forEach((key) => {
-          newSelections[key] = false;
-        });
-        // Clear preview content
-        setPreviewContent({});
+      const next = { ...prev };
+      if (allSelected) {
+        // Clear all if everything already selected in that column
+        selectedKeys.forEach((k) => (next[k] = false));
+        otherKeys.forEach((k) => (next[k] = false));
       } else {
-        // If not all are selected, select all from chosen resume and deselect all from other
-        selectedKeys.forEach((key) => {
-          newSelections[key] = true;
-        });
-        otherKeys.forEach((key) => {
-          newSelections[key] = false;
-        });
-        
-        // Update preview content with selected resume data
-        const newPreviewContent = {};
-        Object.keys(selectedResumeData).forEach(sectionKey => {
-          newPreviewContent[sectionKey] = selectedResumeData[sectionKey].map(item => ({
-            content: item.content,
-            source: resumeType
-          }));
-        });
-        setPreviewContent(newPreviewContent);
+        selectedKeys.forEach((k) => (next[k] = true));
+        otherKeys.forEach((k) => (next[k] = false));
       }
-
-      return newSelections;
+      return next;
     });
-    setIsSaved(false);
-  };
 
-  // Function to handle save
-  const handleSave = () => {
-    // Update selections based on preview content
-    const newSelections = {};
-    
-    Object.keys(previewContent).forEach(sectionKey => {
-      previewContent[sectionKey].forEach(item => {
-        const resumeData = item.source === 'original' ? originalResume : dynamicEnhancedResume;
-        if (resumeData && resumeData[sectionKey]) {
-          const matchingItem = resumeData[sectionKey].find(resumeItem => resumeItem.content === item.content);
-          if (matchingItem) {
-            newSelections[matchingItem.key] = true;
-          }
+    // Keep savedFinalResume in sync with the bulk action
+    setSavedFinalResume((prev) => {
+      if (allSelected) {
+        // Clearing all: keep only custom sections (not in enhancedSectionOrder)
+        const updated = {};
+        if (prev) {
+          Object.keys(prev).forEach((sectionKey) => {
+            if (!enhancedSectionOrder.includes(sectionKey)) {
+              updated[sectionKey] = prev[sectionKey];
+            }
+          });
         }
-      });
+        return updated;
+      } else {
+        // Build from the selected side
+        const updated = {};
+        enhancedSectionOrder.forEach((sectionKey) => {
+          const sectionData = selectedResumeData?.[sectionKey] || [];
+          if (sectionData.length) {
+            updated[sectionKey] = sectionData.map((item) => ({
+              content: item.content,
+              source: resumeType,
+            }));
+          }
+        });
+        // Preserve any custom sections
+        if (prev) {
+          Object.keys(prev).forEach((sectionKey) => {
+            if (!enhancedSectionOrder.includes(sectionKey)) {
+              updated[sectionKey] = prev[sectionKey];
+            }
+          });
+        }
+        return updated;
+      }
     });
-    
-    setSelections(newSelections);
-    setIsSaved(true);
-    
-    setAlertConfig({
-      title: "Saved Successfully",
-      message: "Your resume content has been saved. You can now download it.",
-      type: "success"
-    });
-    setShowAlert(true);
-  };
-
-  // Function to add new section
-  const handleAddSection = () => {
-    if (!newSectionName.trim()) return;
-    
-    const validItems = newSectionItems.filter(item => item.trim());
-    if (validItems.length === 0) return;
-    
-    setPreviewContent(prev => ({
-      ...prev,
-      [newSectionName]: validItems.map(item => ({
-        content: item,
-        source: 'custom'
-      }))
-    }));
-    
-    // Reset modal state
-    setNewSectionName("");
-    setNewSectionItems([""]);
-    setShowAddSectionModal(false);
-    setIsSaved(false);
   };
 
   const downloadResume = async (format) => {
-    if (!isSaved) {
+    if (hasUnsavedChanges) {
       setAlertConfig({
-        title: "Save Required",
-        message: "Please save your content first before downloading.",
-        type: "warning"
+        title: "Unsaved Changes",
+        message:
+          "You have unsaved changes in the live preview. Please save your changes before downloading.",
+        type: "warning",
       });
       setShowAlert(true);
       return;
     }
 
-    // Use previewContent for download
-    const resumeToDownload = previewContent;
-    console.log("Downloading resume with data:", resumeToDownload);
-
-    if (!resumeToDownload || Object.keys(resumeToDownload).length === 0) {
-      setAlertConfig({
-        title: "No Content",
-        message: "Please add some content to your resume before downloading.",
-        type: "warning"
-      });
-      setShowAlert(true);
-      return;
-    }
+    const resumeToDownload = savedFinalResume || finalResume;
+    if (!resumeToDownload) return;
 
     try {
       const studentId = JSON.parse(localStorage.getItem("user") || "{}")?.id;
-
       const eligibilityResponse = await checkDownloadEligibility(studentId);
 
       if (!eligibilityResponse.is_eligible) {
         setAlertConfig({
-          message: eligibilityResponse.message || "Download not allowed at this time.",
-          type: "warning"
+          message:
+            eligibilityResponse.message || "Download not allowed at this time.",
+          type: "warning",
         });
         setShowAlert(true);
         return;
       }
 
       let fileInfo;
-
       if (format === "PDF") {
-        // Generate actual PDF file
         fileInfo = await generateAndDownloadPDF(resumeToDownload);
       } else {
-        // Generate proper DOCX file
         fileInfo = await generateAndDownloadDocx(resumeToDownload);
       }
 
-      // Save to S3 after successful download
       if (fileInfo && fileInfo.file && fileInfo.filename) {
-        console.log("Saving file to S3:", fileInfo.filename);
-
         try {
-          const s3Response = await saveResumeToS3(
-            studentId,
-            fileInfo.file,
-            fileInfo.filename,
-          );
-          console.log("File successfully saved to S3:", s3Response);
+          await saveResumeToS3(studentId, fileInfo.file, fileInfo.filename);
         } catch (s3Error) {
           console.error("Error saving to S3:", s3Error);
-          // Don't prevent download if S3 save fails, just log the error
         }
       }
-
-      console.log(`Successfully downloaded resume as ${format}`);
     } catch (error) {
+      console.error("Error downloading resume:", error);
       setAlertConfig({
         title: "Error",
-        message: "Unable to check download eligibility. Please try again.",
-        type: "error"
+        message: "Unable to download resume. Please try again.",
+        type: "error",
       });
       setShowAlert(true);
     }
   };
 
-  // Function to generate actual PDF file with EXACT same formatting as preview
+  // PDF builder
   const generateAndDownloadPDF = async (resumeData) => {
     try {
       const pdf = new jsPDF({
@@ -487,248 +422,202 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         unit: "pt",
         format: "letter",
       });
-
-      // Set exactly the same font as preview - Arial, 11pt
       pdf.setFont("arial", "normal");
       pdf.setFontSize(11);
 
-      // PDF dimensions and margins - match preview exactly
-      const pageWidth = 612; // 8.5 inches * 72 points
-      const pageHeight = 792; // 11 inches * 72 points
-      const margin = 57.6; // 0.8 inches * 72 points (same as preview padding)
+      const pageWidth = 612,
+        pageHeight = 792;
+      const margin = 57.6;
       const contentWidth = pageWidth - 2 * margin;
-      let yPosition = margin;
+      let y = margin;
 
-      // Function to add watermark exactly like preview
       const addWatermark = () => {
-        pdf.setTextColor(153, 153, 153); // Same gray as preview
+        pdf.setTextColor(153, 153, 153);
         pdf.setFontSize(9);
         pdf.setFont("arial", "italic");
         const watermarkText = "Powered by iQua.ai";
-        const watermarkWidth = pdf.getTextWidth(watermarkText);
-        const watermarkX = pageWidth - margin - watermarkWidth;
-        const watermarkY = pageHeight - 20;
-        pdf.text(watermarkText, watermarkX, watermarkY);
-        pdf.setTextColor(0, 0, 0); // Reset to black
+        const w = pdf.getTextWidth(watermarkText);
+        pdf.text(watermarkText, pageWidth - margin - w, pageHeight - 20);
+        pdf.setTextColor(0, 0, 0);
       };
-
       addWatermark();
 
-      // Function to add text with EXACT same spacing as preview
-      const addText = (text, x, y, maxWidth, options = {}) => {
+      const addText = (text, x, yPos, maxWidth, opts = {}) => {
         const {
           fontSize = 11,
           isBold = false,
           isTitle = false,
-          lineHeight = 1.15
-        } = options;
-
+          lineHeight = 1.15,
+        } = opts;
         pdf.setFontSize(fontSize);
         pdf.setFont("arial", isBold ? "bold" : "normal");
-
         if (isTitle) {
-          // Section titles - exactly like preview
-          pdf.setFontSize(12);
-          pdf.setFont("arial", "bold");
-
-          // Convert to uppercase like preview
-          const titleText = text.toUpperCase();
-          pdf.text(titleText, x, y);
-
-          // Add underline exactly like preview
-          const textWidth = pdf.getTextWidth(titleText);
+          const title = text.toUpperCase();
+          pdf.text(title, x, yPos);
+          const w = pdf.getTextWidth(title);
           pdf.setLineWidth(1);
-          pdf.line(x, y + 3, x + textWidth, y + 3);
-
-          return y + 24; // Same spacing as preview (24pt after section titles)
+          pdf.line(x, yPos + 3, x + w, yPos + 3);
+          return yPos + 24;
         } else {
-          // Regular text
           const lines = pdf.splitTextToSize(text, maxWidth);
-          pdf.text(lines, x, y);
-
-          // Calculate line spacing exactly like preview
-          const lineSpacing = fontSize * lineHeight;
-          const totalHeight = lines.length * lineSpacing;
-
-          return y + totalHeight + 6; // 6pt paragraph spacing like preview
+          pdf.text(lines, x, yPos);
+          const totalHeight = lines.length * fontSize * lineHeight;
+          return yPos + totalHeight + 6;
         }
       };
 
-      // Process each section with EXACT same formatting as preview
-      const sectionOrder = Object.keys(resumeData);
-      sectionOrder.forEach((sectionKey, sectionIndex) => {
-        const sectionItems = resumeData[sectionKey] || [];
+      const allSections = [
+        ...enhancedSectionOrder,
+        ...Object.keys(resumeData || {}).filter(
+          (k) => !enhancedSectionOrder.includes(k),
+        ),
+      ];
 
-        if (sectionItems.length > 0) {
-          // Section spacing - exactly like preview
-          if (sectionIndex > 0) {
-            yPosition += 24; // 24pt between sections like preview
-          }
+      allSections.forEach((sectionKey, i) => {
+        const items = resumeData[sectionKey] || [];
+        if (!items.length) return;
 
-          // Check if we need a new page
-          if (yPosition > pageHeight - 100) {
-            pdf.addPage();
-            addWatermark();
-            yPosition = margin;
-          }
+        if (i > 0) y += 24;
+        if (y > pageHeight - 100) {
+          pdf.addPage();
+          addWatermark();
+          y = margin;
+        }
 
-          // Add section title with exact same formatting as preview
-          const formattedTitle = formatSectionTitle(sectionKey);
-          yPosition = addText(formattedTitle, margin, yPosition, contentWidth, {
-            fontSize: 12,
-            isBold: true,
-            isTitle: true
+        y = addText(formatSectionTitle(sectionKey), margin, y, contentWidth, {
+          fontSize: 12,
+          isBold: true,
+          isTitle: true,
+        });
+
+        if (sectionKey.toLowerCase().includes("contact")) {
+          items.forEach((item) => {
+            if (y > pageHeight - 50) {
+              pdf.addPage();
+              addWatermark();
+              y = margin;
+            }
+            y = addText(item.content, margin, y, contentWidth, {
+              fontSize: 11,
+              lineHeight: 1.15,
+            });
           });
-
-          // Add section content with exact same formatting as preview
-          if (sectionKey.toLowerCase().includes("contact")) {
-            // Contact information - no bullets, exactly like preview
-            sectionItems.forEach((item) => {
-              if (yPosition > pageHeight - 50) {
-                pdf.addPage();
-                addWatermark();
-                yPosition = margin;
-              }
-              yPosition = addText(item.content, margin, yPosition, contentWidth, {
-                fontSize: 11,
-                lineHeight: 1.15
-              });
+        } else {
+          items.forEach((item) => {
+            if (y > pageHeight - 50) {
+              pdf.addPage();
+              addWatermark();
+              y = margin;
+            }
+            pdf.setFont("arial", "normal");
+            pdf.setFontSize(11);
+            pdf.text("•", margin, y);
+            y = addText(item.content, margin + 12, y, contentWidth - 12, {
+              fontSize: 11,
+              lineHeight: 1.15,
             });
-          } else {
-            // All other sections with bullet points - exactly like preview
-            sectionItems.forEach((item) => {
-              if (yPosition > pageHeight - 50) {
-                pdf.addPage();
-                addWatermark();
-                yPosition = margin;
-              }
-
-              // Add bullet point exactly like preview
-              pdf.setFont("arial", "normal");
-              pdf.setFontSize(11);
-              pdf.text("•", margin, yPosition);
-
-              // Add content with exact same indentation as preview
-              yPosition = addText(item.content, margin + 12, yPosition, contentWidth - 12, {
-                fontSize: 11,
-                lineHeight: 1.15
-              });
-            });
-          }
+          });
         }
       });
 
-      // Generate filename and save
-      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, "-");
+      const timestamp = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace(/:/g, "-");
       const filename = `Resume_${timestamp}.pdf`;
       const pdfBlob = pdf.output("blob");
-      const pdfFile = new File([pdfBlob], filename, { type: "application/pdf" });
-
+      const pdfFile = new File([pdfBlob], filename, {
+        type: "application/pdf",
+      });
       pdf.save(filename);
       return { file: pdfFile, filename };
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      throw error;
+    } catch (e) {
+      console.error("Error generating PDF:", e);
+      throw e;
     }
   };
 
-  // Function to generate DOCX with exact same formatting as preview
+  // DOCX builder
   const generateAndDownloadDocx = async (resumeData) => {
     try {
       const children = [];
+      const allSections = [
+        ...enhancedSectionOrder,
+        ...Object.keys(resumeData || {}).filter(
+          (k) => !enhancedSectionOrder.includes(k),
+        ),
+      ];
 
-      // Process each section with exact same formatting as preview
-      const sectionOrder = Object.keys(resumeData);
-      sectionOrder.forEach((sectionKey, sectionIndex) => {
-        const sectionItems = resumeData[sectionKey] || [];
+      allSections.forEach((sectionKey, idx) => {
+        const items = resumeData[sectionKey] || [];
+        if (!items.length) return;
 
-        if (sectionItems.length > 0) {
-          const isFirstSection = sectionIndex === 0;
-
-          // Section title - exactly like preview
-          children.push(
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: formatSectionTitle(sectionKey).toUpperCase(),
-                  bold: true,
-                  size: 24, // 12pt
-                  font: "Arial",
-                  color: "000000",
-                }),
-              ],
-              spacing: {
-                after: 240, // 12pt spacing after section title
-                before: isFirstSection ? 0 : 360, // 18pt spacing before section
-                line: 240,
-                lineRule: "auto",
+        const isFirst = idx === 0;
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: formatSectionTitle(sectionKey).toUpperCase(),
+                bold: true,
+                size: 24,
+                font: "Arial",
+                color: "000000",
+              }),
+            ],
+            spacing: {
+              after: 240,
+              before: isFirst ? 0 : 360,
+              line: 240,
+              lineRule: "auto",
+            },
+            border: {
+              bottom: {
+                color: "000000",
+                space: 1,
+                style: BorderStyle.SINGLE,
+                size: 4,
               },
-              border: {
-                bottom: {
-                  color: "000000",
-                  space: 1,
-                  style: BorderStyle.SINGLE,
-                  size: 4,
-                },
-              },
-            }),
-          );
+            },
+          }),
+        );
 
-          // Section content with exact same formatting as preview
-          if (sectionKey.toLowerCase().includes("contact")) {
-            // Contact information - no bullets, exactly like preview
-            sectionItems.forEach((item) => {
-              children.push(
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: item.content,
-                      size: 22, // 11pt
-                      font: "Arial",
-                      color: "000000",
-                    }),
-                  ],
-                  alignment: AlignmentType.LEFT,
-                  spacing: {
-                    after: 120, // 6pt spacing between items
-                    before: 0,
-                    line: 240,
-                    lineRule: "auto",
-                  },
-                }),
-              );
-            });
-          } else {
-            // All other sections with bullet points - exactly like preview
-            sectionItems.forEach((item) => {
-              children.push(
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: `• ${item.content}`,
-                      size: 22, // 11pt
-                      font: "Arial",
-                      color: "000000",
-                    }),
-                  ],
-                  spacing: {
-                    after: 120, // 6pt spacing between items
-                    before: 0,
-                    line: 240,
-                    lineRule: "auto",
-                  },
-                  indent: {
-                    left: 180, // 9pt left indent for bullet content
-                    hanging: 180, // Hanging indent for bullet points
-                  },
-                }),
-              );
-            });
-          }
+        if (sectionKey.toLowerCase().includes("contact")) {
+          items.forEach((item) => {
+            children.push(
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: item.content,
+                    size: 22,
+                    font: "Arial",
+                    color: "000000",
+                  }),
+                ],
+                alignment: AlignmentType.LEFT,
+                spacing: { after: 120, before: 0, line: 240, lineRule: "auto" },
+              }),
+            );
+          });
+        } else {
+          items.forEach((item) => {
+            children.push(
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `• ${item.content}`,
+                    size: 22,
+                    font: "Arial",
+                    color: "000000",
+                  }),
+                ],
+                spacing: { after: 120, before: 0, line: 240, lineRule: "auto" },
+                indent: { left: 180, hanging: 180 },
+              }),
+            );
+          });
         }
       });
 
-      // Create document with exact same specifications as preview
       const doc = new Document({
         creator: "iQua.ai Resume Builder",
         title: "Professional Resume",
@@ -740,17 +629,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
               name: "Normal",
               basedOn: "Normal",
               next: "Normal",
-              run: {
-                font: "Arial",
-                size: 22, // 11pt
-              },
+              run: { font: "Arial", size: 22 },
               paragraph: {
-                spacing: {
-                  line: 240,
-                  lineRule: "auto",
-                  after: 120,
-                  before: 0,
-                },
+                spacing: { line: 240, lineRule: "auto", after: 120, before: 0 },
               },
             },
           ],
@@ -759,20 +640,11 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           {
             properties: {
               page: {
-                margin: {
-                  top: 1152, // 0.8 inch margins (same as preview padding)
-                  right: 1152,
-                  bottom: 1152,
-                  left: 1152,
-                },
-                size: {
-                  orientation: "portrait",
-                  width: 12240,
-                  height: 15840,
-                },
+                margin: { top: 1152, right: 1152, bottom: 1152, left: 1152 },
+                size: { orientation: "portrait", width: 12240, height: 15840 },
               },
             },
-            children: children,
+            children,
             footers: {
               default: new Footer({
                 children: [
@@ -780,17 +652,14 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                     children: [
                       new TextRun({
                         text: "Powered by iQua.ai",
-                        size: 18, // 9pt
+                        size: 18,
                         font: "Arial",
                         color: "999999",
                         italics: true,
                       }),
                     ],
                     alignment: AlignmentType.RIGHT,
-                    spacing: {
-                      after: 0,
-                      before: 240,
-                    },
+                    spacing: { after: 0, before: 240 },
                   }),
                 ],
               }),
@@ -800,49 +669,47 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       });
 
       const blob = await Packer.toBlob(doc);
-      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, "-");
+      const timestamp = new Date()
+        .toISOString()
+        .slice(0, 19)
+        .replace(/:/g, "-");
       const filename = `Resume_${timestamp}.docx`;
-
       const properBlob = new Blob([blob], {
         type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       });
-
       const docxFile = new File([properBlob], filename, {
         type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       });
-
       saveAs(properBlob, filename);
       return { file: docxFile, filename };
-    } catch (error) {
-      console.error("Error generating DOCX:", error);
-      throw error;
+    } catch (e) {
+      console.error("Error generating DOCX:", e);
+      throw e;
     }
   };
 
-  // Helper function to format section titles exactly like preview
-  const formatSectionTitle = (sectionKey) => {
-    return sectionKey
+  const formatSectionTitle = (sectionKey) =>
+    sectionKey
       .replace(/([A-Z])/g, " $1")
-      .replace(/^./, (str) => str.toUpperCase())
+      .replace(/^./, (s) => s.toUpperCase())
       .trim();
-  };
 
-  // Interactive Word Document Component with ATS-friendly formatting
-  const InteractiveWordDocument = ({ resumeData, title, isOriginal = false, prefix }) => {
-    const getClickableLine = (key, content, displayContent = null, sectionKey, item) => {
-      const isSelected = selections[key];
+  // Left/Center column component
+  const InteractiveWordDocument = ({
+    resumeData,
+    title,
+    isOriginal = false,
+  }) => {
+    const getClickableLine = (key, content, displayContent = null) => {
+      // ✅ Checkboxes rely ONLY on selections state
+      const isSelected = !!selections[key];
 
       return (
         <div className="flex items-start gap-2 group">
           <input
             type="checkbox"
-            checked={isSelected || false}
-            onChange={(e) => {
-              handleSelection(key, e.target.checked);
-              if (e.target.checked) {
-                addToPreview(sectionKey, content, isOriginal ? 'original' : 'enhanced');
-              }
-            }}
+            checked={isSelected}
+            onChange={(e) => handleSelection(key, e.target.checked)}
             className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
           />
           <div
@@ -850,38 +717,21 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
               ? "bg-green-100 border-green-300 border"
               : "hover:bg-blue-50 border border-transparent"
               }`}
-            onClick={() => {
-              const newSelected = !isSelected;
-              handleSelection(key, newSelected);
-              if (newSelected) {
-                addToPreview(sectionKey, content, isOriginal ? 'original' : 'enhanced');
-              }
-            }}
+            onClick={() => handleSelection(key, !isSelected)}
           >
             {displayContent || (
               <span className="text-sm text-gray-800">{content}</span>
             )}
           </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              addToPreview(sectionKey, content, isOriginal ? 'original' : 'enhanced');
-              handleSelection(key, true);
-            }}
-            className="opacity-0 group-hover:opacity-100 bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-all"
-          >
-            Add
-          </button>
         </div>
       );
     };
 
-    // Use enhanced section order for consistent display
-    const sectionOrder = isOriginal ? enhancedSectionOrder : Object.keys(resumeData || {});
-
+    const sectionOrder = isOriginal
+      ? enhancedSectionOrder
+      : Object.keys(resumeData || {});
     return (
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-        {/* Document Header */}
         <div className="bg-gray-100 px-4 py-2 border-b border-gray-300 flex items-center space-x-2">
           <div className="flex space-x-1">
             <div className="w-3 h-3 bg-red-500 rounded-full"></div>
@@ -895,63 +745,108 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           </div>
         </div>
 
-        {/* Document Content - EXACT same formatting as downloads */}
-        <div className="p-8 min-h-[600px] space-y-6" style={{ fontFamily: "Arial, sans-serif", fontSize: "11pt", lineHeight: "1.15", background: "white" }}>
-          {resumeData && sectionOrder.map((sectionKey, sectionIndex) => {
-            const sectionItems = resumeData[sectionKey] || [];
+        <div
+          className="p-8 min-h-[600px] space-y-6"
+          style={{
+            fontFamily: "Arial, sans-serif",
+            fontSize: "11pt",
+            lineHeight: "1.15",
+            background: "white",
+          }}
+        >
+          {resumeData &&
+            sectionOrder.map((sectionKey, idx) => {
+              const sectionItems = resumeData[sectionKey] || [];
+              if (!sectionItems.length) return null;
 
-            if (!sectionItems || sectionItems.length === 0) {
-              return null;
-            }
+              return (
+                <div key={idx} className="mb-6 space-y-3">
+                  <h2
+                    className="text-lg font-bold mb-4 text-gray-900 uppercase"
+                    style={{
+                      fontFamily: "Arial, sans-serif",
+                      fontSize: "12pt",
+                      fontWeight: "bold",
+                      borderBottom: "1px solid #333",
+                      paddingBottom: "2px",
+                    }}
+                  >
+                    {formatSectionTitle(sectionKey)}
+                  </h2>
 
-            return (
-              <div key={sectionIndex} className="mb-6 space-y-3">
-                <h2 className="text-lg font-bold mb-4 text-gray-900 uppercase" style={{ fontFamily: "Arial, sans-serif", fontSize: "12pt", fontWeight: "bold", borderBottom: "1px solid #333", paddingBottom: "2px" }}>
-                  {formatSectionTitle(sectionKey)}
-                </h2>
-
-                <div className="space-y-2">
-                  {sectionKey.toLowerCase().includes("contact") ? (
-                    // Contact information - no bullets, exactly like downloads
-                    <div style={{ fontFamily: "Arial, sans-serif", fontSize: "11pt", lineHeight: "1.15" }}>
-                      <div className="space-y-2">
-                        {sectionItems.map((item, itemIndex) => (
-                          <div key={itemIndex}>
-                            {getClickableLine(item.key, item.content,
-                              <div className="text-gray-800" style={{ fontFamily: "Arial, sans-serif", fontSize: "11pt", lineHeight: "1.15" }}>
-                                {item.content}
-                              </div>,
-                              sectionKey,
-                              item
-                            )}
-                          </div>
-                        ))}
+                  <div className="space-y-2">
+                    {sectionKey.toLowerCase().includes("contact") ? (
+                      <div
+                        style={{
+                          fontFamily: "Arial, sans-serif",
+                          fontSize: "11pt",
+                          lineHeight: "1.15",
+                        }}
+                      >
+                        <div className="space-y-2">
+                          {sectionItems.map((item, i) => (
+                            <div key={i}>
+                              {getClickableLine(
+                                item.key,
+                                item.content,
+                                <div
+                                  className="text-gray-800"
+                                  style={{
+                                    fontFamily: "Arial, sans-serif",
+                                    fontSize: "11pt",
+                                    lineHeight: "1.15",
+                                  }}
+                                  dangerouslySetInnerHTML={{
+                                    __html: item.content,
+                                  }}
+                                />,
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    // All other sections with bullets, exactly like downloads
-                    sectionItems.map((item, itemIndex) => (
-                      <div key={itemIndex}>
-                        {getClickableLine(item.key, item.content,
-                          <div className="text-gray-800 flex items-start" style={{ fontFamily: "Arial, sans-serif", fontSize: "11pt", lineHeight: "1.15" }}>
-                            <span className="text-gray-600 mr-3 mt-0.5" style={{ fontSize: "11pt" }}>•</span>
-                            <span className="flex-1">{item.content}</span>
-                          </div>,
-                          sectionKey,
-                          item
-                        )}
-                      </div>
-                    ))
-                  )}
+                    ) : (
+                      sectionItems.map((item, i) => (
+                        <div key={i}>
+                          {getClickableLine(
+                            item.key,
+                            item.content,
+                            <div
+                              className="text-gray-800 flex items-start"
+                              style={{
+                                fontFamily: "Arial, sans-serif",
+                                fontSize: "11pt",
+                                lineHeight: "1.15",
+                              }}
+                            >
+                              <span
+                                className="text-gray-600 mr-3 mt-0.5"
+                                style={{ fontSize: "11pt" }}
+                              >
+                                •
+                              </span>
+                              <span
+                                className="flex-1"
+                                dangerouslySetInnerHTML={{
+                                  __html: item.content,
+                                }}
+                              />
+                            </div>,
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
 
-        {/* Footer - exactly like downloads */}
         <div className="mt-8 pt-4 border-t border-gray-200 text-right">
-          <p className="text-xs text-gray-400" style={{ fontFamily: "Arial, sans-serif", fontSize: "9pt" }}>
+          <p
+            className="text-xs text-gray-400"
+            style={{ fontFamily: "Arial, sans-serif", fontSize: "9pt" }}
+          >
             Powered by iQua.ai
           </p>
         </div>
@@ -959,102 +854,450 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     );
   };
 
-  // Final Resume Preview Component with exact same formatting as downloads
-  const FinalResumePreview = ({ resumeData }) => {
-    if (!resumeData || Object.keys(resumeData).length === 0) {
+  // Right column (preview + edit)
+  const FinalResumePreview = ({
+    resumeData,
+    isEditing,
+    onSave,
+    onCancel,
+    onEdit,
+    savedFinalResume,
+    previewScrollRef,
+  }) => {
+    const [editableContent, setEditableContent] = useState({});
+    const [newSectionName, setNewSectionName] = useState("");
+    const [showNewSectionInput, setShowNewSectionInput] = useState(false);
+    const [scrollPosition, setScrollPosition] = useState(0);
+
+    const currentData =
+      savedFinalResume ||
+      (Object.keys(finalResume || {}).length > 0 ? finalResume : resumeData);
+
+    useEffect(() => {
+      if (isEditing) {
+        setEditableContent(JSON.parse(JSON.stringify(currentData || {})));
+      }
+    }, [isEditing, currentData]);
+
+    // Track scroll position
+    useEffect(() => {
+      const handleScroll = () => {
+        if (previewScrollRef.current) {
+          setScrollPosition(previewScrollRef.current.scrollTop);
+        }
+      };
+
+      const scrollEl = previewScrollRef.current;
+      if (scrollEl) {
+        scrollEl.addEventListener("scroll", handleScroll);
+        return () => scrollEl.removeEventListener("scroll", handleScroll);
+      }
+    }, []);
+
+    const handleContentChange = (sectionKey, itemIndex, newContent) => {
+      if (!isEditing) return;
+      setHasUnsavedChanges(true);
+      setEditableContent((prev) => {
+        const updatedSection = [...(prev[sectionKey] || [])];
+        updatedSection[itemIndex] = {
+          ...updatedSection[itemIndex],
+          content: newContent,
+        };
+        return { ...prev, [sectionKey]: updatedSection };
+      });
+    };
+
+    const handleAddBulletPoint = (sectionKey) => {
+      if (!isEditing) return;
+      setHasUnsavedChanges(true);
+      setEditableContent((prev) => ({
+        ...prev,
+        [sectionKey]: [
+          ...(prev[sectionKey] || []),
+          { content: "", source: "user-added" },
+        ],
+      }));
+    };
+
+    // Helper: preserve scroll position of the right column while updating state
+    const preservePreviewScroll = (evt, stateUpdater) => {
+      // Store current scroll position
+      const currentScrollTop = previewScrollRef.current?.scrollTop || 0;
+
+      // Execute state updates
+      stateUpdater();
+
+      // Restore scroll position after state updates
+      setTimeout(() => {
+        if (previewScrollRef.current) {
+          previewScrollRef.current.scrollTop = currentScrollTop;
+        }
+      }, 0);
+    };
+
+    // Remove bullet: uncheck, remove from preview, remove from saved (no scroll jump)
+    const handleRemoveBulletPoint = (sectionKey, itemIndex, evt) => {
+      if (!isEditing) return;
+
+      preservePreviewScroll(evt, () => {
+        const itemToRemove = editableContent[sectionKey]?.[itemIndex];
+        if (!itemToRemove) return;
+
+        const contentToRemove = itemToRemove.content;
+
+        const originalItems = originalResume?.[sectionKey] || [];
+        const enhancedItems = dynamicEnhancedResume?.[sectionKey] || [];
+
+        const originalMatch = originalItems.find(
+          (i) => i.content === contentToRemove,
+        );
+        const enhancedMatch = enhancedItems.find(
+          (i) => i.content === contentToRemove,
+        );
+
+        setSelections((prev) => ({
+          ...prev,
+          ...(originalMatch && { [originalMatch.key]: false }),
+          ...(enhancedMatch && { [enhancedMatch.key]: false }),
+        }));
+
+        setHasUnsavedChanges(true);
+        setEditableContent((prev) => {
+          const updated = { ...prev };
+          const arr = [...(updated[sectionKey] || [])];
+          arr.splice(itemIndex, 1);
+          if (arr.length === 0) delete updated[sectionKey];
+          else updated[sectionKey] = arr;
+          return updated;
+        });
+
+        setSavedFinalResume((prev) => {
+          if (!prev) return prev;
+          const updated = { ...prev };
+          if (updated[sectionKey]) {
+            updated[sectionKey] = updated[sectionKey].filter(
+              (i) => i.content !== contentToRemove,
+            );
+            if (updated[sectionKey].length === 0) delete updated[sectionKey];
+          }
+          return Object.keys(updated).length ? updated : {};
+        });
+      });
+    };
+
+    const handleAddNewSection = () => {
+      if (!isEditing || !newSectionName.trim()) return;
+      const sectionName = newSectionName.trim();
+      setEditableContent((prev) => ({
+        ...prev,
+        [sectionName]: [{ content: "", source: "user-added" }],
+      }));
+      setNewSectionName("");
+      setShowNewSectionInput(false);
+      setHasUnsavedChanges(true);
+    };
+
+    // Remove entire section (no scroll jump)
+    const handleRemoveSection = (sectionKey, evt) => {
+      if (!isEditing) return;
+
+      preservePreviewScroll(evt, () => {
+        const originalItems = originalResume?.[sectionKey] || [];
+        const enhancedItems = dynamicEnhancedResume?.[sectionKey] || [];
+        setSelections((prev) => {
+          const next = { ...prev };
+          originalItems.forEach((i) => (next[i.key] = false));
+          enhancedItems.forEach((i) => (next[i.key] = false));
+          return next;
+        });
+
+        setEditableContent((prev) => {
+          const updated = { ...prev };
+          delete updated[sectionKey];
+          return updated;
+        });
+
+        setSavedFinalResume((prev) => {
+          if (!prev) return prev;
+          const updated = { ...prev };
+          delete updated[sectionKey];
+          return Object.keys(updated).length ? updated : {};
+        });
+
+        setHasUnsavedChanges(true);
+      });
+    };
+
+    const displayData = isEditing ? editableContent : currentData;
+
+    if (!displayData || Object.keys(displayData).length === 0) {
       return (
         <div className="bg-white rounded-lg p-8 text-center text-gray-500">
           <div className="mb-4">📄</div>
           <p>Select content from either version to build your resume</p>
-          <button
-            onClick={() => setShowAddSectionModal(true)}
-            className="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-          >
-            + Add Section
-          </button>
         </div>
       );
     }
 
     return (
       <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-        {/* Document Header */}
         <div className="bg-gray-100 px-4 py-2 border-b border-gray-300 flex items-center space-x-2">
           <div className="flex space-x-1">
             <div className="w-3 h-3 bg-red-500 rounded-full"></div>
             <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
           </div>
-          <span className="text-sm text-gray-600 font-medium">Final_Resume.docx</span>
+          <span className="text-sm text-gray-600 font-medium">
+            {savedFinalResume
+              ? "Final_Resume_Edited.docx"
+              : "Final_Resume.docx"}
+            {savedFinalResume && (
+              <span className="ml-2 text-green-600 text-xs">
+                ✓ Latest Saved Version
+              </span>
+            )}
+            {isEditing && (
+              <span className="ml-2 text-blue-600 text-xs">
+                ✏️ Editing...
+                {hasUnsavedChanges && (
+                  <span className="text-orange-600"> (Unsaved)</span>
+                )}
+              </span>
+            )}
+          </span>
           <div className="ml-auto flex items-center space-x-2">
+            {!isEditing && Object.keys(currentData || {}).length > 0 && (
+              <button
+                onClick={onEdit}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
+                title="Edit resume content"
+              >
+                ✏️ {savedFinalResume ? "Edit Again" : "Edit"}
+              </button>
+            )}
+            {isEditing && (
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => onSave(editableContent)}
+                  className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
+                >
+                  💾 Save
+                </button>
+                <button
+                  onClick={onCancel}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
+                >
+                  ✕ Cancel
+                </button>
+              </div>
+            )}
             <span className="text-xs text-gray-500">📄</span>
             <span className="text-xs text-gray-500">100%</span>
-            <button
-              onClick={() => setShowAddSectionModal(true)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs transition-colors"
-            >
-              + Add Section
-            </button>
           </div>
         </div>
 
-        {/* Document Content - EXACT same formatting as downloads */}
-        <div className="p-8 min-h-[600px] space-y-6" style={{ fontFamily: "Arial, sans-serif", fontSize: "11pt", lineHeight: "1.15", background: "white" }}>
-          {Object.keys(resumeData).map((sectionKey, sectionIndex) => {
-            const sectionItems = resumeData[sectionKey] || [];
-
-            if (!sectionItems || sectionItems.length === 0) {
-              return null;
-            }
+        <div
+          className="p-8 min-h-[600px] space-y-6"
+          style={{
+            fontFamily: "Arial, sans-serif",
+            fontSize: "11pt",
+            lineHeight: "1.15",
+            background: "white",
+          }}
+        >
+          {[
+            ...enhancedSectionOrder,
+            ...Object.keys(displayData || {}).filter(
+              (k) => !enhancedSectionOrder.includes(k),
+            ),
+          ].map((sectionKey, idx) => {
+            const sectionItems = displayData[sectionKey] || [];
+            if (!sectionItems.length) return null;
 
             return (
-              <div key={sectionIndex} className="mb-6 space-y-2 group">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold mb-3 text-gray-900 uppercase" style={{ fontFamily: "Arial, sans-serif", fontSize: "12pt", fontWeight: "bold", borderBottom: "1px solid #333", paddingBottom: "2px" }}>
+              <div key={idx} className="mb-6 space-y-2">
+                <div className="flex items-center justify-between mb-3">
+                  <h2
+                    className="text-lg font-bold text-gray-900 uppercase"
+                    style={{
+                      fontFamily: "Arial, sans-serif",
+                      fontSize: "12pt",
+                      fontWeight: "bold",
+                      borderBottom: "1px solid #333",
+                      paddingBottom: "2px",
+                      flex: 1,
+                    }}
+                  >
                     {formatSectionTitle(sectionKey)}
                   </h2>
-                  <button
-                    onClick={() => removeSectionFromPreview(sectionKey)}
-                    className="opacity-0 group-hover:opacity-100 bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs transition-all"
-                  >
-                    Remove Section
-                  </button>
+                  {isEditing && !enhancedSectionOrder.includes(sectionKey) && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleRemoveSection(sectionKey, e);
+                      }}
+                      className="ml-3 text-red-500 hover:text-red-700 text-sm p-1 rounded transition-colors"
+                      title="Remove section"
+                    >
+                      ✕ Remove Section
+                    </button>
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   {sectionKey.toLowerCase().includes("contact") ? (
-                    // Contact information - no bullets, exactly like downloads
-                    <div style={{ fontFamily: "Arial, sans-serif", fontSize: "11pt", lineHeight: "1.15" }}>
+                    <div
+                      style={{
+                        fontFamily: "Arial, sans-serif",
+                        fontSize: "11pt",
+                        lineHeight: "1.15",
+                      }}
+                    >
                       <div className="space-y-2">
                         {sectionItems.map((item, itemIndex) => (
-                          <div key={itemIndex} className="group flex items-start gap-2">
-                            <div className="flex-1 text-gray-800" style={{ fontFamily: "Arial, sans-serif", fontSize: "11pt", lineHeight: "1.15" }}>
-                              {item.content}
-                            </div>
-                            <button
-                              onClick={() => removeFromPreview(sectionKey, itemIndex)}
-                              className="opacity-0 group-hover:opacity-100 bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs transition-all"
-                            >
-                              Remove
-                            </button>
+                          <div
+                            key={`${sectionKey}-contact-${itemIndex}`}
+                            className="group relative"
+                          >
+                            {isEditing ? (
+                              <div className="flex items-start gap-2">
+                                <textarea
+                                  value={item.content || ""}
+                                  onChange={(e) =>
+                                    handleContentChange(
+                                      sectionKey,
+                                      itemIndex,
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="flex-1 text-gray-800 border-none outline-none resize-none bg-transparent resume-textarea"
+                                  style={{
+                                    fontFamily: "Arial, sans-serif",
+                                    fontSize: "11pt",
+                                    lineHeight: "1.15",
+                                    minHeight: "24px",
+                                  }}
+                                  rows={Math.max(
+                                    1,
+                                    Math.ceil((item.content || "").length / 80),
+                                  )}
+                                  placeholder="Enter contact information..."
+                                  autoComplete="off"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleRemoveBulletPoint(
+                                      sectionKey,
+                                      itemIndex,
+                                      e,
+                                    );
+                                  }}
+                                  className="flex-shrink-0 text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded transition-colors bg-red-50 hover:bg-red-100 border border-red-200 ml-2"
+                                  title="Remove contact entry"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ) : (
+                              <div
+                                className="flex-1 text-gray-800"
+                                style={{
+                                  fontFamily: "Arial, sans-serif",
+                                  fontSize: "11pt",
+                                  lineHeight: "1.15",
+                                }}
+                                dangerouslySetInnerHTML={{
+                                  __html: item.content,
+                                }}
+                              />
+                            )}
                           </div>
                         ))}
+                        {isEditing && (
+                          <div className="mt-2">
+                            <button
+                              onClick={() => handleAddBulletPoint(sectionKey)}
+                              className="text-blue-500 hover:text-blue-700 text-sm flex items-center gap-1 transition-colors"
+                            >
+                              <span>+</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ) : (
-                    // All other sections with bullets - exactly like downloads
                     sectionItems.map((item, itemIndex) => (
-                      <div key={itemIndex} className="group flex items-start gap-2">
-                        <div className="flex-1 text-gray-800 flex items-start" style={{ fontFamily: "Arial, sans-serif", fontSize: "11pt", lineHeight: "1.15" }}>
-                          <span className="text-gray-600 mr-3 mt-0.5" style={{ fontSize: "11pt" }}>•</span>
-                          <span className="flex-1">{item.content}</span>
-                        </div>
-                        <button
-                          onClick={() => removeFromPreview(sectionKey, itemIndex)}
-                          className="opacity-0 group-hover:opacity-100 bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs transition-all"
+                      <div
+                        key={`${sectionKey}-bullet-${itemIndex}`}
+                        className="group relative"
+                      >
+                        <div
+                          className="text-gray-800 flex items-start"
+                          style={{
+                            fontFamily: "Arial, sans-serif",
+                            fontSize: "11pt",
+                            lineHeight: "1.15",
+                          }}
                         >
-                          Remove
-                        </button>
+                          <span
+                            className="text-gray-600 mr-3 mt-0.5"
+                            style={{ fontSize: "11pt" }}
+                          >
+                            •
+                          </span>
+                          {isEditing ? (
+                            <div className="flex-1 flex items-start gap-2">
+                              <textarea
+                                value={item.content || ""}
+                                onChange={(e) =>
+                                  handleContentChange(
+                                    sectionKey,
+                                    itemIndex,
+                                    e.target.value,
+                                  )
+                                }
+                                className="flex-1 text-gray-800 border-none outline-none resize-none bg-transparent resume-textarea"
+                                style={{
+                                  fontFamily: "Arial, sans-serif",
+                                  fontSize: "11pt",
+                                  lineHeight: "1.15",
+                                  minHeight: "24px",
+                                }}
+                                rows={Math.max(
+                                  1,
+                                  Math.ceil((item.content || "").length / 80),
+                                )}
+                                placeholder="Enter bullet point content..."
+                                autoComplete="off"
+                              />
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleRemoveBulletPoint(
+                                    sectionKey,
+                                    itemIndex,
+                                    e,
+                                  );
+                                }}
+                                className="flex-shrink-0 text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded transition-colors bg-red-50 hover:bg-red-100 border border-red-200 ml-2"
+                                title="Remove bullet point"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ) : (
+                            <span
+                              className="flex-1"
+                              dangerouslySetInnerHTML={{ __html: item.content }}
+                            />
+                          )}
+                        </div>
                       </div>
                     ))
                   )}
@@ -1063,9 +1306,11 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
             );
           })}
 
-          {/* Footer - exactly like downloads */}
           <div className="mt-8 pt-4 border-t border-gray-200 text-right">
-            <p className="text-xs text-gray-400" style={{ fontFamily: "Arial, sans-serif", fontSize: "9pt" }}>
+            <p
+              className="text-xs text-gray-400"
+              style={{ fontFamily: "Arial, sans-serif", fontSize: "9pt" }}
+            >
               Powered by iQua.ai
             </p>
           </div>
@@ -1074,189 +1319,166 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     );
   };
 
-  // Add Section Modal
-  const AddSectionModal = () => {
-    if (!showAddSectionModal) return null;
-
-    return (
-      <div className="fixed inset-0 z-60 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800">Add New Section</h3>
-          </div>
-          
-          <div className="p-6 space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Section Name
-              </label>
-              <input
-                type="text"
-                value={newSectionName}
-                onChange={(e) => setNewSectionName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., Certifications, Awards, etc."
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Content Items
-              </label>
-              {newSectionItems.map((item, index) => (
-                <div key={index} className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={item}
-                    onChange={(e) => {
-                      const newItems = [...newSectionItems];
-                      newItems[index] = e.target.value;
-                      setNewSectionItems(newItems);
-                    }}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter content item"
-                  />
-                  {newSectionItems.length > 1 && (
-                    <button
-                      onClick={() => {
-                        const newItems = newSectionItems.filter((_, i) => i !== index);
-                        setNewSectionItems(newItems);
-                      }}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition-colors"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                onClick={() => setNewSectionItems([...newSectionItems, ""])}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm transition-colors"
-              >
-                + Add Item
-              </button>
-            </div>
-          </div>
-          
-          <div className="p-6 border-t border-gray-200 flex gap-3">
-            <button
-              onClick={() => {
-                setShowAddSectionModal(false);
-                setNewSectionName("");
-                setNewSectionItems([""]);
-              }}
-              className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleAddSection}
-              disabled={!newSectionName.trim() || newSectionItems.every(item => !item.trim())}
-              className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Add Section
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4" onClick={handleOutsideClick}>
+    <div
+      className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+      onClick={handleOutsideClick}
+    >
       <div className="bg-white rounded-2xl shadow-2xl max-w-7xl w-full h-[95vh] animate-fade-in flex flex-col">
-        {/* Modal Header */}
-        <div className="text-white p-6 rounded-t-2xl flex justify-between items-center"
-          style={{ background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)' }}
+        {/* Header */}
+        <div
+          className="text-white p-6 rounded-t-2xl flex justify-between items-center"
+          style={{
+            background: "linear-gradient(135deg, #8D79FF 0%, #4343E8 100%)",
+          }}
         >
           <div>
             <h3 className="text-xl font-semibold">Customize Your Resume</h3>
-            <p className="text-sm opacity-90 mt-1">Select content and build your perfect resume</p>
+            <p className="text-sm opacity-90 mt-1">
+              Select the best content from original and AI-enhanced versions
+            </p>
           </div>
-          <div className="flex items-center space-x-3">
-            {!isSaved && Object.keys(previewContent).length > 0 && (
-              <span className="text-sm bg-yellow-500 bg-opacity-20 px-3 py-1 rounded-full">
-                Unsaved changes
-              </span>
-            )}
-            {isSaved && (
-              <span className="text-sm bg-green-500 bg-opacity-20 px-3 py-1 rounded-full">
-                ✓ Saved
-              </span>
-            )}
-            <button onClick={() => setShowPreview(false)} className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors">
-              <span className="text-lg">✕</span>
-            </button>
-          </div>
+          <button
+            onClick={() => setShowPreview(false)}
+            className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors"
+          >
+            <span className="text-lg">✕</span>
+          </button>
         </div>
 
-        {/* Content */}
+        {/* Body */}
         <div className="flex-1 overflow-hidden">
           <div className="grid grid-cols-3 h-full">
-            {/* Left Panel - Original Resume */}
+            {/* Original */}
             <div className="overflow-y-auto p-4 border-r border-gray-200">
               <div className="text-center mb-4">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">Your Original</h4>
-                <p className="text-sm text-gray-600 mb-3">Select content to keep</p>
-                <button onClick={() => handleSelectAllToggle("original")} className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg flex items-center space-x-2 mx-auto">
-                  <span>{areAllSelectedForResumeType("original") ? "✕" : "✓"}</span>
-                  <span>{areAllSelectedForResumeType("original") ? "Clear Selection" : "Use All Original"}</span>
+                <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                  Your Original
+                </h4>
+                <p className="text-sm text-gray-600 mb-3">
+                  Select content to keep
+                </p>
+                <button
+                  onClick={() => handleSelectAllToggle("original")}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg flex items-center space-x-2 mx-auto"
+                >
+                  <span>
+                    {areAllSelectedForResumeType("original") ? "✕" : "✓"}
+                  </span>
+                  <span>
+                    {areAllSelectedForResumeType("original")
+                      ? "Clear Selection"
+                      : "Use All Original"}
+                  </span>
                 </button>
               </div>
-              <InteractiveWordDocument resumeData={originalResume} title="Original_Resume.docx" isOriginal={true} prefix="original" />
+              <InteractiveWordDocument
+                resumeData={originalResume}
+                title="Original_Resume.docx"
+                isOriginal={true}
+              />
             </div>
 
-            {/* Middle Panel - Enhanced Resume */}
+            {/* Enhanced */}
             <div className="overflow-y-auto p-4 border-r border-gray-200">
               <div className="text-center mb-4">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">AI Enhanced</h4>
-                <p className="text-sm text-gray-600 mb-3">Select improved content</p>
-                <button onClick={() => handleSelectAllToggle("enhanced")} className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg flex items-center space-x-2 mx-auto">
-                  <span>{areAllSelectedForResumeType("enhanced") ? "✕" : "✓"}</span>
-                  <span>{areAllSelectedForResumeType("enhanced") ? "Clear Selection" : "Use All Enhanced"}</span>
+                <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                  AI Enhanced
+                </h4>
+                <p className="text-sm text-gray-600 mb-3">
+                  Select improved content
+                </p>
+                <button
+                  onClick={() => handleSelectAllToggle("enhanced")}
+                  className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg flex items-center space-x-2 mx-auto"
+                >
+                  <span>
+                    {areAllSelectedForResumeType("enhanced") ? "✕" : "✓"}
+                  </span>
+                  <span>
+                    {areAllSelectedForResumeType("enhanced")
+                      ? "Clear Selection"
+                      : "Use All Enhanced"}
+                  </span>
                 </button>
               </div>
-              <InteractiveWordDocument resumeData={dynamicEnhancedResume} title="Enhanced_Resume.docx" isOriginal={false} prefix="enhanced" />
+              <InteractiveWordDocument
+                resumeData={dynamicEnhancedResume}
+                title="Enhanced_Resume.docx"
+                isOriginal={false}
+              />
             </div>
 
-            {/* Right Panel - Final Resume Preview */}
-            <div className="overflow-y-auto p-4 bg-gray-50">
+            {/* Final Preview */}
+            <div
+              ref={previewScrollRef}
+              className="overflow-y-auto p-4 bg-gray-50"
+            >
               <div className="text-center mb-4">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">Final Resume</h4>
+                <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                  Final Resume
+                </h4>
                 <p className="text-sm text-gray-600">Live preview</p>
               </div>
-              <FinalResumePreview resumeData={previewContent} />
+              <FinalResumePreview
+                resumeData={finalResume}
+                isEditing={isEditing}
+                onSave={handleSaveEdit}
+                onCancel={handleCancelEdit}
+                onEdit={handleEditClick}
+                savedFinalResume={savedFinalResume}
+                previewScrollRef={previewScrollRef}
+              />
             </div>
           </div>
         </div>
 
-        {/* Footer with Save and Download Actions */}
+        {/* Footer */}
         <div className="border-t border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              <span>Build your resume by selecting content from original and enhanced versions</span>
+              <span>
+                Pick individual lines or use "Use All" buttons for quick
+                selection
+              </span>
             </div>
             <div className="flex space-x-3">
-              <button 
-                onClick={handleSave}
-                disabled={Object.keys(previewContent).length === 0}
-                className="bg-green-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-600 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span>💾</span>
-                <span>Save</span>
-              </button>
-              <button 
-                onClick={() => downloadResume("PDF")} 
-                disabled={!isSaved || Object.keys(previewContent).length === 0} 
+              <button
+                onClick={() => downloadResume("PDF")}
+                disabled={
+                  (!finalResume || Object.keys(finalResume).length === 0) &&
+                  (!savedFinalResume ||
+                    Object.keys(savedFinalResume).length === 0)
+                }
                 className="bg-red-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-600 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: "linear-gradient(91.1deg, #5d5fe2 12.97%, #1a23ab 83.79%)",
+                }}
+                title={
+                  savedFinalResume
+                    ? "Download most recent saved version"
+                    : "Download current version"
+                }
               >
                 <span>📄</span>
                 <span>Download PDF</span>
               </button>
-              <button 
-                onClick={() => downloadResume("DOC")} 
-                disabled={!isSaved || Object.keys(previewContent).length === 0} 
+              <button
+                onClick={() => downloadResume("DOC")}
+                disabled={
+                  (!finalResume || Object.keys(finalResume).length === 0) &&
+                  (!savedFinalResume ||
+                    Object.keys(savedFinalResume).length === 0)
+                }
                 className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  background: "linear-gradient(91.1deg,#ededf2 99.97%,#e0e0e7 83.79%), fontWeight: '600', fontcolor: '#121212'",
+                }}
+                title={
+                  savedFinalResume
+                    ? "Download most recent saved version"
+                    : "Download current version"
+                }
               >
                 <span>📃</span>
                 <span>Download DOC</span>
@@ -1265,11 +1487,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           </div>
         </div>
       </div>
-      
-      {/* Add Section Modal */}
-      <AddSectionModal />
-      
-      {/* Alert Modal */}
       <AlertModal
         showAlert={showAlert}
         setShowAlert={setShowAlert}

@@ -57,10 +57,10 @@ export const useResumeLogic = () => {
       const { structuredData } = await fetchAndStructureResumeData(studentId, userProfile);
       // Store in localStorage
       localStorage.setItem('enhancedResumeData', JSON.stringify(structuredData));
-      localStorage.setItem('profileSummaryData', JSON.stringify(structuredData.professionalSummary));
+      // localStorage.setItem('profileSummaryData', JSON.stringify(structuredData.professionalSummary));
       // Update state with enhanced resume data
       setEnhancedResumeData(structuredData);
-      setProfileSummaryData(structuredData.professionalSummary);
+      // setProfileSummaryData(structuredData.professionalSummary);
       // Show success toast
       setShowSuccessToast(true);
       setSuccessMessage("Resume Enhanced Successfully! ✨");

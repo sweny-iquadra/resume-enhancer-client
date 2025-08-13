@@ -97,9 +97,10 @@ const ResumeChat = ({
       setShowAlert(true);
       return;
     }
-
     // Check if user profile is complete before proceeding
-    if (!checkProfileCompletion(userProfile)) {
+
+    const ProfileCompleteResponse = await checkProfileCompletion();
+    if (!ProfileCompleteResponse.completed) {
       setShowProfileCompletion(true);
       return;
     }
@@ -243,7 +244,7 @@ const ResumeChat = ({
                       <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center">💡</div>
                       <div>
                         <h3 className="font-dmsans font-semibold text-neutral-100">Looks like you're almost there!</h3>
-                        <p className="caption text-neutral-300">
+                        <p className="text-neutral-300 text-sm">
                           Complete your profile to build a perfect resume tailored for you.
                         </p>
                       </div>

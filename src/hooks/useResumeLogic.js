@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { createUserProfile, checkProfileCompletion } from '../utils/userProfile';
 import { fetchAndStructureResumeData, checkInterviewStatus } from '../utils/api';
 import { useAuth } from '../utils/AuthContext';
 
@@ -7,7 +6,6 @@ export const useResumeLogic = () => {
   const [showResumeChat, setShowResumeChat] = useState(false);
   const [showInterviewModal, setShowInterviewModal] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
-  const [userProfile] = useState(createUserProfile());
   const [isLoading, setIsLoading] = useState(false);
   const [enhancedResumeData, setEnhancedResumeData] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -54,7 +52,7 @@ export const useResumeLogic = () => {
       setIsLoading(true);
 
       const studentId = JSON.parse(localStorage.getItem('user') || '{}')?.id || null;
-      const { structuredData } = await fetchAndStructureResumeData(studentId, userProfile);
+      const { structuredData } = await fetchAndStructureResumeData(studentId);
       // Store in localStorage
       localStorage.setItem('enhancedResumeData', JSON.stringify(structuredData));
       // localStorage.setItem('profileSummaryData', JSON.stringify(structuredData.professionalSummary));
@@ -91,7 +89,6 @@ export const useResumeLogic = () => {
     setCurrentPage,
     hasAttendedInterview,
     isCheckingInterviewStatus,
-    userProfile,
     handleCreateResumeClick,
     navigateToInterview,
     isLoading,

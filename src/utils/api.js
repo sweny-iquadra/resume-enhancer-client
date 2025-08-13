@@ -73,7 +73,7 @@ export const fetchParsedResumeData = async (studentId, limit = AppConfig.DEFAULT
  * @returns {Promise<Object>} - Structured resume data for ResumeChat component
  * @throws {Error} - If the API call fails
  */
-export const fetchAndStructureResumeData = async (studentId, userProfile = {}, limit = AppConfig.DEFAULT_RESUME_LIMIT) => {
+export const fetchAndStructureResumeData = async (studentId, limit = AppConfig.DEFAULT_RESUME_LIMIT) => {
     try {
         const parsedResumeResponse = await fetchParsedResumeData(studentId, limit);
 
@@ -86,15 +86,15 @@ export const fetchAndStructureResumeData = async (studentId, userProfile = {}, l
 
         // Extract contact information from the current resumes
         const contactInfo = currentResumes?.contact_information || [];
-        const name = contactInfo.find(info => info.includes('@') === false) || userProfile.name || "User";
-        const email = contactInfo.find(info => info.includes('@')) || userProfile.email || "user@example.com";
+        const name = contactInfo.find(info => info.includes('@') === false) || "User";
+        const email = contactInfo.find(info => info.includes('@')) || "user@example.com";
 
         // Create a structured resume data object for ResumeChat component
         const structuredResumeData = {
             basicDetails: {
                 name: name,
                 email: email,
-                location: userProfile.location || ""
+                location: ""
             },
             skills: enhancedResume?.skills || currentResumes?.skills || [],
             professionalSummary: enhancedResume?.profile_summary?.[0] || currentResumes?.profile_summary?.[0] || "",
@@ -144,6 +144,26 @@ export const checkInterviewStatus = async (studentId) => {
     }
 };
 
+export const checkStudentProfileCompletion = async (studentId) => {
+    try {
+        const response = await fetch(`${baseUrl}/check_profile_completion/${studentId}`, {
+            method: 'GET',
+            headers: {
+                ...getAuthHeader(),
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const profileCompletionResponse = await response.json();
+        return profileCompletionResponse;
+    } catch (error) {
+        console.error('Error checking profile completion:', error);
+        throw error;
+    }
+};
 
 export const getAuthHeader = () => {
     const token = localStorage.getItem("access_token");

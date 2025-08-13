@@ -85,7 +85,7 @@ function App() {
 
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-neutral-900 text-neutral-100 font-inter">
         {/* Main Content Area */}
         <div className="flex-1 flex">
           {/* Dashboard */}

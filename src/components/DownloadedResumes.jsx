@@ -19,7 +19,7 @@ const DownloadedResumes = ({ setCurrentPage }) => {
                 const studentId = JSON.parse(localStorage.getItem("user") || "{}")?.id;
                 const response = await fetchDownloadedResumes(studentId);
 
-                // Map API response to component expected format
+                // Map API response to component format (UNCHANGED)
                 const resumes = (response.files || []).map((file, index) => ({
                     id: index + 1,
                     filename: file.filename,
@@ -57,9 +57,9 @@ const DownloadedResumes = ({ setCurrentPage }) => {
     const formatFileSize = (bytes) => {
         if (!bytes) return "0 B";
         const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const sizes = ["B", "KB", "MB", "GB"];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
     };
 
     const getFileIcon = (fileType) => {
@@ -85,7 +85,7 @@ const DownloadedResumes = ({ setCurrentPage }) => {
                 const link = document.createElement("a");
                 link.href = resume.download_url;
                 link.download = resume.filename;
-                link.target = '_blank';
+                link.target = "_blank";
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -105,16 +105,16 @@ const DownloadedResumes = ({ setCurrentPage }) => {
         } else if (filterType === "pdf") {
             setFilteredResumes(
                 downloadedResumes.filter(
-                    (resume) => resume.file_type.toLowerCase() === "pdf",
-                ),
+                    (resume) => resume.file_type.toLowerCase() === "pdf"
+                )
             );
         } else if (filterType === "doc") {
             setFilteredResumes(
                 downloadedResumes.filter(
                     (resume) =>
                         resume.file_type.toLowerCase() === "docx" ||
-                        resume.file_type.toLowerCase() === "doc",
-                ),
+                        resume.file_type.toLowerCase() === "doc"
+                )
             );
         }
     };
@@ -155,10 +155,10 @@ const DownloadedResumes = ({ setCurrentPage }) => {
 
         const handleDownload = () => {
             if (previewUrl) {
-                const link = document.createElement('a');
+                const link = document.createElement("a");
                 link.href = previewUrl;
                 link.download = resume.filename;
-                link.target = '_blank';
+                link.target = "_blank";
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -168,22 +168,21 @@ const DownloadedResumes = ({ setCurrentPage }) => {
         if (!resume) return null;
 
         return (
-            <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full h-[90vh] flex flex-col overflow-hidden">
-                    {/* Modal Header */}
-                    <div className="text-white p-6 rounded-t-2xl flex justify-between items-center"
-                        style={{ background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)' }}
-                    >
-                        <div>
-                            <h3 className="text-xl font-semibold">{resume.filename}</h3>
-                            <p className="text-sm opacity-90 mt-1">
-                                Downloaded on {formatDate(resume.download_date)} • {resume.file_size}
-                            </p>
-                        </div>
-                        <div className="flex items-center space-x-2">
+            <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+                <div className="bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl max-w-6xl w-full h-[90vh] flex flex-col overflow-hidden">
+                    {/* Modal Header — brand gradient */}
+                    <div className="bg-gradient-to-br from-primary to-accent text-white p-6">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h3 className="text-xl font-semibold">{resume.filename}</h3>
+                                <p className="caption text-white/90 mt-1">
+                                    Downloaded on {formatDate(resume.download_date)} • {resume.file_size}
+                                </p>
+                            </div>
                             <button
                                 onClick={onClose}
-                                className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors"
+                                className="rounded-full p-2 hover:bg-white/15 transition-colors"
+                                aria-label="Close"
                             >
                                 ✕
                             </button>
@@ -191,29 +190,27 @@ const DownloadedResumes = ({ setCurrentPage }) => {
                     </div>
 
                     {/* Preview Content */}
-                    <div className="flex-1 bg-gray-100">
+                    <div className="flex-1 bg-neutral-900">
                         {loading ? (
                             <div className="h-full flex items-center justify-center">
-                                <div className="animate-spin w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full"></div>
-                                <p className="ml-4 text-gray-600">Loading preview...</p>
+                                <div className="animate-spin w-10 h-10 border-4 border-primary border-t-transparent rounded-full" />
+                                <p className="ml-4 caption text-neutral-300">Loading preview...</p>
                             </div>
                         ) : previewError ? (
                             <div className="h-full flex flex-col items-center justify-center text-center px-6">
                                 <div className="text-6xl mb-4">⚠️</div>
-                                <p className="text-red-600 text-lg font-semibold mb-2">{previewError}</p>
-                                <p className="text-sm text-gray-500 mb-4">
-                                    The file might not be accessible or may have been moved.
-                                </p>
-                                <div className="flex space-x-3">
+                                <h4 className="font-dmsans font-semibold text-neutral-100 mb-1">Preview error</h4>
+                                <p className="caption text-red-400 mb-4">{previewError}</p>
+                                <div className="flex gap-3">
                                     <button
                                         onClick={() => window.location.reload()}
-                                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                                        className="btn btn-primary"
                                     >
                                         Try Again
                                     </button>
                                     <button
                                         onClick={handleDownload}
-                                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                                        className="btn btn-secondary"
                                     >
                                         Download Instead
                                     </button>
@@ -222,15 +219,15 @@ const DownloadedResumes = ({ setCurrentPage }) => {
                         ) : iframeError ? (
                             <div className="h-full flex flex-col items-center justify-center text-center px-6">
                                 <div className="text-6xl mb-4">📄</div>
-                                <p className="text-gray-600 text-lg font-semibold mb-2">
+                                <h4 className="font-dmsans font-semibold text-neutral-100 mb-1">
                                     Preview not available
-                                </p>
-                                <p className="text-sm text-gray-500 mb-4">
+                                </h4>
+                                <p className="caption text-neutral-300 mb-4">
                                     The file preview couldn't be loaded in the browser.
                                 </p>
                                 <button
                                     onClick={handleDownload}
-                                    className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors font-medium"
+                                    className="btn btn-primary"
                                 >
                                     Download File
                                 </button>
@@ -243,44 +240,25 @@ const DownloadedResumes = ({ setCurrentPage }) => {
                                 onError={handleIframeError}
                                 sandbox="allow-same-origin allow-scripts"
                             />
-
                         ) : (
-                            //<div className="h-full flex flex-col items-center justify-center text-center px-6">
-                            //   <div className="text-6xl mb-4">📄</div>
-                            //   <p className="text-gray-600 text-lg font-semibold mb-2">
-                            //       Preview not supported for this file type
-                            //   </p>
-                            //   <p className="text-sm text-gray-500 mb-4">
-                            //       You can download and view this file on your system.
-                            //   </p>
-                            //   <button
-                            //       onClick={handleDownload}
-                            //       className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors font-medium"
-                            //   >
-                            //       Download File
-                            //   </button>
-                            //   </div>
                             <iframe
                                 src={`https://docs.google.com/gview?url=${encodeURIComponent(previewUrl)}&embedded=true`}
                                 title="Word Resume Preview"
                                 className="w-full h-full border-none"
                             />
-                        )
-                        }
+                        )}
                     </div>
                 </div>
             </div>
         );
     };
 
-
-
     if (isLoading) {
         return (
             <main className="flex items-center justify-center min-h-[calc(100vh-80px)] px-6 py-12">
                 <div className="text-center">
-                    <div className="animate-spin w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading your enhanced resumes...</p>
+                    <div className="animate-spin w-16 h-16 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+                    <p className="caption text-neutral-300">Loading your enhanced resumes...</p>
                 </div>
             </main>
         );
@@ -291,13 +269,13 @@ const DownloadedResumes = ({ setCurrentPage }) => {
             <main className="flex items-center justify-center min-h-[calc(100vh-80px)] px-6 py-12">
                 <div className="text-center">
                     <div className="text-6xl mb-4">❌</div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    <h3 className="font-dmsans text-xl font-semibold text-neutral-100 mb-2">
                         Error Loading Resumes
                     </h3>
-                    <p className="text-gray-600 mb-4">{error}</p>
+                    <p className="caption text-neutral-300 mb-4">{error}</p>
                     <button
                         onClick={() => window.location.reload()}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                        className="btn btn-primary"
                     >
                         Try Again
                     </button>
@@ -308,34 +286,23 @@ const DownloadedResumes = ({ setCurrentPage }) => {
 
     return (
         <>
-            <main className="min-h-[calc(100vh-80px)] px-6 py-12 bg-gray-50">
+            {/* Page */}
+            <main className="min-h-[calc(100vh-80px)] px-6 py-12 bg-neutral-900 text-neutral-100">
                 <div className="max-w-6xl mx-auto">
                     {/* Header */}
                     <div className="mb-8">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                                    Enhanced Resumes
-                                </h1>
-                                <p className="text-gray-600">
+                                <h1 className="font-dmsans font-semibold">Enhanced Resumes</h1>
+                                <p className="caption text-neutral-300">
                                     Manage and view your iQua AI enhanced resume files
                                 </p>
                             </div>
                             <button
                                 onClick={() => setCurrentPage("dashboard")}
-                                className="text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
-                                style={{
-                                    background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.target.style.background = 'linear-gradient(135deg, #6d7ff5 0%, #5b5ff0 100%)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.target.style.background = 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)';
-                                }}
+                                className="btn grad-cta text-white"
                             >
-                                <span>←</span>
-                                <span>Back To Dashboard</span>
+                                ← <span className="ml-1">Back To Dashboard</span>
                             </button>
                         </div>
                     </div>
@@ -344,68 +311,64 @@ const DownloadedResumes = ({ setCurrentPage }) => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <button
                             onClick={() => handleFilterChange("all")}
-                            className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-left hover:shadow-md transition-all duration-200 ${activeFilter === "all" ? "ring-2 ring-blue-500 bg-blue-50" : ""
-                                }`}
+                            className={[
+                                "card p-6 text-left transition-all duration-200",
+                                "hover:border-primary/50 hover:shadow-xl",
+                                activeFilter === "all" ? "ring-2 ring-primary/60" : ""
+                            ].join(" ")}
                         >
-                            <div className="flex items-center space-x-3">
-                                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-primary/15 text-primary rounded-lg flex items-center justify-center">
                                     <span className="text-2xl">📄</span>
                                 </div>
                                 <div>
-                                    <p className="text-2xl font-bold text-gray-900">
-                                        {downloadedResumes.length}
-                                    </p>
-                                    <p className="text-sm text-gray-600">Total Downloads</p>
+                                    <p className="text-2xl font-semibold">{downloadedResumes.length}</p>
+                                    <p className="caption">Total Downloads</p>
                                 </div>
                             </div>
                         </button>
 
                         <button
                             onClick={() => handleFilterChange("pdf")}
-                            className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-left hover:shadow-md transition-all duration-200 ${activeFilter === "pdf"
-                                ? "ring-2 ring-green-500 bg-green-50"
-                                : ""
-                                }`}
+                            className={[
+                                "card p-6 text-left transition-all duration-200",
+                                "hover:border-primary/50 hover:shadow-xl",
+                                activeFilter === "pdf" ? "ring-2 ring-primary/60" : ""
+                            ].join(" ")}
                         >
-                            <div className="flex items-center space-x-3">
-                                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-primary/15 text-primary rounded-lg flex items-center justify-center">
                                     <span className="text-2xl">📃</span>
                                 </div>
                                 <div>
-                                    <p className="text-2xl font-bold text-gray-900">
-                                        {
-                                            downloadedResumes.filter(
-                                                (r) => r.file_type.toLowerCase() === "pdf",
-                                            ).length
-                                        }
+                                    <p className="text-2xl font-semibold">
+                                        {downloadedResumes.filter((r) => r.file_type.toLowerCase() === "pdf").length}
                                     </p>
-                                    <p className="text-sm text-gray-600">PDF Files</p>
+                                    <p className="caption">PDF Files</p>
                                 </div>
                             </div>
                         </button>
 
                         <button
                             onClick={() => handleFilterChange("doc")}
-                            className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-left hover:shadow-md transition-all duration-200 ${activeFilter === "doc"
-                                ? "ring-2 ring-orange-500 bg-orange-50"
-                                : ""
-                                }`}
+                            className={[
+                                "card p-6 text-left transition-all duration-200",
+                                "hover:border-primary/50 hover:shadow-xl",
+                                activeFilter === "doc" ? "ring-2 ring-primary/60" : ""
+                            ].join(" ")}
                         >
-                            <div className="flex items-center space-x-3">
-                                <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-secondary/20 text-secondary rounded-lg flex items-center justify-center">
                                     <span className="text-2xl">📋</span>
                                 </div>
                                 <div>
-                                    <p className="text-2xl font-bold text-gray-900">
-                                        {
-                                            downloadedResumes.filter(
-                                                (r) =>
-                                                    r.file_type.toLowerCase() === "docx" ||
-                                                    r.file_type.toLowerCase() === "doc",
-                                            ).length
-                                        }
+                                    <p className="text-2xl font-semibold">
+                                        {downloadedResumes.filter((r) => {
+                                            const t = r.file_type.toLowerCase();
+                                            return t === "docx" || t === "doc";
+                                        }).length}
                                     </p>
-                                    <p className="text-sm text-gray-600">DOC Files</p>
+                                    <p className="caption">DOC Files</p>
                                 </div>
                             </div>
                         </button>
@@ -413,25 +376,20 @@ const DownloadedResumes = ({ setCurrentPage }) => {
 
                     {/* Resume List */}
                     {downloadedResumes.length === 0 ? (
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                        <div className="card p-12 text-center">
                             <div className="text-6xl mb-4">📄</div>
-                            <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                                Your Enhanced Resumes
-                            </h3>
-                            <p className="text-gray-600">
-                                Your iQua AI enhanced resume files will appear here once you
-                                download them.
+                            <h3 className="font-dmsans text-xl font-semibold mb-2">Your Enhanced Resumes</h3>
+                            <p className="caption">
+                                Your iQua AI enhanced resume files will appear here once you download them.
                             </p>
                         </div>
                     ) : (
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                            <div className="p-6 border-b border-gray-200">
+                        <div className="card overflow-hidden">
+                            <div className="p-6 border-b border-neutral-800">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <h2 className="text-lg font-semibold text-gray-900">
-                                            Resume Files
-                                        </h2>
-                                        <p className="text-sm text-gray-600 mt-1">
+                                        <h2 className="font-dmsans text-lg font-semibold">Resume Files</h2>
+                                        <p className="caption mt-1">
                                             {activeFilter === "all" && "Showing all resume files"}
                                             {activeFilter === "pdf" && "Showing PDF files only"}
                                             {activeFilter === "doc" && "Showing DOC files only"}
@@ -441,7 +399,7 @@ const DownloadedResumes = ({ setCurrentPage }) => {
                                     {activeFilter !== "all" && (
                                         <button
                                             onClick={() => handleFilterChange("all")}
-                                            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                                            className="label text-primary hover:underline"
                                         >
                                             Show All Files
                                         </button>
@@ -449,62 +407,51 @@ const DownloadedResumes = ({ setCurrentPage }) => {
                                 </div>
                             </div>
 
-                            <div className="divide-y divide-gray-200">
+                            <div className="divide-y divide-neutral-800">
                                 {filteredResumes.length === 0 ? (
                                     <div className="p-12 text-center">
                                         <div className="text-4xl mb-4">📂</div>
-                                        <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                                            No{" "}
-                                            {activeFilter === "pdf"
-                                                ? "PDF"
-                                                : activeFilter === "doc"
-                                                    ? "DOC"
-                                                    : ""}{" "}
-                                            Files Found
+                                        <h3 className="font-dmsans text-lg font-semibold mb-2">
+                                            No {activeFilter === "pdf" ? "PDF" : activeFilter === "doc" ? "DOC" : ""} Files Found
                                         </h3>
-                                        <p className="text-gray-600">
-                                            Try selecting a different file type or create more
-                                            resumes.
+                                        <p className="caption">
+                                            Try selecting a different file type or create more resumes.
                                         </p>
                                     </div>
                                 ) : (
                                     filteredResumes.map((resume) => (
                                         <div
                                             key={resume.id}
-                                            className="p-6 hover:bg-gray-50 transition-colors cursor-pointer group"
+                                            className="p-6 hover:bg-neutral-800/40 transition-colors cursor-pointer group"
                                             onClick={() => handleResumeClick(resume)}
                                         >
                                             <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-4">
-                                                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                                                        <span className="text-xl">
-                                                            {getFileIcon(resume.file_type)}
-                                                        </span>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 bg-primary/15 text-primary rounded-lg flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                                        <span className="text-xl">{getFileIcon(resume.file_type)}</span>
                                                     </div>
                                                     <div>
-                                                        <h3 className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                                                        <h3 className="font-medium text-neutral-100 group-hover:text-primary transition-colors">
                                                             {resume.filename}
                                                         </h3>
-                                                        <div className="flex items-center space-x-4 text-sm text-gray-600 mt-1">
+                                                        <div className="flex items-center gap-4 caption mt-1">
                                                             <span>{resume.file_type}</span>
                                                             <span>•</span>
                                                             <span>{resume.file_size}</span>
                                                             <span>•</span>
-                                                            <span>
-                                                                Downloaded {formatDate(resume.download_date)}
-                                                            </span>
+                                                            <span>Downloaded {formatDate(resume.download_date)}</span>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             setSelectedResume(resume);
                                                             setShowPreview(true);
                                                         }}
-                                                        className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                                                        className="btn btn-ghost"
                                                     >
                                                         👁️ Preview
                                                     </button>
@@ -513,7 +460,7 @@ const DownloadedResumes = ({ setCurrentPage }) => {
                                                             e.stopPropagation();
                                                             handleDownload(resume);
                                                         }}
-                                                        className="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                                                        className="btn btn-secondary"
                                                     >
                                                         ⬇️ Download
                                                     </button>

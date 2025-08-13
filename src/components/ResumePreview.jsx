@@ -32,7 +32,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         setShowPreview(false);
       }
     },
-    [setShowPreview],
+    [setShowPreview]
   );
 
   // Load parsed resume data
@@ -77,7 +77,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       const sectionData = currentResumes[sectionKey];
       if (Array.isArray(sectionData)) {
         const dedup = Array.from(
-          new Set(sectionData.filter((i) => i && i.trim())),
+          new Set(sectionData.filter((i) => i && i.trim()))
         );
         normalized[sectionKey] = dedup.map((item, index) => ({
           content: item,
@@ -101,7 +101,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       const sectionData = enhancedResumes[sectionKey];
       if (Array.isArray(sectionData)) {
         const dedup = Array.from(
-          new Set(sectionData.filter((i) => i && i.trim())),
+          new Set(sectionData.filter((i) => i && i.trim()))
         );
         normalized[sectionKey] = dedup.map((item, index) => ({
           content: item,
@@ -139,7 +139,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       };
       localStorage.setItem(
         "profileSummaryData",
-        JSON.stringify(profileSummaryData),
+        JSON.stringify(profileSummaryData)
       );
       return {};
     }
@@ -178,8 +178,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     setHasUnsavedChanges(false);
     setAlertConfig({
       title: "Success",
-      message:
-        "Resume saved successfully!",
+      message: "Resume saved successfully!",
       type: "success",
     });
     setShowAlert(true);
@@ -194,21 +193,18 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   if (!originalResume && !dynamicEnhancedResume) {
     return (
       <div
-        className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
         onClick={handleOutsideClick}
       >
-        <div className="bg-white rounded-2xl shadow-2xl max-w-md w/full p-6 text-center">
+        <div className="card max-w-md w-full p-6 text-center bg-white text-neutral-900">
           <div className="text-6xl mb-4">📄</div>
-          <h3 className="text-xl font-semibold text-gray-800 mb-2">
-            No Resume Data Available
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Unable to load parsed resume data. Please try generating a new
-            resume.
+          <h3 className="card-title mb-2 text-neutral-900">No Resume Data Available</h3>
+          <p className="caption text-neutral-600 mb-4">
+            Unable to load parsed resume data. Please try generating a new resume.
           </p>
           <button
             onClick={() => setShowPreview(false)}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+            className="btn btn-primary"
           >
             Close
           </button>
@@ -228,7 +224,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     const itemContent = sourceData?.[sectionKey]?.[itemIndex]?.content;
 
     if (isSelected) {
-      // Select + unselect corresponding
       setSelections((prev) => {
         const next = { ...prev };
         const other = resumeType === "original" ? "enhanced" : "original";
@@ -238,13 +233,12 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         return next;
       });
 
-      // Mirror into saved resume if it exists
       if (savedFinalResume && itemContent) {
         setSavedFinalResume((prev) => {
           const updated = { ...prev };
           if (!updated[sectionKey]) updated[sectionKey] = [];
           const exists = updated[sectionKey].some(
-            (i) => i.content === itemContent,
+            (i) => i.content === itemContent
           );
           if (!exists) {
             updated[sectionKey].push({
@@ -256,7 +250,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         });
       }
     } else {
-      // Deselect
       setSelections((prev) => ({ ...prev, [key]: false }));
       if (savedFinalResume && itemContent) {
         setSavedFinalResume((prev) => {
@@ -264,7 +257,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           const updated = { ...prev };
           if (updated[sectionKey]) {
             updated[sectionKey] = updated[sectionKey].filter(
-              (i) => i.content !== itemContent,
+              (i) => i.content !== itemContent
             );
             if (updated[sectionKey].length === 0) delete updated[sectionKey];
           }
@@ -292,7 +285,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       resumeType === "original" ? originalResume : dynamicEnhancedResume;
     const keys = getAllKeysForResume(resumeData);
     return keys.length > 0 && keys.every((k) => selections[k] === true);
-    // NOTE: only `selections` controls the checkboxes now
   };
 
   // Use All toggle (mutually exclusive)
@@ -308,11 +300,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     const selectedKeys = getAllKeysForResume(selectedResumeData);
     const otherKeys = getAllKeysForResume(otherResumeData);
 
-    // Update only by selections (the sole source of truth for checkbox UI)
     setSelections((prev) => {
       const next = { ...prev };
       if (allSelected) {
-        // Clear all if everything already selected in that column
         selectedKeys.forEach((k) => (next[k] = false));
         otherKeys.forEach((k) => (next[k] = false));
       } else {
@@ -322,10 +312,8 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       return next;
     });
 
-    // Keep savedFinalResume in sync with the bulk action
     setSavedFinalResume((prev) => {
       if (allSelected) {
-        // Clearing all: keep only custom sections (not in enhancedSectionOrder)
         const updated = {};
         if (prev) {
           Object.keys(prev).forEach((sectionKey) => {
@@ -336,7 +324,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         }
         return updated;
       } else {
-        // Build from the selected side
         const updated = {};
         enhancedSectionOrder.forEach((sectionKey) => {
           const sectionData = selectedResumeData?.[sectionKey] || [];
@@ -347,7 +334,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
             }));
           }
         });
-        // Preserve any custom sections
         if (prev) {
           Object.keys(prev).forEach((sectionKey) => {
             if (!enhancedSectionOrder.includes(sectionKey)) {
@@ -469,7 +455,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       const allSections = [
         ...enhancedSectionOrder,
         ...Object.keys(resumeData || {}).filter(
-          (k) => !enhancedSectionOrder.includes(k),
+          (k) => !enhancedSectionOrder.includes(k)
         ),
       ];
 
@@ -544,7 +530,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       const allSections = [
         ...enhancedSectionOrder,
         ...Object.keys(resumeData || {}).filter(
-          (k) => !enhancedSectionOrder.includes(k),
+          (k) => !enhancedSectionOrder.includes(k)
         ),
       ];
 
@@ -578,7 +564,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                 size: 4,
               },
             },
-          }),
+          })
         );
 
         if (sectionKey.toLowerCase().includes("contact")) {
@@ -595,7 +581,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                 ],
                 alignment: AlignmentType.LEFT,
                 spacing: { after: 120, before: 0, line: 240, lineRule: "auto" },
-              }),
+              })
             );
           });
         } else {
@@ -612,7 +598,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                 ],
                 spacing: { after: 120, before: 0, line: 240, lineRule: "auto" },
                 indent: { left: 180, hanging: 180 },
-              }),
+              })
             );
           });
         }
@@ -701,7 +687,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     isOriginal = false,
   }) => {
     const getClickableLine = (key, content, displayContent = null) => {
-      // ✅ Checkboxes rely ONLY on selections state
       const isSelected = !!selections[key];
 
       return (
@@ -710,17 +695,17 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
             type="checkbox"
             checked={isSelected}
             onChange={(e) => handleSelection(key, e.target.checked)}
-            className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+            className="mt-1 w-4 h-4 text-primary rounded focus:ring-primary"
           />
           <div
             className={`flex-1 cursor-pointer transition-all duration-200 rounded p-1 ${isSelected
               ? "bg-green-100 border-green-300 border"
-              : "hover:bg-blue-50 border border-transparent"
+              : "hover:bg-primary/5 border border-transparent"
               }`}
             onClick={() => handleSelection(key, !isSelected)}
           >
             {displayContent || (
-              <span className="text-sm text-gray-800">{content}</span>
+              <span className="text-sm text-neutral-800">{content}</span>
             )}
           </div>
         </div>
@@ -731,27 +716,26 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       ? enhancedSectionOrder
       : Object.keys(resumeData || {});
     return (
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div className="bg-gray-100 px-4 py-2 border-b border-gray-300 flex items-center space-x-2">
-          <div className="flex space-x-1">
+      <div className="card bg-white text-neutral-900 shadow-lg overflow-hidden">
+        <div className="px-4 py-2 border-b border-neutral-200 flex items-center gap-2 bg-neutral-50">
+          <div className="flex gap-1">
             <div className="w-3 h-3 bg-red-500 rounded-full"></div>
             <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
           </div>
-          <span className="text-sm text-gray-600 font-medium">{title}</span>
-          <div className="ml-auto flex items-center space-x-2">
-            <span className="text-xs text-gray-500">📄</span>
-            <span className="text-xs text-gray-500">100%</span>
+          <span className="text-sm text-neutral-600 font-medium">{title}</span>
+          <div className="ml-auto flex items-center gap-2">
+            <span className="text-xs text-neutral-500">📄</span>
+            <span className="text-xs text-neutral-500">100%</span>
           </div>
         </div>
 
         <div
-          className="p-8 min-h-[600px] space-y-6"
+          className="p-8 min-h-[600px] space-y-6 bg-white"
           style={{
             fontFamily: "Arial, sans-serif",
             fontSize: "11pt",
             lineHeight: "1.15",
-            background: "white",
           }}
         >
           {resumeData &&
@@ -762,7 +746,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
               return (
                 <div key={idx} className="mb-6 space-y-3">
                   <h2
-                    className="text-lg font-bold mb-4 text-gray-900 uppercase"
+                    className="text-lg font-bold mb-4 text-neutral-900 uppercase"
                     style={{
                       fontFamily: "Arial, sans-serif",
                       fontSize: "12pt",
@@ -790,7 +774,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                                 item.key,
                                 item.content,
                                 <div
-                                  className="text-gray-800"
+                                  className="text-neutral-800"
                                   style={{
                                     fontFamily: "Arial, sans-serif",
                                     fontSize: "11pt",
@@ -799,7 +783,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                                   dangerouslySetInnerHTML={{
                                     __html: item.content,
                                   }}
-                                />,
+                                />
                               )}
                             </div>
                           ))}
@@ -812,7 +796,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                             item.key,
                             item.content,
                             <div
-                              className="text-gray-800 flex items-start"
+                              className="text-neutral-800 flex items-start"
                               style={{
                                 fontFamily: "Arial, sans-serif",
                                 fontSize: "11pt",
@@ -820,7 +804,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                               }}
                             >
                               <span
-                                className="text-gray-600 mr-3 mt-0.5"
+                                className="text-neutral-600 mr-3 mt-0.5"
                                 style={{ fontSize: "11pt" }}
                               >
                                 •
@@ -831,7 +815,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                                   __html: item.content,
                                 }}
                               />
-                            </div>,
+                            </div>
                           )}
                         </div>
                       ))
@@ -842,9 +826,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
             })}
         </div>
 
-        <div className="mt-8 pt-4 border-t border-gray-200 text-right">
+        <div className="mt-8 pt-4 border-t border-neutral-200 text-right bg-white">
           <p
-            className="text-xs text-gray-400"
+            className="text-xs text-neutral-400"
             style={{ fontFamily: "Arial, sans-serif", fontSize: "9pt" }}
           >
             Powered by iQua.ai
@@ -919,15 +903,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       }));
     };
 
-    // Helper: preserve scroll position of the right column while updating state
     const preservePreviewScroll = (evt, stateUpdater) => {
-      // Store current scroll position
       const currentScrollTop = previewScrollRef.current?.scrollTop || 0;
-
-      // Execute state updates
       stateUpdater();
-
-      // Restore scroll position after state updates
       setTimeout(() => {
         if (previewScrollRef.current) {
           previewScrollRef.current.scrollTop = currentScrollTop;
@@ -935,7 +913,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       }, 0);
     };
 
-    // Remove bullet: uncheck, remove from preview, remove from saved (no scroll jump)
     const handleRemoveBulletPoint = (sectionKey, itemIndex, evt) => {
       if (!isEditing) return;
 
@@ -949,10 +926,10 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         const enhancedItems = dynamicEnhancedResume?.[sectionKey] || [];
 
         const originalMatch = originalItems.find(
-          (i) => i.content === contentToRemove,
+          (i) => i.content === contentToRemove
         );
         const enhancedMatch = enhancedItems.find(
-          (i) => i.content === contentToRemove,
+          (i) => i.content === contentToRemove
         );
 
         setSelections((prev) => ({
@@ -976,7 +953,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           const updated = { ...prev };
           if (updated[sectionKey]) {
             updated[sectionKey] = updated[sectionKey].filter(
-              (i) => i.content !== contentToRemove,
+              (i) => i.content !== contentToRemove
             );
             if (updated[sectionKey].length === 0) delete updated[sectionKey];
           }
@@ -997,7 +974,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       setHasUnsavedChanges(true);
     };
 
-    // Remove entire section (no scroll jump)
     const handleRemoveSection = (sectionKey, evt) => {
       if (!isEditing) return;
 
@@ -1032,83 +1008,68 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
     if (!displayData || Object.keys(displayData).length === 0) {
       return (
-        <div className="bg-white rounded-lg p-8 text-center text-gray-500">
+        <div className="card bg-white text-neutral-600 p-8 text-center">
           <div className="mb-4">📄</div>
-          <p>Select content from either version to build your resume</p>
+          <p className="caption">Select content from either version to build your resume</p>
         </div>
       );
     }
 
     return (
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-        <div className="bg-gray-100 px-4 py-2 border-b border-gray-300 flex items-center space-x-2">
-          <div className="flex space-x-1">
+      <div className="card bg-white text-neutral-900 shadow-lg overflow-hidden">
+        <div className="px-4 py-2 border-b border-neutral-200 flex items-center gap-2 bg-neutral-50">
+          <div className="flex gap-1">
             <div className="w-3 h-3 bg-red-500 rounded-full"></div>
             <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
           </div>
-          <span className="text-sm text-gray-600 font-medium">
-            {savedFinalResume
-              ? "Final_Resume_Edited.docx"
-              : "Final_Resume.docx"}
+          <span className="text-sm text-neutral-700 font-medium">
+            {savedFinalResume ? "Final_Resume_Edited.docx" : "Final_Resume.docx"}
             {savedFinalResume && (
-              <span className="ml-2 text-green-600 text-xs">
-                ✓ Latest Saved Version
-              </span>
+              <span className="ml-2 text-green-600 text-xs">✓ Latest Saved Version</span>
             )}
             {isEditing && (
-              <span className="ml-2 text-blue-600 text-xs">
+              <span className="ml-2 text-primary text-xs">
                 ✏️ Editing...
-                {hasUnsavedChanges && (
-                  <span className="text-orange-600"> (Unsaved)</span>
-                )}
+                {hasUnsavedChanges && <span className="text-secondary"> (Unsaved)</span>}
               </span>
             )}
           </span>
-          <div className="ml-auto flex items-center space-x-2">
+          <div className="ml-auto flex items-center gap-2">
             {!isEditing && Object.keys(currentData || {}).length > 0 && (
               <button
                 onClick={onEdit}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
+                className="btn btn-primary"
                 title="Edit resume content"
               >
-                ✏️ {savedFinalResume ? "Edit Again" : "Edit"}
+                ✏️ <span className="ml-1">Edit</span>
               </button>
             )}
             {isEditing && (
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => onSave(editableContent)}
-                  className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
-                >
-                  💾 Save
+              <div className="flex flex-wrap items-center gap-2 w-full overflow-visible">
+                <button onClick={() => onSave(editableContent)} className="btn btn-primary">
+                  Save
                 </button>
-                <button
-                  onClick={onCancel}
-                  className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded text-xs font-medium transition-colors"
-                >
-                  ✕ Cancel
+                <button onClick={onCancel} className="btn btn-secondary">
+                  Cancel
                 </button>
               </div>
             )}
-            <span className="text-xs text-gray-500">📄</span>
-            <span className="text-xs text-gray-500">100%</span>
           </div>
         </div>
 
         <div
-          className="p-8 min-h-[600px] space-y-6"
+          className="p-8 min-h-[600px] space-y-6 bg-white"
           style={{
             fontFamily: "Arial, sans-serif",
             fontSize: "11pt",
             lineHeight: "1.15",
-            background: "white",
           }}
         >
           {[
             ...enhancedSectionOrder,
             ...Object.keys(displayData || {}).filter(
-              (k) => !enhancedSectionOrder.includes(k),
+              (k) => !enhancedSectionOrder.includes(k)
             ),
           ].map((sectionKey, idx) => {
             const sectionItems = displayData[sectionKey] || [];
@@ -1118,7 +1079,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
               <div key={idx} className="mb-6 space-y-2">
                 <div className="flex items-center justify-between mb-3">
                   <h2
-                    className="text-lg font-bold text-gray-900 uppercase"
+                    className="text-lg font-bold text-neutral-900 uppercase"
                     style={{
                       fontFamily: "Arial, sans-serif",
                       fontSize: "12pt",
@@ -1137,10 +1098,10 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                         e.stopPropagation();
                         handleRemoveSection(sectionKey, e);
                       }}
-                      className="ml-3 text-red-500 hover:text-red-700 text-sm p-1 rounded transition-colors"
+                      className="flex-shrink-0 text-red-500 hover:text-red-700 text-xs ml-2"
                       title="Remove section"
                     >
-                      ✕ Remove Section
+                      ❌ Remove Section
                     </button>
                   )}
                 </div>
@@ -1168,10 +1129,10 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                                     handleContentChange(
                                       sectionKey,
                                       itemIndex,
-                                      e.target.value,
+                                      e.target.value
                                     )
                                   }
-                                  className="flex-1 text-gray-800 border-none outline-none resize-none bg-transparent resume-textarea"
+                                  className="flex-1 text-neutral-800 border-none outline-none resize-none bg-transparent"
                                   style={{
                                     fontFamily: "Arial, sans-serif",
                                     fontSize: "11pt",
@@ -1180,7 +1141,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                                   }}
                                   rows={Math.max(
                                     1,
-                                    Math.ceil((item.content || "").length / 80),
+                                    Math.ceil((item.content || "").length / 80)
                                   )}
                                   placeholder="Enter contact information..."
                                   autoComplete="off"
@@ -1190,21 +1151,17 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    handleRemoveBulletPoint(
-                                      sectionKey,
-                                      itemIndex,
-                                      e,
-                                    );
+                                    handleRemoveBulletPoint(sectionKey, itemIndex, e);
                                   }}
-                                  className="flex-shrink-0 text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded transition-colors bg-red-50 hover:bg-red-100 border border-red-200 ml-2"
+                                  className="flex-shrink-0 text-red-500 hover:text-red-700 text-xs ml-2"
                                   title="Remove contact entry"
                                 >
-                                  ✕
+                                  ❌
                                 </button>
                               </div>
                             ) : (
                               <div
-                                className="flex-1 text-gray-800"
+                                className="flex-1 text-neutral-800"
                                 style={{
                                   fontFamily: "Arial, sans-serif",
                                   fontSize: "11pt",
@@ -1221,7 +1178,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                           <div className="mt-2">
                             <button
                               onClick={() => handleAddBulletPoint(sectionKey)}
-                              className="text-blue-500 hover:text-blue-700 text-sm flex items-center gap-1 transition-colors"
+                              className="text-primary hover:brightness-110 text-sm flex items-center gap-1 transition-colors"
                             >
                               <span>+</span>
                             </button>
@@ -1236,7 +1193,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                         className="group relative"
                       >
                         <div
-                          className="text-gray-800 flex items-start"
+                          className="text-neutral-800 flex items-start"
                           style={{
                             fontFamily: "Arial, sans-serif",
                             fontSize: "11pt",
@@ -1244,7 +1201,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                           }}
                         >
                           <span
-                            className="text-gray-600 mr-3 mt-0.5"
+                            className="text-neutral-600 mr-3 mt-0.5"
                             style={{ fontSize: "11pt" }}
                           >
                             •
@@ -1257,10 +1214,10 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                                   handleContentChange(
                                     sectionKey,
                                     itemIndex,
-                                    e.target.value,
+                                    e.target.value
                                   )
                                 }
-                                className="flex-1 text-gray-800 border-none outline-none resize-none bg-transparent resume-textarea"
+                                className="flex-1 text-neutral-800 border-none outline-none resize-none bg-transparent"
                                 style={{
                                   fontFamily: "Arial, sans-serif",
                                   fontSize: "11pt",
@@ -1269,7 +1226,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                                 }}
                                 rows={Math.max(
                                   1,
-                                  Math.ceil((item.content || "").length / 80),
+                                  Math.ceil((item.content || "").length / 80)
                                 )}
                                 placeholder="Enter bullet point content..."
                                 autoComplete="off"
@@ -1282,13 +1239,13 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                                   handleRemoveBulletPoint(
                                     sectionKey,
                                     itemIndex,
-                                    e,
+                                    e
                                   );
                                 }}
-                                className="flex-shrink-0 text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded transition-colors bg-red-50 hover:bg-red-100 border border-red-200 ml-2"
+                                className="flex-shrink-0 text-red-500 hover:text-red-700 text-xs ml-2"
                                 title="Remove bullet point"
                               >
-                                ✕
+                                ❌
                               </button>
                             </div>
                           ) : (
@@ -1306,9 +1263,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
             );
           })}
 
-          <div className="mt-8 pt-4 border-t border-gray-200 text-right">
+          <div className="mt-8 pt-4 border-t border-neutral-200 text-right">
             <p
-              className="text-xs text-gray-400"
+              className="text-xs text-neutral-400"
               style={{ fontFamily: "Arial, sans-serif", fontSize: "9pt" }}
             >
               Powered by iQua.ai
@@ -1321,26 +1278,21 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
       onClick={handleOutsideClick}
     >
-      <div className="bg-white rounded-2xl shadow-2xl max-w-7xl w-full h-[95vh] animate-fade-in flex flex-col">
+      <div className="rounded-2xl shadow-2xl max-w-7xl w-full h-[95vh] animate-fade-in flex flex-col bg-neutral-900 border border-neutral-800">
         {/* Header */}
-        <div
-          className="text-white p-6 rounded-t-2xl flex justify-between items-center"
-          style={{
-            background: "linear-gradient(135deg, #8D79FF 0%, #4343E8 100%)",
-          }}
-        >
+        <div className="text-white p-6 rounded-t-2xl flex justify-between items-center bg-gradient-to-br from-accent to-primary">
           <div>
-            <h3 className="text-xl font-semibold">Customize Your Resume</h3>
-            <p className="text-sm opacity-90 mt-1">
+            <h3 className="font-dmsans text-lg font-semibold">Customize Your Resume</h3>
+            <p className="caption text-white/90 mt-1">
               Select the best content from original and AI-enhanced versions
             </p>
           </div>
           <button
             onClick={() => setShowPreview(false)}
-            className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors"
+            className="text-white hover:bg-white/15 rounded-full p-2 transition-colors"
           >
             <span className="text-lg">✕</span>
           </button>
@@ -1350,19 +1302,17 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         <div className="flex-1 overflow-hidden">
           <div className="grid grid-cols-3 h-full">
             {/* Original */}
-            <div className="overflow-y-auto p-4 border-r border-gray-200">
+            <div className="overflow-y-auto p-4 border-r border-neutral-800 bg-neutral-900">
               <div className="text-center mb-4">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                <h4 className="font-dmsans font-semibold text-neutral-100 mb-2">
                   Your Original
                 </h4>
-                <p className="text-sm text-gray-600 mb-3">
-                  Select content to keep
-                </p>
+                <p className="caption text-neutral-300 mb-3">Select content to keep</p>
                 <button
                   onClick={() => handleSelectAllToggle("original")}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg flex items-center space-x-2 mx-auto"
+                  className="btn grad-cta text-white"
                 >
-                  <span>
+                  <span className="mr-1">
                     {areAllSelectedForResumeType("original") ? "✕" : "✓"}
                   </span>
                   <span>
@@ -1380,19 +1330,17 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
             </div>
 
             {/* Enhanced */}
-            <div className="overflow-y-auto p-4 border-r border-gray-200">
+            <div className="overflow-y-auto p-4 border-r border-neutral-800 bg-neutral-900">
               <div className="text-center mb-4">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                <h4 className="font-dmsans font-semibold text-neutral-100 mb-2">
                   AI Enhanced
                 </h4>
-                <p className="text-sm text-gray-600 mb-3">
-                  Select improved content
-                </p>
+                <p className="caption text-neutral-300 mb-3">Select improved content</p>
                 <button
                   onClick={() => handleSelectAllToggle("enhanced")}
-                  className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md hover:shadow-lg flex items-center space-x-2 mx-auto"
+                  className="btn grad-cta text-white"
                 >
-                  <span>
+                  <span className="mr-1">
                     {areAllSelectedForResumeType("enhanced") ? "✕" : "✓"}
                   </span>
                   <span>
@@ -1412,13 +1360,13 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
             {/* Final Preview */}
             <div
               ref={previewScrollRef}
-              className="overflow-y-auto p-4 bg-gray-50"
+              className="overflow-y-auto p-4 bg-neutral-900"
             >
               <div className="text-center mb-4">
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">
+                <h4 className="font-dmsans font-semibold text-neutral-100 mb-2">
                   Final Resume
                 </h4>
-                <p className="text-sm text-gray-600">Live preview</p>
+                <p className="caption text-neutral-300">Live preview</p>
               </div>
               <FinalResumePreview
                 resumeData={finalResume}
@@ -1434,15 +1382,12 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 p-6">
+        <div className="border-t border-neutral-800 p-6 bg-neutral-900 rounded-b-2xl">
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-600">
-              <span>
-                Pick individual lines or use "Use All" buttons for quick
-                selection
-              </span>
+            <div className="caption text-neutral-300">
+              Pick individual lines or use "Use All" buttons for quick selection
             </div>
-            <div className="flex space-x-3">
+            <div className="flex gap-3">
               <button
                 onClick={() => downloadResume("PDF")}
                 disabled={
@@ -1450,18 +1395,19 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                   (!savedFinalResume ||
                     Object.keys(savedFinalResume).length === 0)
                 }
-                className="bg-red-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-red-600 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  background: "linear-gradient(91.1deg, #5d5fe2 12.97%, #1a23ab 83.79%)",
-                }}
+                className={`btn grad-cta text-white ${(!finalResume || Object.keys(finalResume).length === 0) &&
+                  (!savedFinalResume ||
+                    Object.keys(savedFinalResume).length === 0)
+                  ? "opacity-60 cursor-not-allowed"
+                  : ""
+                  }`}
                 title={
                   savedFinalResume
                     ? "Download most recent saved version"
                     : "Download current version"
                 }
               >
-                <span>📄</span>
-                <span>Download PDF</span>
+                📄 <span className="ml-1">Download PDF</span>
               </button>
               <button
                 onClick={() => downloadResume("DOC")}
@@ -1470,23 +1416,25 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                   (!savedFinalResume ||
                     Object.keys(savedFinalResume).length === 0)
                 }
-                className="bg-blue-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  background: "linear-gradient(91.1deg,#ededf2 99.97%,#e0e0e7 83.79%), fontWeight: '600', fontcolor: '#121212'",
-                }}
+                className={`btn grad-cta text-white ${(!finalResume || Object.keys(finalResume).length === 0) &&
+                  (!savedFinalResume ||
+                    Object.keys(savedFinalResume).length === 0)
+                  ? "opacity-60 cursor-not-allowed"
+                  : ""
+                  }`}
                 title={
                   savedFinalResume
                     ? "Download most recent saved version"
                     : "Download current version"
                 }
               >
-                <span>📃</span>
-                <span>Download DOC</span>
+                📃 <span className="ml-1">Download DOC</span>
               </button>
             </div>
           </div>
         </div>
       </div>
+
       <AlertModal
         showAlert={showAlert}
         setShowAlert={setShowAlert}

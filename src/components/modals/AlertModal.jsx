@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const AlertModal = ({
@@ -20,48 +19,56 @@ const AlertModal = ({
         }
     };
 
-    const getIconAndColors = () => {
+    // Map variants to brand-aware classes from tailwind.config.js
+    const getVariant = () => {
         switch (type) {
             case 'error':
                 return {
                     icon: '❌',
-                    bgGradient: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
-                    iconBg: 'bg-red-100',
-                    messageText: 'text-red-700',
-                    messageBg: 'bg-red-50',
-                    messageBorder: 'border-red-200'
+                    headerGrad: 'bg-gradient-to-br from-red-600 to-red-500',
+                    iconChip: 'bg-red-100 text-red-700',
+                    // no brand alert helper for error: use tailwind reds
+                    msgBox: 'rounded-xl p-4 border border-red-200 bg-red-50',
+                    msgText: 'text-red-700',
+                    confirmBtn: 'btn btn-primary',     // use brand primary for destructive confirm
+                    cancelBtn: 'btn btn-ghost',
                 };
             case 'warning':
                 return {
                     icon: '⚠️',
-                    bgGradient: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
-                    iconBg: 'bg-yellow-100',
-                    messageText: 'text-yellow-700',
-                    messageBg: 'bg-yellow-50',
-                    messageBorder: 'border-yellow-200'
+                    headerGrad: 'bg-gradient-to-br from-secondary to-secondary',
+                    iconChip: 'bg-yellow-100 text-yellow-700',
+                    // brand-provided alert style for warnings
+                    msgBox: 'alert alert-warn',
+                    msgText: '',
+                    confirmBtn: 'btn btn-secondary',   // brand secondary (amber)
+                    cancelBtn: 'btn btn-ghost',
                 };
             case 'success':
                 return {
                     icon: '✅',
-                    bgGradient: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-                    iconBg: 'bg-green-100',
-                    messageText: 'text-green-700',
-                    messageBg: 'bg-green-50',
-                    messageBorder: 'border-green-200'
+                    headerGrad: 'bg-gradient-to-br from-emerald-600 to-emerald-500',
+                    iconChip: 'bg-green-100 text-green-700',
+                    msgBox: 'rounded-xl p-4 border border-green-200 bg-green-50',
+                    msgText: 'text-green-700',
+                    confirmBtn: 'btn grad-cta',        // celebratory gradient
+                    cancelBtn: 'btn btn-ghost',
                 };
-            default:
+            default: // 'info'
                 return {
                     icon: 'ℹ️',
-                    bgGradient: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)',
-                    iconBg: 'bg-blue-100',
-                    messageText: 'text-blue-700',
-                    messageBg: 'bg-blue-50',
-                    messageBorder: 'border-blue-200'
+                    headerGrad: 'bg-gradient-to-br from-primary to-accent',
+                    iconChip: 'bg-primary/10 text-primary',
+                    // brand-provided alert style for info
+                    msgBox: 'alert alert-info',
+                    msgText: '',
+                    confirmBtn: 'btn grad-cta',
+                    cancelBtn: 'btn btn-ghost',
                 };
         }
     };
 
-    const { icon, bgGradient, iconBg, messageText, messageBg, messageBorder } = getIconAndColors();
+    const { icon, headerGrad, iconChip, msgBox, msgText, confirmBtn, cancelBtn } = getVariant();
 
     const handleConfirm = () => {
         if (onConfirm) {
@@ -73,49 +80,47 @@ const AlertModal = ({
 
     return (
         <div
-            className="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-start justify-center pt-20 px-4"
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center pt-20 px-4"
             onClick={handleOutsideClick}
         >
-            <div className="bg-white rounded-lg shadow-xl max-w-md w-full transform transition-all duration-300 animate-fade-in">
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all duration-300 animate-fade-in">
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                    <div className="flex items-center space-x-2">
-                        <div className={`w-8 h-8 ${iconBg} rounded-full flex items-center justify-center`}>
+                <div className={`${headerGrad} text-white px-5 py-4 flex items-center justify-between`}>
+                    <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${iconChip}`}>
                             <span className="text-sm">{icon}</span>
                         </div>
-                        <h3 className="text-base font-semibold text-gray-800">{title}</h3>
+                        <h3 className="font-dmsans text-base font-semibold">{title}</h3>
                     </div>
                     <button
                         onClick={() => setShowAlert(false)}
-                        className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                        className="rounded-full p-2 hover:bg-white/15 transition-colors"
+                        aria-label="Close alert"
                     >
-                        <span className="text-sm">✕</span>
+                        <span className="text-white text-sm">✕</span>
                     </button>
                 </div>
 
                 {/* Content */}
-                <div className="p-4">
-                    <div className={`${messageBg} rounded-md p-3 border ${messageBorder}`}>
-                        <p className={`${messageText} text-sm leading-relaxed`}>
-                            {message}
-                        </p>
+                <div className="p-5">
+                    <div className={msgBox}>
+                        <p className={`text-sm leading-relaxed ${msgText}`}>{message}</p>
                     </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex justify-end gap-2 p-4 pt-0">
+                {/* Actions */}
+                <div className="flex justify-end gap-2 px-5 pb-5">
                     {showCancel && (
                         <button
                             onClick={() => setShowAlert(false)}
-                            className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md font-medium hover:bg-gray-200 transition-colors"
+                            className={`${cancelBtn}`}
                         >
                             {cancelText}
                         </button>
                     )}
                     <button
                         onClick={handleConfirm}
-                        className="px-4 py-2 text-sm text-white rounded-md font-medium transition-all duration-200 hover:shadow-md transform hover:scale-[1.02]"
-                        style={{ background: bgGradient }}
+                        className={`${confirmBtn}`}
                     >
                         {confirmText}
                     </button>

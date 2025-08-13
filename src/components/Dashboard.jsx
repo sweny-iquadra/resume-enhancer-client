@@ -1,35 +1,12 @@
 import React from 'react';
 
 const Dashboard = ({ setCurrentPage }) => {
+  // ⚠️ keep data/logic exactly as-is (ids & titles drive navigation)
   const features = [
-    {
-      id: 1,
-      title: 'My Profile',
-      icon: '👤',
-      bgColor: 'bg-white',
-      borderColor: 'border-blue-200'
-    },
-    {
-      id: 2,
-      title: 'My Interviews',
-      icon: '👥',
-      bgColor: 'bg-white',
-      borderColor: 'border-blue-200'
-    },
-    {
-      id: 3,
-      title: 'Enhanced Resumes',
-      icon: '📄',
-      bgColor: 'bg-white',
-      borderColor: 'border-blue-200'
-    },
-    {
-      id: 4,
-      title: 'Job Tracker',
-      icon: '🏆',
-      bgColor: 'bg-white',
-      borderColor: 'border-blue-200'
-    }
+    { id: 1, title: 'My Profile', icon: '👤', bgColor: 'bg-white', borderColor: 'border-blue-200' },
+    { id: 2, title: 'My Interviews', icon: '👥', bgColor: 'bg-white', borderColor: 'border-blue-200' },
+    { id: 3, title: 'Enhanced Resumes', icon: '📄', bgColor: 'bg-white', borderColor: 'border-blue-200' },
+    { id: 4, title: 'Job Tracker', icon: '🏆', bgColor: 'bg-white', borderColor: 'border-blue-200' },
   ];
 
   const handleFeatureClick = (id) => {
@@ -43,78 +20,67 @@ const Dashboard = ({ setCurrentPage }) => {
   };
 
   return (
-    <main className="flex items-center justify-center min-h-[calc(100vh-80px)] px-6 py-12">
-      <div className="max-w-6xl w-full">
+    <main className="min-h-[calc(100vh-80px)] px-6 py-12 bg-neutral-900 text-neutral-100">
+      <div className="max-w-6xl w-full mx-auto">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Left Side - Illustration */}
+          {/* Left — Brand illustration (primary → accent gradient, dark canvas) */}
           <div className="flex justify-center">
             <div className="relative">
-              {/* Main circular background */}
-              <div className="w-96 h-80 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full relative overflow-hidden flex items-center justify-center">
-                {/* People figures */}
-                <div className="absolute top-12 left-1/2 transform -translate-x-1/2">
-                  <div className="w-12 h-16 bg-orange-400 rounded-t-full relative">
-                    <div className="w-6 h-6 bg-orange-300 rounded-full absolute -top-1 left-1/2 transform -translate-x-1/2"></div>
-                  </div>
+              <div className="w-96 h-80 rounded-full bg-gradient-to-br from-primary to-accent relative overflow-hidden flex items-center justify-center shadow-2xl">
+                {/* subtle inner rings */}
+                <div className="absolute inset-6 rounded-full border border-white/10" />
+                <div className="absolute inset-12 rounded-full border border-white/10" />
+                {/* center tiles (use brand colors) */}
+                <div className="relative z-10 grid grid-cols-2 gap-1">
+                  <div className="w-12 h-12 rounded-lg bg-white/15 backdrop-blur-sm border border-white/10"></div>
+                  <div className="w-12 h-12 rounded-lg bg-secondary/80"></div>
+                  <div className="w-12 h-12 rounded-lg bg-secondary/70"></div>
+                  <div className="w-12 h-12 rounded-lg bg-white/15 backdrop-blur-sm border border-white/10"></div>
                 </div>
-
-                <div className="absolute bottom-16 left-12">
-                  <div className="w-10 h-14 bg-blue-600 rounded-t-full relative">
-                    <div className="w-5 h-5 bg-orange-300 rounded-full absolute -top-1 left-1/2 transform -translate-x-1/2"></div>
-                  </div>
-                </div>
-
-                <div className="absolute bottom-16 right-12">
-                  <div className="w-10 h-14 bg-orange-500 rounded-t-full relative">
-                    <div className="w-5 h-5 bg-orange-300 rounded-full absolute -top-1 left-1/2 transform -translate-x-1/2"></div>
-                  </div>
-                </div>
-
-                {/* Puzzle pieces in center */}
-                <div className="flex items-center justify-center">
-                  <div className="grid grid-cols-2 gap-1">
-                    <div className="w-12 h-12 bg-blue-500 rounded-lg shadow-md"></div>
-                    <div className="w-12 h-12 bg-orange-400 rounded-lg shadow-md"></div>
-                    <div className="w-12 h-12 bg-orange-400 rounded-lg shadow-md"></div>
-                    <div className="w-12 h-12 bg-blue-500 rounded-lg shadow-md"></div>
-                  </div>
-                </div>
-
-                {/* Decorative elements */}
-                <div className="absolute bottom-4 left-8">
-                  <div className="w-6 h-8 bg-green-400 rounded-t-full"></div>
-                </div>
-                <div className="absolute bottom-4 right-8">
-                  <div className="w-4 h-6 bg-green-400 rounded-t-full"></div>
-                </div>
-
-                {/* Background shapes */}
-                <div className="absolute top-16 left-16 w-16 h-16 bg-blue-200 rounded-lg transform rotate-12 opacity-60"></div>
-                <div className="absolute top-20 right-20 w-12 h-12 bg-orange-200 rounded-lg transform -rotate-12 opacity-60"></div>
-                <div className="absolute bottom-20 left-20 w-8 h-8 bg-purple-200 rounded-lg transform rotate-45 opacity-60"></div>
+                {/* sparkles */}
+                <div className="absolute -top-2 left-10 w-2 h-2 rounded-full bg-white/70"></div>
+                <div className="absolute bottom-6 right-12 w-1.5 h-1.5 rounded-full bg-white/60"></div>
+                <div className="absolute top-12 right-20 w-1.5 h-1.5 rounded-full bg-white/60"></div>
               </div>
             </div>
           </div>
 
-          {/* Right Side - Navigation Cards */}
+          {/* Right — Feature cards using iQua tokens/utilities */}
           <div className="grid grid-cols-2 gap-6">
             {features.map((feature) => (
               <div
                 key={feature.id}
                 onClick={() => handleFeatureClick(feature.id)}
-                className={`${feature.bgColor} ${feature.borderColor} border-2 p-8 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group hover:-translate-y-1`}
+                className={[
+                  // brand card base
+                  "card p-8 cursor-pointer transition-all duration-300 group",
+                  // interactive accents
+                  "hover:border-primary/50 hover:shadow-xl hover:-translate-y-1",
+                ].join(" ")}
               >
                 <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-300">
+                  {/* icon chip */}
+                  <div className="w-16 h-16 rounded-xl flex items-center justify-center text-2xl transition-transform duration-300 group-hover:scale-110 bg-primary/15 text-primary">
                     {feature.icon}
                   </div>
-                  <h3 className="font-medium text-lg text-blue-600">
+
+                  {/* title (DM Sans per base rules) */}
+                  <h3 className="font-dmsans font-semibold text-lg text-neutral-100 group-hover:text-primary">
                     {feature.title}
                   </h3>
+
+                  {/* helper caption (brand caption utility) */}
+                  <p className="caption">
+                    {feature.id === 1 && "View and update your details"}
+                    {feature.id === 2 && "Check status & outcomes"}
+                    {feature.id === 3 && "See AI-enhanced resumes"}
+                    {feature.id === 4 && "Track roles you’re pursuing"}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
+
         </div>
       </div>
     </main>

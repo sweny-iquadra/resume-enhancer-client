@@ -59,72 +59,64 @@ const ProfileCompletionModal = ({
   return (
     <>
       <div
-        className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
         onClick={handleOutsideClick}
       >
-        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-fade-in">
-          {/* Modal Header */}
-          <div
-            className="text-white p-6 rounded-t-2xl text-center relative"
-            style={{
-              background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)'
-            }}
-          >
+        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-fade-in">
+          {/* Modal Header — brand gradient */}
+          <div className="text-white p-6 text-center relative bg-gradient-to-br from-primary to-accent">
             <button
               onClick={() => setShowProfileModal(false)}
-              className="absolute top-4 right-4 text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors"
+              className="absolute top-4 right-4 rounded-full p-2 hover:bg-white/15 transition-colors"
+              aria-label="Close"
             >
               <span className="text-lg">✕</span>
             </button>
 
-            <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
               <span className="text-3xl">📄</span>
             </div>
-            <h3 className="text-xl font-semibold">Complete Your Profile</h3>
+            <h3 className="font-dmsans text-xl font-semibold">Complete Your Profile</h3>
           </div>
 
           {/* Modal Body */}
           <div className="p-6">
             {!showSuccessContent ? (
               <>
-                <p className="text-gray-700 text-lg leading-relaxed mb-4">
+                <p className="text-neutral-100 text-base leading-relaxed mb-3">
                   Looks like you're almost there!
                 </p>
-                <p className="text-gray-600 text-base leading-relaxed mb-6">
+                <p className="caption text-neutral-300 mb-6">
                   Complete your profile to build a perfect resume tailored for your career goals.
                 </p>
 
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-3">
-                  {/* Complete Profile Button - Primary Action */}
+                  {/* Complete Profile — primary CTA */}
                   <button
                     onClick={() => {
                       setShowProfileModal(false);
                       setCurrentPage('profile');
                     }}
-                    className="text-white py-3.5 px-6 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center space-x-2"
-                    style={{
-                      background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)'
-                    }}
+                    className="btn grad-cta w-full rounded-2xl py-3.5"
                   >
-                    <span>📝</span>
-                    <span>COMPLETE PROFILE</span>
+                    <span className="flex items-center justify-center gap-2">
+                      <span>📝</span>
+                      <span>COMPLETE PROFILE</span>
+                    </span>
                   </button>
 
-                  {/* Generate Resume Anyway Button - Secondary Action */}
+                  {/* Generate Resume Anyway — secondary CTA */}
                   <button
                     onClick={handleGenerateAnyway}
                     disabled={isGenerating}
-                    className={`border-2 px-6 py-3.5 rounded-xl transition-all duration-300 font-semibold flex-1 max-w-[180px] flex items-center justify-center space-x-2 mx-auto ${isGenerating
-                      ? "text-gray-500 border-gray-200 bg-gray-50 cursor-not-allowed"
-                      : "text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
-                      }`}
+                    className={`btn btn-secondary w-full rounded-2xl py-3.5 disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     {isGenerating ? (
-                      <>
-                        <div className="animate-spin w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full"></div>
+                      <span className="flex items-center justify-center gap-2">
+                        <div className="animate-spin w-4 h-4 border-2 border-neutral-900 border-t-transparent rounded-full"></div>
                         <span>GENERATING...</span>
-                      </>
+                      </span>
                     ) : (
                       <span>GENERATE ANYWAY</span>
                     )}
@@ -133,25 +125,29 @@ const ProfileCompletionModal = ({
               </>
             ) : (
               <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-3xl text-green-600">✓</span>
+                <div className="w-16 h-16 bg-green-500/15 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl text-green-500">✓</span>
                 </div>
-                <h4 className="text-lg font-semibold text-gray-800 mb-2">Resume Generated!</h4>
-                <p className="text-gray-600 mb-4">Your enhanced resume is ready for review.</p>
+                <h4 className="font-dmsans text-lg font-semibold text-neutral-100 mb-2">
+                  Resume Generated!
+                </h4>
+                <p className="caption text-neutral-300 mb-4">
+                  Your enhanced resume is ready for review.
+                </p>
 
-                <div className="flex space-x-3">
+                <div className="flex gap-3">
                   <button
                     onClick={() => {
                       setShowPreview(true);
                       setShowProfileModal(false);
                     }}
-                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                    className="btn grad-cta flex-1"
                   >
                     View Resume
                   </button>
                   <button
                     onClick={() => setShowProfileModal(false)}
-                    className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+                    className="btn btn-ghost flex-1"
                   >
                     Close
                   </button>

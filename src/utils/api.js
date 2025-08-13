@@ -42,7 +42,7 @@ export const fetchParsedResumeData = async (studentId, limit = AppConfig.DEFAULT
             throw new Error("User not authenticated. Missing token.");
         }
 
-        const response = await fetch(`${baseUrl}/get_parsed_resume/${studentId}?limit=${limit}`, {
+        const response = await fetch(`${baseUrl}/enhance_resume/${studentId}?limit=${limit}`, {
             method: 'GET',
             headers: {
                 Authorization: `${tokenType} ${token}`,

@@ -3,31 +3,42 @@ import { useAuth } from '../utils/AuthContext';
 
 const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage, onLogout }) => {
   const { user } = useAuth();
+
+  // Brand header shell (dark UI)
+  const shell =
+    "backdrop-blur bg-neutral-900/80 border-b border-neutral-800 px-6 py-4 text-neutral-100";
+
+  // Logo chip uses brand gradient: primary → accent
+  const logoChip =
+    "w-8 h-8 rounded-2xl flex items-center justify-center bg-gradient-to-br from-primary to-accent shadow-button";
+
+  // Small caption per brand type scale (Inter 14/140%)
+  const caption = "caption";
+
   if (currentPage === 'interview') {
     return (
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
+      <header className={shell}>
         <div className="flex justify-between items-center">
           {/* Logo */}
           <div
-            className="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity"
             onClick={() => setCurrentPage('dashboard')}
           >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#7f90fa' }}>
-              <span className="text-white text-sm font-bold">iQ</span>
+            <div className={logoChip}>
+              <span className="text-white text-sm font-medium">iQ</span>
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-semibold text-gray-800">iQua.ai Interview</span>
-              <span className="text-xs text-gray-500 -mt-1">AI that gets you</span>
+              <span className="font-dmsans font-semibold text-lg leading-tight">iQua.ai Interview</span>
+              <span className={`${caption} -mt-0.5 text-neutral-300`}>AI that gets you</span>
             </div>
           </div>
 
-          {/* Back to Dashboard Button */}
+          {/* Back to Dashboard */}
           <button
             onClick={() => setCurrentPage('dashboard')}
-            className="flex items-center space-x-2 text-gray-600 hover:text-purple-600 transition-colors"
+            className="btn btn-ghost rounded-2xl"
           >
-            <span className="text-lg">←</span>
-            <span className="font-medium">Back to Dashboard</span>
+            ← <span className="ml-1">Back to Dashboard</span>
           </button>
         </div>
       </header>
@@ -35,53 +46,63 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
   }
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
+    <header className={shell}>
       <div className="flex justify-between items-center">
         {/* Logo */}
         <div
-          className="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity"
           onClick={() => setCurrentPage('dashboard')}
         >
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#7f90fa' }}>
-            <span className="text-white text-sm font-bold">iQ</span>
+          <div className={logoChip}>
+            <span className="text-white text-sm font-medium">iQ</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-semibold text-gray-800">iQua.ai</span>
-            <span className="text-xs text-gray-500 -mt-1">AI that gets you</span>
+            <span className="font-dmsans font-semibold text-lg leading-tight">iQua.ai</span>
+            <span className={`${caption} -mt-0.5 text-neutral-300`}>AI that gets you</span>
           </div>
         </div>
 
-        {/* Resume Enhancer Icon & User Profile */}
-        <div className="flex items-center space-x-4">
+        {/* Resume Enhancer & User */}
+        <div className="flex items-center gap-4">
+          {/* Resume Enhancer launcher */}
           <div
             onClick={() => setShowResumeChat(!showResumeChat)}
-            className="w-10 h-10 rounded-lg flex items-center justify-center hover:shadow-xl transition-all duration-300 cursor-pointer shadow-lg transform hover:scale-110 hover:-translate-y-1 active:scale-95"
-            style={{
-              background: 'linear-gradient(135deg, #7f90fa 0%, #6366f1 100%)',
-              animation: showResumeChat ? 'none' : 'gentlePulse 2s ease-in-out infinite',
-              boxShadow: '0 4px 20px rgba(57, 53, 205, 0.3)'
-            }}
+            className={[
+              "relative w-10 h-10 rounded-2xl flex items-center justify-center",
+              "bg-gradient-to-br from-primary to-accent shadow-button cursor-pointer transition-transform duration-300",
+              showResumeChat ? "scale-100" : "hover:scale-110 active:scale-95"
+            ].join(" ")}
             title="Resume Enhancer - Click to open"
+            role="button"
+            aria-pressed={showResumeChat}
+            aria-label="Open Resume Enhancer"
           >
-            <span className="text-white text-base font-medium transform transition-transform duration-200">📄</span>
+            <span className="text-white text-base font-medium">📄</span>
             {!showResumeChat && (
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse border-2 border-white"></div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-secondary rounded-full border-2 border-neutral-900" />
             )}
           </div>
-          <div className="flex items-center space-x-3">
-            <span className="text-gray-700 font-medium text-sm">{user ? user.username : ""}</span>
-            <div className="w-8 h-8 bg-gray-200 rounded-lg flex items-center justify-center">
-              <span className="text-gray-600 text-xs">👤</span>
+
+          {/* User & Logout */}
+          <div className="flex items-center gap-3">
+            <span className="text-neutral-100 font-medium text-sm">{user ? user.username : ""}</span>
+            <div className="w-8 h-8 bg-neutral-800 rounded-2xl flex items-center justify-center">
+              <span className="text-neutral-300 text-xs">👤</span>
             </div>
             <button
               onClick={onLogout}
-              className="text-gray-600 hover:text-red-600 transition-colors p-2 hover:bg-red-50 rounded-lg"
+              className="rounded-2xl p-2 text-neutral-300 hover:text-secondary hover:bg-secondary/10 transition-colors"
               title="Logout"
+              aria-label="Logout"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M16 17L21 12L16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 21H5A2 2 0 0 1 3 19V5a2 2 0 0 1 2-2h4"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M16 17L21 12L16 7"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M21 12H9"
+                  stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
           </div>

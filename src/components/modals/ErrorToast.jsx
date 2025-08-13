@@ -3,11 +3,7 @@ import React, { useEffect } from 'react';
 const ErrorToast = ({ showErrorToast, setShowErrorToast, errorMessage }) => {
   useEffect(() => {
     if (showErrorToast) {
-      // Auto hide after 4 seconds
-      const timer = setTimeout(() => {
-        setShowErrorToast(false);
-      }, 4000);
-
+      const timer = setTimeout(() => setShowErrorToast(false), 4000);
       return () => clearTimeout(timer);
     }
   }, [showErrorToast, setShowErrorToast]);
@@ -15,32 +11,33 @@ const ErrorToast = ({ showErrorToast, setShowErrorToast, errorMessage }) => {
   if (!showErrorToast) return null;
 
   return (
-    <div 
-      className={`fixed top-4 right-4 z-50 transform transition-all duration-500 ease-out ${
-        showErrorToast 
-          ? 'translate-y-0 opacity-100 scale-100' 
-          : '-translate-y-full opacity-0 scale-95 pointer-events-none'
-      }`}
+    <div
+      className={[
+        "fixed top-4 right-4 z-50 transition-all duration-500 ease-out",
+        showErrorToast
+          ? "translate-y-0 opacity-100 scale-100"
+          : "-translate-y-full opacity-0 scale-95 pointer-events-none"
+      ].join(" ")}
+      role="alert"
+      aria-live="assertive"
     >
-      <div className="text-white px-6 py-4 rounded-lg shadow-lg flex items-center space-x-3 max-w-sm border border-red-400" 
-           style={{
-             background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f87171 100%)',
-             boxShadow: '0 8px 25px rgba(220, 38, 38, 0.3)'
-           }}>
-        <div className="flex-shrink-0">
-          <div className="w-6 h-6 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-            <span className="text-white text-sm font-bold">✕</span>
-          </div>
+      <div className="relative flex items-start gap-3 max-w-sm rounded-2xl border border-red-500/40 bg-neutral-900 text-neutral-100 shadow-2xl p-4">
+
+        {/* Text */}
+        <div className="flex-1 min-w-0">
+          <h4 className="font-dmsans text-sm font-semibold">Error</h4>
+          <p className="caption text-red-300 mt-1 break-words">
+            {errorMessage || "Something went wrong. Please try again."}
+          </p>
         </div>
-        <div className="flex-1">
-          <h4 className="font-semibold text-sm">Error</h4>
-          <p className="text-red-100 text-xs mt-1">{errorMessage}</p>
-        </div>
+
+        {/* Close */}
         <button
           onClick={() => setShowErrorToast(false)}
-          className="flex-shrink-0 text-red-200 hover:text-white transition-colors"
+          className="ml-2 rounded-xl p-1.5 text-red-300 hover:text-red-200 hover:bg-red-500/10 transition-colors"
+          aria-label="Dismiss error"
         >
-          <span className="text-lg">×</span>
+          <span className="text-base leading-none">×</span>
         </button>
       </div>
     </div>

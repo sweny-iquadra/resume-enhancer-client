@@ -1,56 +1,56 @@
-
 import React from 'react';
 
 const DeleteConfirmationModal = ({ isOpen, onConfirm, onCancel }) => {
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
       }}
     >
-      <div 
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6"
+      <div
+        className="bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
         }}
       >
-        {/* Modal Text */}
-        <div className="text-center mb-6">
-          <p className="text-gray-800 text-lg font-medium">
-            Are you sure you want to delete?
-          </p>
-        </div>
+        {/* Body */}
+        <div className="p-6">
+          {/* Text */}
+          <div className="text-center mb-6">
+            <p className="font-dmsans text-neutral-100 text-lg font-semibold">
+              Are you sure you want to delete?
+            </p>
+          </div>
 
-        {/* Buttons */}
-        <div className="flex space-x-3">
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onConfirm();
-            }}
-            className="flex-1 text-white py-3 px-6 rounded-xl font-medium transition-colors"
-            style={{
-              background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)'
-            }}
-          >
-            Yes
-          </button>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onCancel();
-            }}
-            className="flex-1 bg-white text-black py-3 px-6 rounded-xl font-medium border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm"
-          >
-            No
-          </button>
+          {/* Actions */}
+          <div className="flex gap-3">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onConfirm();
+              }}
+              className="btn btn-secondary flex-1"
+            >
+              Yes
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onCancel();
+              }}
+              className="btn btn-ghost flex-1"
+            >
+              No
+            </button>
+          </div>
         </div>
       </div>
     </div>

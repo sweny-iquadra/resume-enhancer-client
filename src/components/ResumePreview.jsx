@@ -1016,7 +1016,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     }
 
     return (
-      <div className="card bg-white text-neutral-900 shadow-lg overflow-hidden">
+      <div className="card bg-white text-neutral-900 shadow-lg overflow-hidden" style={{ marginTop: '65px' }}>
         <div className="px-4 py-2 border-b border-neutral-200 flex items-center gap-2 bg-neutral-50">
           <div className="flex gap-1">
             <div className="w-3 h-3 bg-red-500 rounded-full"></div>

@@ -6,7 +6,7 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
 
   // Brand header shell (dark UI)
   const shell =
-    "backdrop-blur bg-neutral-900/80 border-b border-neutral-800 px-6 py-4 text-neutral-100";
+    "backdrop-blur bg-neutral-900/80 border-b border-neutral-900 px-6 py-4 text-neutral-100";
 
   // Logo chip uses brand gradient: primary → accent
   const logoChip =
@@ -53,13 +53,8 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
           className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity"
           onClick={() => setCurrentPage('dashboard')}
         >
-          <div className={logoChip}>
-            <span className="text-white text-sm font-medium">iQ</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="font-dmsans font-semibold text-lg leading-tight">iQua.ai</span>
-            <span className={`${caption} -mt-0.5 text-neutral-300`}>AI that gets you</span>
-          </div>
+          <img src="/iqua_logo.svg" alt="iQua.ai" style={{ width: '75%' }} />
+
         </div>
 
         {/* Resume Enhancer & User */}

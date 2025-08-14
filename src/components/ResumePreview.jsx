@@ -1008,7 +1008,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
     if (!displayData || Object.keys(displayData).length === 0) {
       return (
-        <div className="card bg-white text-neutral-600 p-8 text-center">
+        <div className="card bg-white text-neutral-600 p-8 text-center" style={{ marginTop: '65px' }}>
           <div className="mb-4">📄</div>
           <p className="caption">Select content from either version to build your resume</p>
         </div>

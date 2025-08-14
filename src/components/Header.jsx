@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../utils/AuthContext';
+import { sectionMarginDefaults } from 'docx';
 
 const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage, onLogout }) => {
   const { user } = useAuth();
@@ -51,6 +52,7 @@ const Header = ({ showResumeChat, setShowResumeChat, currentPage, setCurrentPage
         {/* Logo */}
         <div
           className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity"
+          style={{ margin: '5px' }}
           onClick={() => setCurrentPage('dashboard')}
         >
           <img src="/iqua_logo.svg" alt="iQua.ai" style={{ width: '75%' }} />

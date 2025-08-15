@@ -19,7 +19,7 @@ export const loginUser = async (email, password) => {
     const data = await res.json();
 
     if (!res.ok) {
-        throw { message: "Login failed", status: res.status };
+        throw { message: "Invalid credentials", status: res.status };
     }
 
     return data;

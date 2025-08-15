@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { fetchAndStructureResumeData, checkInterviewStatus } from '../utils/api';
+import { fetchAndStructureResumeData, checkInterviewStatus, storeEnhancedResume } from '../utils/api';
 import { useAuth } from '../utils/AuthContext';
 
 export const useResumeLogic = () => {
@@ -52,12 +52,14 @@ export const useResumeLogic = () => {
       setIsLoading(true);
 
       const studentId = JSON.parse(localStorage.getItem('user') || '{}')?.id || null;
-      const { structuredData } = await fetchAndStructureResumeData(studentId);
+      const { rawResponse, structuredData } = await fetchAndStructureResumeData(studentId);
       // Store in localStorage
       localStorage.setItem('enhancedResumeData', JSON.stringify(structuredData));
       // localStorage.setItem('profileSummaryData', JSON.stringify(structuredData.professionalSummary));
       // Update state with enhanced resume data
       setEnhancedResumeData(structuredData);
+
+      await storeEnhancedResume(studentId, rawResponse?.profile_id, "");
       // setProfileSummaryData(structuredData.professionalSummary);
       // Show success toast
       setShowSuccessToast(true);

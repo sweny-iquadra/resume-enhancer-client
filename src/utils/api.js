@@ -324,3 +324,33 @@ export const checkDownloadEligibility = async (studentId) => {
         throw error;
     }
 };
+
+
+export const storeEnhancedResume = async (studentId, profileId, resumeData) => {
+    try {
+        const response = await fetch(`${baseUrl}/store_enhanced_resume`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...getAuthHeader()
+            },
+            body: JSON.stringify({
+                student_id: studentId,
+                profile_id: profileId,
+                resume_data: resumeData,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log("Resume stored successfully:", data);
+        return data;
+    } catch (error) {
+        console.error("Failed to store enhanced resume:", error);
+        throw error;
+    }
+}
+

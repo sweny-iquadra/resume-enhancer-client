@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import MDEditor from "@uiw/react-md-editor";
 import {
   Document,
   Packer,
@@ -11,8 +10,8 @@ import {
 } from "docx";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import { saveResumeToS3, checkDownloadEligibility } from "../utils/api";
+import { normalizeResumeArrays, isParsedJson, safeStringify } from "../utils/resumeNormalizer";
 import AlertModal from "./modals/AlertModal";
 
 const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
@@ -40,8 +39,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     const storedData = localStorage.getItem("parsedResumeData");
     if (storedData) {
       try {
-        const parsed = JSON.parse(storedData);
-        setParsedResumeData(parsed);
+        let parsed = JSON.parse(storedData);
+        const flatKV = normalizeResumeArrays(parsed);
+        setParsedResumeData(flatKV);
       } catch (error) {
         console.error("Error parsing stored resume data:", error);
       }
@@ -59,8 +59,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       const storedData = localStorage.getItem("parsedResumeData");
       if (storedData) {
         try {
-          const parsed = JSON.parse(storedData);
-          setParsedResumeData(parsed);
+          let parsed = JSON.parse(storedData);
+          const flatKV = normalizeResumeArrays(parsed);
+          setParsedResumeData(flatKV);
         } catch (error) {
           console.error("Error parsing stored resume data:", error);
         }
@@ -77,13 +78,20 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       const sectionData = currentResumes[sectionKey];
       if (Array.isArray(sectionData)) {
         const dedup = Array.from(
-          new Set(sectionData.filter((i) => i && i.trim()))
+          new Set(sectionData.filter((i) => {
+            // Handle both strings and parsed objects
+            if (typeof i === 'string') {
+              return i && i.trim();
+            }
+            // For objects/arrays, consider them valid if they exist
+            return i !== null && i !== undefined;
+          }))
         );
         normalized[sectionKey] = dedup.map((item, index) => ({
           content: item,
           key: `original.${sectionKey}.${index}`,
         }));
-      } else if (sectionData && sectionData.trim()) {
+      } else if (sectionData && typeof sectionData === 'string' && sectionData.trim()) {
         normalized[sectionKey] = [
           { content: sectionData, key: `original.${sectionKey}.0` },
         ];
@@ -101,13 +109,20 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       const sectionData = enhancedResumes[sectionKey];
       if (Array.isArray(sectionData)) {
         const dedup = Array.from(
-          new Set(sectionData.filter((i) => i && i.trim()))
+          new Set(sectionData.filter((i) => {
+            // Handle both strings and parsed objects
+            if (typeof i === 'string') {
+              return i && i.trim();
+            }
+            // For objects/arrays, consider them valid if they exist
+            return i !== null && i !== undefined;
+          }))
         );
         normalized[sectionKey] = dedup.map((item, index) => ({
           content: item,
           key: `enhanced.${sectionKey}.${index}`,
         }));
-      } else if (sectionData && sectionData.trim()) {
+      } else if (sectionData && typeof sectionData === 'string' && sectionData.trim()) {
         normalized[sectionKey] = [
           { content: sectionData, key: `enhanced.${sectionKey}.0` },
         ];
@@ -151,11 +166,13 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
       orig.forEach((item) => {
         if (selections[item.key])
-          selectedItems.push({ content: item.content, source: "original" });
+          // FIX: Pass the unique key as a stable ID
+          selectedItems.push({ content: item.content, source: "original", id: item.key });
       });
       enh.forEach((item) => {
         if (selections[item.key])
-          selectedItems.push({ content: item.content, source: "enhanced" });
+          // FIX: Pass the unique key as a stable ID
+          selectedItems.push({ content: item.content, source: "enhanced", id: item.key });
       });
 
       if (selectedItems.length) final[sectionKey] = selectedItems;
@@ -347,6 +364,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   };
 
   const downloadResume = async (format) => {
+    // Check if there are unsaved changes and prevent download
     if (hasUnsavedChanges) {
       setAlertConfig({
         title: "Unsaved Changes",
@@ -355,11 +373,21 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         type: "warning",
       });
       setShowAlert(true);
+      // Don't return here - let the alert show and preserve the edit state
       return;
     }
 
     const resumeToDownload = savedFinalResume || finalResume;
-    if (!resumeToDownload) return;
+
+    if (!resumeToDownload || Object.keys(resumeToDownload).length === 0) {
+      setAlertConfig({
+        title: "No Content",
+        message: "No resume content available to download. Please select some content first.",
+        type: "warning",
+      });
+      setShowAlert(true);
+      return;
+    }
 
     try {
       const studentId = JSON.parse(localStorage.getItem("user") || "{}")?.id;
@@ -483,7 +511,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
               addWatermark();
               y = margin;
             }
-            y = addText(item.content, margin, y, contentWidth, {
+            y = addText(getDisplayContent(item.content), margin, y, contentWidth, {
               fontSize: 11,
               lineHeight: 1.15,
             });
@@ -498,7 +526,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
             pdf.setFont("arial", "normal");
             pdf.setFontSize(11);
             pdf.text("•", margin, y);
-            y = addText(item.content, margin + 12, y, contentWidth - 12, {
+            y = addText(getDisplayContent(item.content), margin + 12, y, contentWidth - 12, {
               fontSize: 11,
               lineHeight: 1.15,
             });
@@ -573,7 +601,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: item.content,
+                    text: getDisplayContent(item.content),
                     size: 22,
                     font: "Arial",
                     color: "000000",
@@ -590,7 +618,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
               new Paragraph({
                 children: [
                   new TextRun({
-                    text: `• ${item.content}`,
+                    text: `• ${getDisplayContent(item.content)}`,
                     size: 22,
                     font: "Arial",
                     color: "000000",
@@ -679,6 +707,17 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       .replace(/([A-Z])/g, " $1")
       .replace(/^./, (s) => s.toUpperCase())
       .trim();
+
+  // Utility function to safely display content
+  const getDisplayContent = (content) => {
+    if (typeof content === 'string') {
+      return content;
+    }
+    if (isParsedJson(content)) {
+      return safeStringify(content);
+    }
+    return String(content);
+  };
 
   // Left/Center column component
   const InteractiveWordDocument = ({
@@ -781,7 +820,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                                     lineHeight: "1.15",
                                   }}
                                   dangerouslySetInnerHTML={{
-                                    __html: item.content,
+                                    __html: getDisplayContent(item.content),
                                   }}
                                 />
                               )}
@@ -812,7 +851,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                               <span
                                 className="flex-1"
                                 dangerouslySetInnerHTML={{
-                                  __html: item.content,
+                                  __html: getDisplayContent(item.content),
                                 }}
                               />
                             </div>
@@ -849,9 +888,8 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     previewScrollRef,
   }) => {
     const [editableContent, setEditableContent] = useState({});
-    const [newSectionName, setNewSectionName] = useState("");
-    const [showNewSectionInput, setShowNewSectionInput] = useState(false);
     const [scrollPosition, setScrollPosition] = useState(0);
+    const hasInitializedRef = useRef(false);
 
     const currentData =
       savedFinalResume ||
@@ -859,9 +897,32 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
     useEffect(() => {
       if (isEditing) {
-        setEditableContent(JSON.parse(JSON.stringify(currentData || {})));
+        // Only initialize editableContent when entering edit mode, not on every re-render.
+        if (!hasInitializedRef.current) {
+          const clonedData = JSON.parse(JSON.stringify(currentData || {}));
+          Object.keys(clonedData).forEach(sectionKey => {
+            if (Array.isArray(clonedData[sectionKey])) {
+              clonedData[sectionKey] = clonedData[sectionKey].map(item => {
+                if (!item.id) {
+                  return {
+                    ...item,
+                    id: `${item.source || 'unknown'}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+                  };
+                }
+                return item;
+              });
+            }
+          });
+          setEditableContent(clonedData);
+          hasInitializedRef.current = true;
+        }
+      } else {
+        // Reset the initialization flag and clear content when not editing.
+        hasInitializedRef.current = false;
       }
     }, [isEditing, currentData]);
+
+
 
     // Track scroll position
     useEffect(() => {
@@ -898,7 +959,11 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         ...prev,
         [sectionKey]: [
           ...(prev[sectionKey] || []),
-          { content: "", source: "user-added" },
+          {
+            content: "",
+            source: "user-added",
+            id: `user-added-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+          },
         ],
       }));
     };
@@ -913,65 +978,37 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       }, 0);
     };
 
-    const handleRemoveBulletPoint = (sectionKey, itemIndex, evt) => {
+    const handleRemoveBulletPoint = (sectionKey, itemId, evt) => {
       if (!isEditing) return;
 
       preservePreviewScroll(evt, () => {
-        const itemToRemove = editableContent[sectionKey]?.[itemIndex];
+        const itemToRemove = editableContent[sectionKey]?.find(item => item.id === itemId);
         if (!itemToRemove) return;
 
-        const contentToRemove = itemToRemove.content;
-
-        const originalItems = originalResume?.[sectionKey] || [];
-        const enhancedItems = dynamicEnhancedResume?.[sectionKey] || [];
-
-        const originalMatch = originalItems.find(
-          (i) => i.content === contentToRemove
-        );
-        const enhancedMatch = enhancedItems.find(
-          (i) => i.content === contentToRemove
-        );
-
-        setSelections((prev) => ({
-          ...prev,
-          ...(originalMatch && { [originalMatch.key]: false }),
-          ...(enhancedMatch && { [enhancedMatch.key]: false }),
-        }));
+        // Use the item's stable ID (which is the original key) to update selections
+        if (itemToRemove.id && (itemToRemove.id.startsWith('original.') || itemToRemove.id.startsWith('enhanced.'))) {
+          setSelections((prev) => ({
+            ...prev,
+            [itemToRemove.id]: false,
+          }));
+        }
 
         setHasUnsavedChanges(true);
+
+        // FIX: Only update editableContent. Saving happens via the Save button.
         setEditableContent((prev) => {
           const updated = { ...prev };
-          const arr = [...(updated[sectionKey] || [])];
-          arr.splice(itemIndex, 1);
-          if (arr.length === 0) delete updated[sectionKey];
-          else updated[sectionKey] = arr;
+          if (updated[sectionKey]) {
+            const filteredArr = updated[sectionKey].filter(item => item.id !== itemId);
+            if (filteredArr.length === 0) {
+              delete updated[sectionKey];
+            } else {
+              updated[sectionKey] = filteredArr;
+            }
+          }
           return updated;
         });
-
-        setSavedFinalResume((prev) => {
-          if (!prev) return prev;
-          const updated = { ...prev };
-          if (updated[sectionKey]) {
-            updated[sectionKey] = updated[sectionKey].filter(
-              (i) => i.content !== contentToRemove
-            );
-            if (updated[sectionKey].length === 0) delete updated[sectionKey];
-          }
-          return Object.keys(updated).length ? updated : {};
-        });
       });
-    };
-
-    const handleAddNewSection = () => {
-      if (!isEditing || !newSectionName.trim()) return;
-      const sectionName = newSectionName.trim();
-      setEditableContent((prev) => ({
-        ...prev,
-        [sectionName]: [{ content: "", source: "user-added" }],
-      }));
-      setNewSectionName("");
-      setShowNewSectionInput(false);
-      setHasUnsavedChanges(true);
     };
 
     const handleRemoveSection = (sectionKey, evt) => {
@@ -987,20 +1024,13 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           return next;
         });
 
+        setHasUnsavedChanges(true);
+        // FIX: Only update editableContent.
         setEditableContent((prev) => {
           const updated = { ...prev };
           delete updated[sectionKey];
           return updated;
         });
-
-        setSavedFinalResume((prev) => {
-          if (!prev) return prev;
-          const updated = { ...prev };
-          delete updated[sectionKey];
-          return Object.keys(updated).length ? updated : {};
-        });
-
-        setHasUnsavedChanges(true);
       });
     };
 
@@ -1118,7 +1148,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                       <div className="space-y-2">
                         {sectionItems.map((item, itemIndex) => (
                           <div
-                            key={`${sectionKey}-contact-${itemIndex}`}
+                            key={item.id || itemIndex}
                             className="group relative"
                           >
                             {isEditing ? (
@@ -1151,7 +1181,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    handleRemoveBulletPoint(sectionKey, itemIndex, e);
+                                    handleRemoveBulletPoint(sectionKey, item.id, e);
                                   }}
                                   className="flex-shrink-0 text-red-500 hover:text-red-700 text-xs ml-2"
                                   title="Remove contact entry"
@@ -1168,7 +1198,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                                   lineHeight: "1.15",
                                 }}
                                 dangerouslySetInnerHTML={{
-                                  __html: item.content,
+                                  __html: getDisplayContent(item.content),
                                 }}
                               />
                             )}
@@ -1180,88 +1210,102 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                               onClick={() => handleAddBulletPoint(sectionKey)}
                               className="text-primary hover:brightness-110 text-sm flex items-center gap-1 transition-colors"
                             >
-                              <span>+</span>
+                              <span>+ Add Bullet Point</span>
                             </button>
                           </div>
                         )}
                       </div>
                     </div>
                   ) : (
-                    sectionItems.map((item, itemIndex) => (
-                      <div
-                        key={`${sectionKey}-bullet-${itemIndex}`}
-                        className="group relative"
-                      >
+                    <div className="space-y-2">
+                      {sectionItems.map((item, itemIndex) => (
                         <div
-                          className="text-neutral-800 flex items-start"
-                          style={{
-                            fontFamily: "Arial, sans-serif",
-                            fontSize: "11pt",
-                            lineHeight: "1.15",
-                          }}
+                          key={item.id || itemIndex}
+                          className="group relative"
                         >
-                          <span
-                            className="text-neutral-600 mr-3 mt-0.5"
-                            style={{ fontSize: "11pt" }}
+                          <div
+                            className="text-neutral-800 flex items-start"
+                            style={{
+                              fontFamily: "Arial, sans-serif",
+                              fontSize: "11pt",
+                              lineHeight: "1.15",
+                            }}
                           >
-                            •
-                          </span>
-                          {isEditing ? (
-                            <div className="flex-1 flex items-start gap-2">
-                              <textarea
-                                value={item.content || ""}
-                                onChange={(e) =>
-                                  handleContentChange(
-                                    sectionKey,
-                                    itemIndex,
-                                    e.target.value
-                                  )
-                                }
-                                className="flex-1 text-neutral-800 border-none outline-none resize-none bg-transparent"
-                                style={{
-                                  fontFamily: "Arial, sans-serif",
-                                  fontSize: "11pt",
-                                  lineHeight: "1.15",
-                                  minHeight: "24px",
-                                }}
-                                rows={Math.max(
-                                  1,
-                                  Math.ceil((item.content || "").length / 80)
-                                )}
-                                placeholder="Enter bullet point content..."
-                                autoComplete="off"
-                              />
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  handleRemoveBulletPoint(
-                                    sectionKey,
-                                    itemIndex,
-                                    e
-                                  );
-                                }}
-                                className="flex-shrink-0 text-red-500 hover:text-red-700 text-xs ml-2"
-                                title="Remove bullet point"
-                              >
-                                ❌
-                              </button>
-                            </div>
-                          ) : (
                             <span
-                              className="flex-1"
-                              dangerouslySetInnerHTML={{ __html: item.content }}
-                            />
-                          )}
+                              className="text-neutral-600 mr-3 mt-0.5"
+                              style={{ fontSize: "11pt" }}
+                            >
+                              •
+                            </span>
+                            {isEditing ? (
+                              <div className="flex-1 flex items-start gap-2">
+                                <textarea
+                                  value={item.content || ""}
+                                  onChange={(e) =>
+                                    handleContentChange(
+                                      sectionKey,
+                                      itemIndex,
+                                      e.target.value
+                                    )
+                                  }
+                                  className="flex-1 text-neutral-800 border-none outline-none resize-none bg-transparent"
+                                  style={{
+                                    fontFamily: "Arial, sans-serif",
+                                    fontSize: "11pt",
+                                    lineHeight: "1.15",
+                                    minHeight: "24px",
+                                  }}
+                                  rows={Math.max(
+                                    1,
+                                    Math.ceil((item.content || "").length / 80)
+                                  )}
+                                  placeholder="Enter bullet point content..."
+                                  autoComplete="off"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleRemoveBulletPoint(
+                                      sectionKey,
+                                      item.id,
+                                      e
+                                    );
+                                  }}
+                                  className="flex-shrink-0 text-red-500 hover:text-red-700 text-xs ml-2"
+                                  title="Remove bullet point"
+                                >
+                                  ❌
+                                </button>
+                              </div>
+                            ) : (
+                              <span
+                                className="flex-1"
+                                dangerouslySetInnerHTML={{ __html: getDisplayContent(item.content) }}
+                              />
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      ))}
+                      {isEditing && (
+                        <div className="mt-2">
+                          <button
+                            onClick={() => handleAddBulletPoint(sectionKey)}
+                            className="text-primary hover:brightness-110 text-sm flex items-center gap-1 transition-colors"
+                          >
+                            <span>+ Add Bullet Point</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
             );
           })}
+
+
 
           <div className="mt-8 pt-4 border-t border-neutral-200 text-right">
             <p
@@ -1275,6 +1319,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       </div>
     );
   };
+
+  const isDownloadDisabled = isEditing || hasUnsavedChanges || (!savedFinalResume && Object.keys(finalResume).length === 0);
+
 
   return (
     <div
@@ -1390,45 +1437,35 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
             <div className="flex gap-3">
               <button
                 onClick={() => downloadResume("PDF")}
-                disabled={
-                  (!finalResume || Object.keys(finalResume).length === 0) &&
-                  (!savedFinalResume ||
-                    Object.keys(savedFinalResume).length === 0)
-                }
-                className={`btn grad-cta text-white ${(!finalResume || Object.keys(finalResume).length === 0) &&
-                  (!savedFinalResume ||
-                    Object.keys(savedFinalResume).length === 0)
-                  ? "opacity-60 cursor-not-allowed"
-                  : ""
-                  }`}
+                disabled={isDownloadDisabled}
+                className={`btn grad-cta text-white group relative ${isDownloadDisabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
                 title={
-                  savedFinalResume
-                    ? "Download most recent saved version"
-                    : "Download current version"
+                  isEditing || hasUnsavedChanges
+                    ? "Please save or cancel your changes to download"
+                    : !savedFinalResume && Object.keys(finalResume).length === 0
+                      ? "No content to download"
+                      : "Download PDF"
                 }
               >
-                📄 <span className="ml-1">Download PDF</span>
+                <span className="group-hover:hidden">📄</span>
+                <span className="hidden group-hover:inline">{isDownloadDisabled ? '🚫' : '📄'}</span>
+                <span className="ml-1">Download PDF</span>
               </button>
               <button
                 onClick={() => downloadResume("DOC")}
-                disabled={
-                  (!finalResume || Object.keys(finalResume).length === 0) &&
-                  (!savedFinalResume ||
-                    Object.keys(savedFinalResume).length === 0)
-                }
-                className={`btn grad-cta text-white ${(!finalResume || Object.keys(finalResume).length === 0) &&
-                  (!savedFinalResume ||
-                    Object.keys(savedFinalResume).length === 0)
-                  ? "opacity-60 cursor-not-allowed"
-                  : ""
-                  }`}
+                disabled={isDownloadDisabled}
+                className={`btn grad-cta text-white group relative ${isDownloadDisabled ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
                 title={
-                  savedFinalResume
-                    ? "Download most recent saved version"
-                    : "Download current version"
+                  isEditing || hasUnsavedChanges
+                    ? "Please save or cancel your changes to download"
+                    : !savedFinalResume && Object.keys(finalResume).length === 0
+                      ? "No content to download"
+                      : "Download DOC"
                 }
               >
-                📃 <span className="ml-1">Download DOC</span>
+                <span className="group-hover:hidden">📃</span>
+                <span className="hidden group-hover:inline">{isDownloadDisabled ? '🚫' : '📃'}</span>
+                <span className="ml-1">Download DOC</span>
               </button>
             </div>
           </div>

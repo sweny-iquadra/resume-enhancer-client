@@ -391,18 +391,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
 
     try {
       const studentId = JSON.parse(localStorage.getItem("user") || "{}")?.id;
-      const eligibilityResponse = await checkDownloadEligibility(studentId);
-
-      if (!eligibilityResponse.is_eligible) {
-        setAlertConfig({
-          message:
-            eligibilityResponse.message || "Download not allowed at this time.",
-          type: "warning",
-        });
-        setShowAlert(true);
-        return;
-      }
-
       let fileInfo;
       if (format === "PDF") {
         fileInfo = await generateAndDownloadPDF(resumeToDownload);

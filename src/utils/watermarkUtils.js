@@ -12,13 +12,6 @@ import {
 } from "docx";
 import AppConfig from "../config";
 
-/* export const WATERMARK_CONFIG = {
-    text: "Powered by iQua.ai",
-    url: "https://www.iqua.ai/",
-    logoPath: AppConfig.WATERMARK_IMAGE_PATH, // Path to logo in public folder
-    useImageWatermark: false,
-}; */
-
 // PDF watermark utilities
 export const addFooterWatermarkPDF = (pdf, pageWidth, pageHeight, margin = 57.6) => {
     pdf.setTextColor(187, 187, 187); // Light gray (BBBBBB) to match DOC footer

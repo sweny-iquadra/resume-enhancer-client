@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import {
   Document,
@@ -6,13 +7,24 @@ import {
   TextRun,
   AlignmentType,
   BorderStyle,
-  Footer,
 } from "docx";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
-import { saveResumeToS3, checkDownloadEligibility } from "../utils/api";
+import { saveResumeToS3 } from "../utils/api";
 import { normalizeResumeArrays, isParsedJson, safeStringify } from "../utils/resumeNormalizer";
 import AlertModal from "./modals/AlertModal";
+import {
+  buildDocxFooter,
+  buildDocxWatermarkHeader,
+  addDiagonalTextWatermarkPDF,
+  addDiagonalImageWatermarkPDF,
+  addFooterWatermarkPDF,
+  ClickableFooterPDF,
+} from "../utils/watermarkUtils";
+
+import AppConfig from "../config";
+
+
 
 const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const [selections, setSelections] = useState({});
@@ -416,7 +428,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     }
   };
 
-  // PDF builder
+  // Enhanced PDF builder with watermarks
   const generateAndDownloadPDF = async (resumeData) => {
     try {
       const pdf = new jsPDF({
@@ -433,16 +445,19 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
       const contentWidth = pageWidth - 2 * margin;
       let y = margin;
 
-      const addWatermark = () => {
-        pdf.setTextColor(153, 153, 153);
-        pdf.setFontSize(9);
-        pdf.setFont("arial", "italic");
-        const watermarkText = "Powered by iQua.ai";
-        const w = pdf.getTextWidth(watermarkText);
-        pdf.text(watermarkText, pageWidth - margin - w, pageHeight - 20);
-        pdf.setTextColor(0, 0, 0);
+      const addPageWatermarks = async () => {
+        // Add diagonal background watermark
+        if (AppConfig.USE_IMAGE_WATERMARK) {
+          await addDiagonalImageWatermarkPDF(pdf, pageWidth, pageHeight);
+        } else {
+          addDiagonalTextWatermarkPDF(pdf, pageWidth, pageHeight);
+        }
+        // Add clickable footer watermark
+        addFooterWatermarkPDF(pdf, pageWidth, pageHeight, margin);
       };
-      addWatermark();
+
+      // Add watermarks to first page
+      await addPageWatermarks();
 
       const addText = (text, x, yPos, maxWidth, opts = {}) => {
         const {
@@ -475,14 +490,15 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         ),
       ];
 
-      allSections.forEach((sectionKey, i) => {
+      for (let i = 0; i < allSections.length; i++) {
+        const sectionKey = allSections[i];
         const items = resumeData[sectionKey] || [];
-        if (!items.length) return;
+        if (!items.length) continue;
 
         if (i > 0) y += 24;
         if (y > pageHeight - 100) {
           pdf.addPage();
-          addWatermark();
+          await addPageWatermarks(); // Add watermarks to new page
           y = margin;
         }
 
@@ -493,22 +509,22 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         });
 
         if (sectionKey.toLowerCase().includes("contact")) {
-          items.forEach((item) => {
+          for (const item of items) {
             if (y > pageHeight - 50) {
               pdf.addPage();
-              addWatermark();
+              await addPageWatermarks(); // Add watermarks to new page
               y = margin;
             }
             y = addText(getDisplayContent(item.content), margin, y, contentWidth, {
               fontSize: 11,
               lineHeight: 1.15,
             });
-          });
+          }
         } else {
-          items.forEach((item) => {
+          for (const item of items) {
             if (y > pageHeight - 50) {
               pdf.addPage();
-              addWatermark();
+              await addPageWatermarks(); // Add watermarks to new page
               y = margin;
             }
             pdf.setFont("arial", "normal");
@@ -518,9 +534,9 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
               fontSize: 11,
               lineHeight: 1.15,
             });
-          });
+          }
         }
-      });
+      }
 
       const timestamp = new Date()
         .toISOString()
@@ -539,17 +555,18 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     }
   };
 
-  // DOCX builder
+  // Enhanced DOCX builder with proper watermarks on every page
   const generateAndDownloadDocx = async (resumeData) => {
     try {
       const children = [];
+
       const allSections = [
         ...enhancedSectionOrder,
         ...Object.keys(resumeData || {}).filter(
           (k) => !enhancedSectionOrder.includes(k)
         ),
       ];
-
+      // Build all content sections
       allSections.forEach((sectionKey, idx) => {
         const items = resumeData[sectionKey] || [];
         if (!items.length) return;
@@ -619,11 +636,14 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
           });
         }
       });
-
+      const watermarkHeader = await buildDocxWatermarkHeader();
       const doc = new Document({
         creator: "iQua.ai Resume Builder",
         title: "Professional Resume",
         description: "ATS-Friendly Professional Resume",
+        background: {
+          color: "FFFFFF",
+        },
         styles: {
           paragraphStyles: [
             {
@@ -646,25 +666,12 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
                 size: { orientation: "portrait", width: 12240, height: 15840 },
               },
             },
+            headers: {
+              default: watermarkHeader
+            },
             children,
             footers: {
-              default: new Footer({
-                children: [
-                  new Paragraph({
-                    children: [
-                      new TextRun({
-                        text: "Powered by iQua.ai",
-                        size: 18,
-                        font: "Arial",
-                        color: "999999",
-                        italics: true,
-                      }),
-                    ],
-                    alignment: AlignmentType.RIGHT,
-                    spacing: { after: 0, before: 240 },
-                  }),
-                ],
-              }),
+              default: buildDocxFooter()
             },
           },
         ],
@@ -853,14 +860,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
             })}
         </div>
 
-        <div className="mt-8 pt-4 border-t border-neutral-200 text-right bg-white">
-          <p
-            className="text-xs text-neutral-400"
-            style={{ fontFamily: "Arial, sans-serif", fontSize: "9pt" }}
-          >
-            Powered by iQua.ai
-          </p>
-        </div>
+        <ClickableFooterPDF className="bg-white" />
       </div>
     );
   };
@@ -909,8 +909,6 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
         hasInitializedRef.current = false;
       }
     }, [isEditing, currentData]);
-
-
 
     // Track scroll position
     useEffect(() => {
@@ -1293,23 +1291,13 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
             );
           })}
 
-
-
-          <div className="mt-8 pt-4 border-t border-neutral-200 text-right">
-            <p
-              className="text-xs text-neutral-400"
-              style={{ fontFamily: "Arial, sans-serif", fontSize: "9pt" }}
-            >
-              Powered by iQua.ai
-            </p>
-          </div>
+          <ClickableFooterPDF />
         </div>
       </div>
     );
   };
 
   const isDownloadDisabled = isEditing || hasUnsavedChanges || (!savedFinalResume && Object.keys(finalResume).length === 0);
-
 
   return (
     <div

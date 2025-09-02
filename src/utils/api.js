@@ -1,5 +1,4 @@
 import AppConfig from '../config';
-
 const baseUrl = AppConfig.REACT_APP_API_URL;
 
 
@@ -56,7 +55,6 @@ export const fetchParsedResumeData = async (studentId, limit = AppConfig.DEFAULT
         }
 
         const parsedResumeData = await response.json();
-        console.log("Parsed Resume Data:", parsedResumeData);
         return parsedResumeData;
     } catch (error) {
         console.error("Failed to fetch parsed resume:", error.message);
@@ -135,8 +133,6 @@ export const checkInterviewStatus = async (studentId) => {
         }
 
         const interviewStatusResponse = await response.json();
-        console.log('Interview Status Response:', interviewStatusResponse);
-
         return interviewStatusResponse;
     } catch (error) {
         console.error('Error checking interview status:', error);
@@ -204,8 +200,6 @@ export const saveResumeToS3 = async (studentId, file, filename) => {
         }
 
         const s3Response = await response.json();
-        console.log('S3 Save Response:', s3Response);
-
         return s3Response;
     } catch (error) {
         console.error('Error saving resume to S3:', error);
@@ -259,8 +253,6 @@ export const fetchPreviewUrlAPI = async (s3Key) => {
     if (!token) throw new Error("Access token missing");
 
     const url = `${baseUrl}/resume_preview_url?s3_key=${encodeURIComponent(s3Key)}`;
-    console.log("Fetching preview URL for s3_key:", s3Key);
-    console.log("Request URL:", url);
 
     const response = await fetch(url, {
         method: "GET",
@@ -277,8 +269,6 @@ export const fetchPreviewUrlAPI = async (s3Key) => {
     }
 
     const data = await response.json();
-    console.log("Preview URL API response:", data);
-
     if (!data.url) throw new Error("No preview URL returned from API");
 
     return data; // { url: "https://..." }
@@ -317,7 +307,6 @@ export const checkDownloadEligibility = async (studentId) => {
         }
 
         const eligibilityResponse = await response.json();
-        console.log("Download Eligibility Response:", eligibilityResponse);
         return eligibilityResponse;
     } catch (error) {
         console.error("Failed to check download eligibility:", error.message);
@@ -346,7 +335,6 @@ export const storeEnhancedResume = async (studentId, profileId, resumeData) => {
         }
 
         const data = await response.json();
-        console.log("Resume stored successfully:", data);
         return data;
     } catch (error) {
         console.error("Failed to store enhanced resume:", error);

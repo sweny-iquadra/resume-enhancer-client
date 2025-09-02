@@ -21,7 +21,7 @@ import {
   addFooterWatermarkPDF,
   ClickableFooterPDF,
 } from "../utils/watermarkUtils";
-
+import { useAuth } from "../utils/AuthContext";
 import AppConfig from "../config";
 
 
@@ -35,7 +35,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
   const [savedFinalResume, setSavedFinalResume] = useState(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const previewScrollRef = useRef(null);
-
+  const { user } = useAuth();
   // Close on backdrop
   const handleOutsideClick = useCallback(
     (e) => {
@@ -402,7 +402,7 @@ const ResumePreview = ({ showPreview, setShowPreview, enhancedResumeData }) => {
     }
 
     try {
-      const studentId = JSON.parse(localStorage.getItem("user") || "{}")?.id;
+      const studentId = user?.id;
       let fileInfo;
       if (format === "PDF") {
         fileInfo = await generateAndDownloadPDF(resumeToDownload);

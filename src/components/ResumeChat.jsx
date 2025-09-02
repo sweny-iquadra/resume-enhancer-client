@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { checkDownloadEligibility } from "../utils/api";
 import { checkProfileCompletion } from "../utils/userProfile";
 import AlertModal from "./modals/AlertModal";
-
+import { useAuth } from "../utils/AuthContext";
 const ResumeChat = ({
   showResumeChat,
   setShowResumeChat,
@@ -29,7 +29,7 @@ const ResumeChat = ({
     type: "info"
   });
   const chatContentRef = useRef(null);
-
+  const { user } = useAuth();
   // Auto-scroll to bottom when enhancedResumeData changes
   useEffect(() => {
     if (enhancedResumeData && chatContentRef.current) {
@@ -76,7 +76,7 @@ const ResumeChat = ({
   const handleCreateResumeWithFeedback = async () => {
     // Check download eligibility before allowing resume generation
     try {
-      const studentId = JSON.parse(localStorage.getItem("user") || "{}")?.id;
+      const studentId = user?.id;
       const eligibilityResponse = await checkDownloadEligibility(studentId);
 
       if (!eligibilityResponse.is_eligible) {
@@ -99,7 +99,7 @@ const ResumeChat = ({
     }
     // Check if user profile is complete before proceeding
 
-    const ProfileCompleteResponse = await checkProfileCompletion();
+    const ProfileCompleteResponse = await checkProfileCompletion(user);
     if (!ProfileCompleteResponse.completed) {
       setShowProfileCompletion(true);
       return;

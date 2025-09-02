@@ -1,8 +1,8 @@
 import { checkStudentProfileCompletion } from './api';
 
 // Function to check if profile is complete
-export const checkProfileCompletion = async () => {
-  const studentId = JSON.parse(localStorage.getItem('user') || '{}')?.id || null;
+export const checkProfileCompletion = async (user) => {
+  const studentId = user?.id;
   if (studentId) {
     const profileCompletion = await checkStudentProfileCompletion(studentId);
     return profileCompletion;

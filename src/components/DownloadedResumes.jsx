@@ -16,9 +16,8 @@ const DownloadedResumes = ({ setCurrentPage }) => {
         const loadDownloadedResumes = async () => {
             try {
                 setIsLoading(true);
-                const studentId = JSON.parse(localStorage.getItem("user") || "{}")?.id;
+                const studentId = user?.id;
                 const response = await fetchDownloadedResumes(studentId);
-
                 // Map API response to component format (UNCHANGED)
                 const resumes = (response.files || []).map((file, index) => ({
                     id: index + 1,

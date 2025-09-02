@@ -31,7 +31,7 @@ export const useResumeLogic = () => {
   };
 
   useEffect(() => {
-    const studentId = JSON.parse(localStorage.getItem('user') || '{}')?.id || null;
+    const studentId = user?.id;
     if (studentId) {
       checkInterviewStatusFromAPI(studentId);
     }
@@ -51,20 +51,14 @@ export const useResumeLogic = () => {
       // Show loading modal
       setIsLoading(true);
 
-      const studentId = JSON.parse(localStorage.getItem('user') || '{}')?.id || null;
+      const studentId = user?.id;
       const { rawResponse, structuredData } = await fetchAndStructureResumeData(studentId);
-      // Store in localStorage
       localStorage.setItem('enhancedResumeData', JSON.stringify(structuredData));
-      // localStorage.setItem('profileSummaryData', JSON.stringify(structuredData.professionalSummary));
-      // Update state with enhanced resume data
       setEnhancedResumeData(structuredData);
 
       await storeEnhancedResume(studentId, rawResponse?.profile_id, "");
-      // setProfileSummaryData(structuredData.professionalSummary);
-      // Show success toast
       setShowSuccessToast(true);
       setSuccessMessage("Resume Enhanced Successfully! ✨");
-
 
     } catch (error) {
       console.error('Error calling enhance resume API:', error);
